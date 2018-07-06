@@ -75,3 +75,10 @@ If you want to use NeSTiNg without the IDE or using OMNeT++ core, you can also b
   $ MODE=debug ./runsim example.ini     # run simulation without graphical interface (debug)
   $ MODE=debug ./runsim-qt example.ini  # run simulation with the Qt interface (debug)
 ```
+
+
+## Contribution
+Institute of Parallel and Distributed Systems  
+University of Stuttgart  
+[https://www.ipvs.uni-stuttgart.de/abteilungen/vs/](https://www.ipvs.uni-stuttgart.de/abteilungen/vs/)
+
