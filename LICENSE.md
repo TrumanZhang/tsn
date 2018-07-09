@@ -1,5 +1,7 @@
 # NeSTiNg - Network Simulator for Time-sensitive Networking
 
+Copyright &copy; 2018 by University of Stuttgart and contributors
+
 NeSTiNg is licensed under the GNU LGPL version 3 or later:
 
 > This program is free software: you can redistribute it and/or modify
