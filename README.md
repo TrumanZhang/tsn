@@ -2,7 +2,7 @@
 
 NeSTiNg is a simulation model for Time-sensitive Networking (TSN) using the OMNeT++ discrete event simulation framework.
 Our model uses the [INET framework](https://inet.omnetpp.org/) and enhances it by TSN-capable components.
-The model was initially developed by a group of students during a curricular project and is being continously extended at the [Distributed Systems group of IPVS, University of Stuttgart](https://www.ipvs.uni-stuttgart.de/abteilungen/vs/)
+The model was initially developed by a group of students during a curricular project and is continously extended at the [Distributed Systems group of IPVS, University of Stuttgart](https://www.ipvs.uni-stuttgart.de/abteilungen/vs/)
 
 ## Compatibility
 
@@ -47,7 +47,7 @@ The current version of the NeSTiNg simulation framework has been tested with OMN
 + Build both INET and NeSTiNg by right-clicking on the corresponding project folder and selecting `Build Project`.
   (You can switch between the `release` and `debug` configuration in the same context menu under `Build Configurations -> Set Active`)
 + You can now run the supplied example simulation:
-	- Navigate into `nesting > seimulations` in the project explorer.
+	- Navigate into `nesting > simulations` in the project explorer.
 	- Right-click `example.ini` and choose `Run As` (or `Debug As` depending on the build configuration) `OMNeT++ Simulation`.
 	- After a possible build step you will be presented with a graphical interface showing the simulation model.
 
