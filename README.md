@@ -25,6 +25,10 @@ The current version of the NeSTiNg simulation framework has been tested with OMN
   $ git clone https://github.com/inet-framework/inet.git
   $ git checkout -b v3.6.4 v3.6.4
 ```
+  Alternatively, as space-saving one-liner
+```
+  $ git clone --branch v3.6.4 --depth 1 https://github.com/inet-framework/inet.git
+```
 
 + Your directory should now look like this:
 
