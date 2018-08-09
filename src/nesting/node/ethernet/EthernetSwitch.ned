@@ -36,27 +36,27 @@ module EthernetSwitch
 {
     parameters:
         @networkNode();
-        @display("i=device/switch;bgb=676.044,343.896");
+        @display("i=device/switch;bgb=,521");
         **.interfaceTableModule = default("");
     gates:
         inout ethg[];
     submodules:
         queuing[sizeof(ethg)]: Queuing {
-            @display("p=395.16,253.116");
+            @display("p=195,370,r,200");
             tsAlgorithms[*].macModule = "^.^.lowerLayer[" + string(index) + "].mac";
             gateController.macModule = "^.^.lowerLayer[" + string(index) + "].mac";
         }
         lowerLayer[sizeof(ethg)]: LowerLayer {
             mac.queueModule = "^.^.queuing[" + string(index) + "].transmissionSelection";
             mac.mtu = 1500B;
-            @display("p=151.65599,253.116");
+            @display("p=140,440,r,200");
         }
         relayUnit: <default("ForwardingRelayUnit")> like RelayUnit {
-            @display("p=396,72");
             numberOfPorts = sizeof(ethg);
+            @display("p=400,180");
         }
         processingDelay[sizeof(ethg)]: Delayer {
-            @display("p=152,72;i=block/delay");
+            @display("p=85,350,r,200;i=block/delay");
             delay = default(4us);
         }
         clock: <default("IdealClock")> like IClock {
