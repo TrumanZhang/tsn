@@ -53,20 +53,20 @@ module EthernetSwitch
         }
         relayUnit: <default("ForwardingRelayUnit")> like RelayUnit {
             numberOfPorts = sizeof(ethg);
-            @display("p=400,180");
+            @display("p=473,165");
         }
         processingDelay[sizeof(ethg)]: Delayer {
             @display("p=85,350,r,200;i=block/delay");
             delay = default(4us);
         }
         clock: <default("IdealClock")> like IClock {
-            @display("p=557.496,63.011997;is=s");
+            @display("p=273,65;is=s");
         }
         filteringDatabase: FilteringDatabase {
-            @display("p=557.496,128.16;is=s");
+            @display("p=73,165;is=s");
         }
         scheduleSwap: ScheduleSwap {
-            @display("p=557.496,194.37599;i=block/switch;is=s");
+            @display("p=273,165;i=block/switch;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=73,65;is=s");
