@@ -74,17 +74,17 @@ cPacket* EtherTrafGenQueue::generatePacket() {
 
   cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
 
-  long len = packetLength->longValue();
+  long len = packetLength->intValue();
   packet->setByteLength(len);
 
   Ieee8021QCtrl *etherctrl = new Ieee8021QCtrl();
 
-  etherctrl->setEtherType(etherType->longValue());
+  etherctrl->setEtherType(etherType->intValue());
   etherctrl->setDest(destMACAddress);
   etherctrl->setTagged(vlanTagEnabled->boolValue());
-  etherctrl->setPCP(pcp->longValue());
+  etherctrl->setPCP(pcp->intValue());
   etherctrl->setDEI(dei->boolValue());
-  etherctrl->setVID(vid->longValue());
+  etherctrl->setVID(vid->intValue());
 
   packet->setControlInfo(etherctrl);
 

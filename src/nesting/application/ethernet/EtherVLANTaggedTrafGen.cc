@@ -31,7 +31,7 @@ void EtherVLANTaggedTrafGen::initialize(int stage) {
 }
 
 void EtherVLANTaggedTrafGen::sendBurstPackets() {
-  int n = numPacketsPerBurst->longValue();
+  int n = numPacketsPerBurst->intValue();
   for (int i = 0; i < n; i++) {
     seqNum++;
 
@@ -40,7 +40,7 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
 
     cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
 
-    long len = packetLength->longValue();
+    long len = packetLength->intValue();
     packet->setByteLength(len);
 
     // Create control info for encap modules
@@ -48,9 +48,9 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
     ctrlInfo->setEtherType(etherType);
     ctrlInfo->setDest(destMACAddress);
     ctrlInfo->setTagged(vlanTagEnabled->boolValue());
-    ctrlInfo->setPCP(pcp->longValue());
+    ctrlInfo->setPCP(pcp->intValue());
     ctrlInfo->setDEI(dei->boolValue());
-    ctrlInfo->setVID(vid->longValue());
+    ctrlInfo->setVID(vid->intValue());
     packet->setControlInfo(ctrlInfo);
 
     EV_TRACE << getFullPath()
