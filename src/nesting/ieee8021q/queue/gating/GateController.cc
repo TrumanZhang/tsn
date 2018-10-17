@@ -66,7 +66,7 @@ void GateController::initialize(int stage) {
       //This is needed because hold is only always requested for the following entry,
       //but not for the current one. Therefore the first entry would not be held.
       for (TransmissionGate* transmissionGate : transmissionGates) {
-        if ((currentSchedule->isEmpty() || currentSchedule->getScheduledObject(0).test(transmissionGate->getIndex()))
+        if ((!currentSchedule->isEmpty() && currentSchedule->getScheduledObject(0).test(transmissionGate->getIndex()))
             && transmissionGate->isExpressQueue()) {
           macModule->hold(SIMTIME_ZERO);
           break;
