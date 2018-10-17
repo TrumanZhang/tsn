@@ -565,8 +565,11 @@ void EtherMACFullDuplexPreemptable::release() {
         //Clear pending requests from this module, otherwise
         transmissionSelectionModule->removePendingRequests();
         if(!transmittingExpressFrame) {
-            getNextFrameFromQueue();
-            beginSendFrames();
+            if(!endIFGMsg->isScheduled()) {
+                getNextFrameFromQueue();
+                beginSendFrames();
+            }
+            //check for preemptable frame, assert that no preempted frame is ready for transmission
         }
     }
 }
