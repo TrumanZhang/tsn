@@ -13,8 +13,7 @@ namespace nesting {
 class IClock;
 
 /**
- * This class is an interface providing method stubs to allow subscribing clock
- * ticks by the the IClockInterface.
+ * This class is an interface for marking a component as express or preemptable queue
  *
  * @see IClock
  */
