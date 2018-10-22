@@ -29,7 +29,7 @@ package nesting.ieee8021q.queue.transmissionSelectionAlgorithms;
 simple CreditBasedShaper like TSAlgorithm {
     parameters:
         @display("i=block/server");
-        @class(nesting::CreditBasedShaper);
+        @class(CreditBasedShaper);
         string macModule; // Path to the ~EtherMACFullDuplex module
         string gateModule; // Path to the transmission gate module
         string queueModule; // Path to the length-aware-queue module

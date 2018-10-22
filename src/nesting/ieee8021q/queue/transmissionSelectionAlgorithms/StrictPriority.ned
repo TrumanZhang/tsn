@@ -30,7 +30,7 @@ simple StrictPriority like TSAlgorithm
 {
     parameters:
         @display("i=block/server");
-        @class(nesting::StrictPriority);
+        @class(StrictPriority);
         string macModule; // Path to the MAC module
         string gateModule; // Path to the transmission gate module
         string queueModule; // Path to the length-aware-queue module

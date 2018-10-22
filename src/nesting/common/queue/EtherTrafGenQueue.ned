@@ -26,7 +26,7 @@ simple EtherTrafGenQueue
 {
     parameters:
         @display("i=block/queue");
-        @class(nesting::EtherTrafGenQueue);
+        @class(EtherTrafGenQueue);
         string destAddress = default("");		// destination MAC address, or module path name of destination station; empty means off
         int etherType = default(0);				// etherType to set on outgoing packets
         bool vlanTagEnabled = default(true);	// When true, the application's packets will be VLAN encapsulated by the VLANEncap module, otherwise the pcp, dei, vid value is ignored

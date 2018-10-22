@@ -19,7 +19,7 @@ simple FrameForward
 {
     parameters:
         bool verbose = default(false);
-        @class(nesting::FrameForward);
+        @class(FrameForward);
     gates:
         input lowerLayerInP;
         input lowerLayerInE;

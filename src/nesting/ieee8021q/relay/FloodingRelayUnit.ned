@@ -25,7 +25,7 @@ package nesting.ieee8021q.relay;
 simple FloodingRelayUnit like RelayUnit {
     parameters:
         @display("i=block/switch");
-        @class(nesting::FloodingRelayUnit);
+        @class(FloodingRelayUnit);
         int numberOfPorts;
         bool verbose = default(false);
     gates:

@@ -26,7 +26,7 @@ package nesting.ieee8021q.queue;
 simple QueuingFrames {
     parameters:
         @display("i=block/classifier");
-        @class(nesting::QueuingFrames);
+        @class(QueuingFrames);
         bool verbose = default(false);
     gates:
         input in;

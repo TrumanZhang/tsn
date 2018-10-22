@@ -23,7 +23,9 @@
 #include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
 #include "../../ieee8021q/queue/TransmissionSelection.h"
 #include "../../ieee8021q/Ieee8021q.h"
+
 using namespace inet;
+
 namespace nesting {
 
 class TransmissionSelection;

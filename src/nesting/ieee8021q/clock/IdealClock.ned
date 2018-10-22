@@ -24,7 +24,7 @@ package nesting.ieee8021q.clock;
 simple IdealClock like IClock {
     parameters:
         @display("i=block/timer");
-        @class(nesting::IdealClock);
+        @class(IdealClock);
         string clockRate = default("1us");
         bool verbose = default(false);
 }

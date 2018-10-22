@@ -25,7 +25,7 @@ simple FilteringDatabase
 {
     parameters:
 	    @display("i=block/table2");
-	    @class(nesting::FilteringDatabase);
+	    @class(FilteringDatabase);
 	    xml cycle = default(xml("<schedule><cycle>100</cycle></schedule>"));
 	    xml database;
 	    string switchModule = default("^"); // Path to the ~EthernetSwitch module

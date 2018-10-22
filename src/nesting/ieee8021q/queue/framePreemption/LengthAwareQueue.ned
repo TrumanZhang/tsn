@@ -33,7 +33,7 @@ simple LengthAwareQueue
         bool expressQueue = default(true);
         string transmissionSelectionAlgorithmModule; // Path to the ~TSAlgorithm module
         @display("i=block/queue");
-        @class(nesting::LengthAwareQueue);
+        @class(LengthAwareQueue);
         @signal[rcvdPk](type=cPacket);
         @signal[enqueuePk](type=cPacket);
         @signal[dequeuePk](type=cPacket);

@@ -34,5 +34,5 @@ simple ScheduleSwap
         bool usedInHost = default(false);
         bool verbose = default(false);
         @display("i=block/switch");
-        @class(nesting::ScheduleSwap);
+        @class(ScheduleSwap);
 }

@@ -27,7 +27,7 @@ package nesting.ieee8021q.queue.gating;
 simple GateController {
     parameters:
         @display("i=block/table");
-        @class(nesting::GateController);
+        @class(GateController);
         string clockModule = default("^.^.clock");
         string switchModule = default("^.^");
         string queuingModule = default("^");

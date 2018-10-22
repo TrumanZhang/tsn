@@ -34,7 +34,7 @@ import inet.applications.ethernet.EtherTrafGen;
 simple EtherVLANTaggedTrafGen extends EtherTrafGen
 {
     parameters:
-        @class(nesting::EtherVLANTaggedTrafGen);
+        @class(EtherVLANTaggedTrafGen);
         bool vlanTagEnabled = default(true);	// When true, the application's packets will be VLAN encapsulated by the VLANEncap module
         int pcp = default(0);					// PCP (Priority Code Point) value that is added to the packets control information
         bool dei = default(false);				// DEI (Drop Eligible Indicator) that is added to the packets control information

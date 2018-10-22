@@ -25,7 +25,7 @@ package nesting.ieee8021q.relay;
 simple ForwardingRelayUnit like RelayUnit {
     parameters:
         @display("i=block/switch");
-        @class(nesting::ForwardingRelayUnit);
+        @class(ForwardingRelayUnit);
         int numberOfPorts;
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
         bool verbose = default(false);

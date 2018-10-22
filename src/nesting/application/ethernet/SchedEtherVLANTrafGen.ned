@@ -31,7 +31,7 @@ package nesting.application.ethernet;
 simple SchedEtherVLANTrafGen
 {
     parameters:
-        @class(nesting::SchedEtherVLANTrafGen);
+        @class(SchedEtherVLANTrafGen);
 
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

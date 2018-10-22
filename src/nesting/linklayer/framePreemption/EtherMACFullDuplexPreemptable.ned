@@ -19,12 +19,14 @@
 
 import inet.linklayer.ethernet.EtherMACFullDuplex;
 
+//@namespace(inet);
+
 package nesting.linklayer.framePreemption;
 
 simple EtherMACFullDuplexPreemptable extends EtherMACFullDuplex
 {
     parameters:
-        @class(nesting::EtherMACFullDuplexPreemptable);
+        @class(EtherMACFullDuplexPreemptable);
         bool enablePreemptingFrames = default(false);
         @signal[preemptCurrentFrameSignal](type=EtherFrame);
         @signal[transmittedExpressFrameSignal](type=EtherFrame);

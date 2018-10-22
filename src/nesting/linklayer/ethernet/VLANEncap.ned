@@ -45,7 +45,7 @@ package nesting.linklayer.ethernet;
 simple VLANEncap {
     parameters:
         @display("i=block/square");
-        @class(nesting::VLANEncap);
+        @class(VLANEncap);
         bool tagUntaggedFrames = default(false);	// If true, the encap process will add a VLAN Tag to untagged frames. This alters the frame size.
         int pvid = default(1);						// Default port-VID inserted in control info of (vlan-)untagged frames. 
         @signal[encapPk](type=cPacket);

@@ -32,7 +32,7 @@ package nesting.ieee8021q.queue;
 simple TransmissionSelection {
     parameters:
         @display("i=block/server");
-        @class(nesting::TransmissionSelection);
+        @class(TransmissionSelection);
         string transmissionGateVectorModule; // Path to the ~TransmissionGate vector module
         bool verbose = default(false);
     gates:
