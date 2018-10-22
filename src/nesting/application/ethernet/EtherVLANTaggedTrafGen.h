@@ -27,16 +27,16 @@ using namespace inet;
 namespace nesting {
 
 /** See the NED file for a detailed description */
-class EtherVLANTaggedTrafGen : public EtherTrafGen {
+class EtherVLANTaggedTrafGen: public EtherTrafGen {
 private:
-  // Parameters from NED file
-  cPar* vlanTagEnabled;
-  cPar* pcp;
-  cPar* dei;
-  cPar* vid;
+    // Parameters from NED file
+    cPar* vlanTagEnabled;
+    cPar* pcp;
+    cPar* dei;
+    cPar* vid;
 protected:
-  virtual void initialize(int stage) override;
-  virtual void sendBurstPackets() override;
+    virtual void initialize(int stage) override;
+    virtual void sendBurstPackets() override;
 };
 
 } // namespace nesting

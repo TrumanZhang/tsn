@@ -31,22 +31,22 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class ForwardingRelayUnit : public cSimpleModule {
+class ForwardingRelayUnit: public cSimpleModule {
 private:
-  FilteringDatabase* fdb;
-  int numberOfPorts;
-  //TODO: Create parameter for filtering database aging
-  simtime_t fdbAgingThreshold = 1000;
+    FilteringDatabase* fdb;
+    int numberOfPorts;
+    //TODO: Create parameter for filtering database aging
+    simtime_t fdbAgingThreshold = 1000;
 protected:
-  virtual void initialize();
-  virtual void handleMessage(cMessage* msg);
-  virtual void processBroadcast(cPacket* packet);
-  virtual void processMulticast(cPacket* packet);
-  virtual void processUnicast(cPacket* packet);
-  virtual cPacket* duplicatePacketWithCtrlInfo(cPacket* packet);
+    virtual void initialize();
+    virtual void handleMessage(cMessage* msg);
+    virtual void processBroadcast(cPacket* packet);
+    virtual void processMulticast(cPacket* packet);
+    virtual void processUnicast(cPacket* packet);
+    virtual cPacket* duplicatePacketWithCtrlInfo(cPacket* packet);
 
 public:
-  //TODO: Fix filtering database aging parameter!
+    //TODO: Fix filtering database aging parameter!
 //  ForwardingRelayUnit() : fdb(1000) {};
 };
 

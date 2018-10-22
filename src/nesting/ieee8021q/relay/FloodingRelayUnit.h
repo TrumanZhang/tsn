@@ -27,10 +27,10 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class FloodingRelayUnit : public cSimpleModule {
+class FloodingRelayUnit: public cSimpleModule {
 protected:
-  virtual void initialize();
-  virtual void handleMessage(cMessage *msg);
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 };
 
 } // namespace nesting

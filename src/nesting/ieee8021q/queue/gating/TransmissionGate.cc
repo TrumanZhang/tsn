@@ -23,143 +23,149 @@ namespace nesting {
 Define_Module(TransmissionGate);
 
 TransmissionGate::~TransmissionGate() {
-  cancelEvent(&requestPacketMsg);
-  cancelEvent(&packetEnqueuedMsg);
-  cancelEvent(&gateStateChangedMsg);
+    cancelEvent(&requestPacketMsg);
+    cancelEvent(&packetEnqueuedMsg);
+    cancelEvent(&gateStateChangedMsg);
 }
 
 void TransmissionGate::initialize() {
-  lengthAwareSchedulingEnabled = par("lengthAwareSchedulingEnabled");
-    EV_DEBUG << getFullPath() << ": LengthAwareScheduling NED parameter is " << lengthAwareSchedulingEnabled << endl;
+    lengthAwareSchedulingEnabled = par("lengthAwareSchedulingEnabled");
+    EV_DEBUG << getFullPath() << ": LengthAwareScheduling NED parameter is "
+                    << lengthAwareSchedulingEnabled << endl;
 
-  WATCH(gateOpen);
+    WATCH(gateOpen);
 
-  // Initialize referenced modules
-  gateController = getModuleFromPar<GateController>(par("gateControllerModule"), this);
-  transmissionSelection = getModuleFromPar<TransmissionSelection>(par("transmissionSelectionModule"), this);
-  tsAlgorithm = getModuleFromPar<TSAlgorithm>(par("transmissionSelectionAlgorithmModule"), this);
+    // Initialize referenced modules
+    gateController = getModuleFromPar<GateController>(
+            par("gateControllerModule"), this);
+    transmissionSelection = getModuleFromPar<TransmissionSelection>(
+            par("transmissionSelectionModule"), this);
+    tsAlgorithm = getModuleFromPar<TSAlgorithm>(
+            par("transmissionSelectionAlgorithmModule"), this);
 
-  clock = getModuleFromPar<IClock>(par("clockModule"), this);
+    clock = getModuleFromPar<IClock>(par("clockModule"), this);
 }
 
 void TransmissionGate::handleMessage(cMessage* msg) {
-  if (msg->isSelfMessage()) {
-    if (msg == &gateStateChangedMsg) {
-      handleGateStateChangedEvent();
+    if (msg->isSelfMessage()) {
+        if (msg == &gateStateChangedMsg) {
+            handleGateStateChangedEvent();
+        } else if (msg == &packetEnqueuedMsg) {
+            handlePacketEnqueuedEvent();
+        } else if (msg == &requestPacketMsg) {
+            handleRequestPacketEvent();
+        }
+    } else {
+        cPacket* packet = check_and_cast<cPacket *>(msg);
+        EV_TRACE << getFullPath() << ": Sending packet '" << packet->getName()
+                        << "' of size " << packet->getByteLength() << "B ("
+                        << packet->getBitLength() << " bit) at time "
+                        << clock->getTime().inUnit(SIMTIME_US) << endl;
+        send(msg, "out");
     }
-    else if (msg == &packetEnqueuedMsg) {
-      handlePacketEnqueuedEvent();
-    }
-    else if (msg == &requestPacketMsg) {
-      handleRequestPacketEvent();
-    }
-  }
-  else {
-    cPacket* packet = check_and_cast<cPacket *>(msg);
-      EV_TRACE << getFullPath() << ": Sending packet '" << packet->getName() << "' of size " << packet->getByteLength()
-          << "B (" << packet->getBitLength() << " bit) at time " << clock->getTime().inUnit(SIMTIME_US) << endl;
-    send(msg, "out");
-  }
 }
 
 void TransmissionGate::refreshDisplay() const {
-  char buf[80];
-  sprintf(buf, "%s", gateOpen ? "opened" : "closed");
-  getDisplayString().setTagArg("t", 0, buf);
+    char buf[80];
+    sprintf(buf, "%s", gateOpen ? "opened" : "closed");
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void TransmissionGate::notifyPacketEnqueued() {
-  transmissionSelection->packetEnqueued(this);
+    transmissionSelection->packetEnqueued(this);
 }
 
 void TransmissionGate::notifyGateStateChanged() {
-  tsAlgorithm->gateStateChanged();
+    tsAlgorithm->gateStateChanged();
 }
 
 void TransmissionGate::handleRequestPacketEvent() {
     EV_INFO << getFullPath() << "Handle request-packet event." << endl;
 
-  ASSERT(!isEmpty());
-  tsAlgorithm->requestPacket(maxTransferableBits());
+    ASSERT(!isEmpty());
+    tsAlgorithm->requestPacket(maxTransferableBits());
 }
 
 void TransmissionGate::handlePacketEnqueuedEvent() {
     EV_INFO << getFullPath() << "Handle packet-enqueued event." << endl;
 
-  if (gateOpen && (isExpressQueue() || !gateController->currentlyOnHold())) {
-    transmissionSelection->packetEnqueued(this);
-  }
+    if (gateOpen && (isExpressQueue() || !gateController->currentlyOnHold())) {
+        transmissionSelection->packetEnqueued(this);
+    }
 }
 
 void TransmissionGate::handleGateStateChangedEvent() {
     EV_INFO << getFullPath() << ":Handle gate-state-changed event: ";
     if (this->gateOpen) {
-      EV_INFO << "Gate opened." << endl;
-    }
-    else {
-      EV_INFO << "Gate closed." << endl;
+        EV_INFO << "Gate opened." << endl;
+    } else {
+        EV_INFO << "Gate closed." << endl;
     }
 
-  // Notify transmission-selection if packet has become ready for transmission
-  if (gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits()) && (isExpressQueue() || !gateController->currentlyOnHold())) {
-    transmissionSelection->packetEnqueued(this);
-  }
+    // Notify transmission-selection if packet has become ready for transmission
+    if (gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits())
+            && (isExpressQueue() || !gateController->currentlyOnHold())) {
+        transmissionSelection->packetEnqueued(this);
+    }
 
-  // Notify transmission-selection-algorithm about gate state change
-  tsAlgorithm->gateStateChanged();
+    // Notify transmission-selection-algorithm about gate state change
+    tsAlgorithm->gateStateChanged();
 }
 
 uint64_t TransmissionGate::maxTransferableBits() {
-  if (lengthAwareSchedulingEnabled) {
-    unsigned int maxbit = gateController->calculateMaxBit(getIndex());
-      EV_DEBUG << getFullPath() << ": max bit transferable: " << maxbit << " at time "
-          << clock->getTime().inUnit(SIMTIME_US) << endl;
+    if (lengthAwareSchedulingEnabled) {
+        unsigned int maxbit = gateController->calculateMaxBit(getIndex());
+        EV_DEBUG << getFullPath() << ": max bit transferable: " << maxbit
+                        << " at time " << clock->getTime().inUnit(SIMTIME_US)
+                        << endl;
 
-    return maxbit;
-  }
-  return Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+        return maxbit;
+    }
+    return Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
 }
 
 bool TransmissionGate::isGateOpen() {
-  return gateOpen;
+    return gateOpen;
 }
 
 void TransmissionGate::setGateState(bool gateOpen, bool release) {
-  Enter_Method_Silent("setGateState()");
+    Enter_Method_Silent("setGateState()");
 
-  // Update state
-  bool gateStateChanged = this->gateOpen != gateOpen;
-  this->gateOpen = gateOpen;
+    // Update state
+    bool gateStateChanged = this->gateOpen != gateOpen;
+    this->gateOpen = gateOpen;
 
-  // Schedule gate-state-changed event
-  if (gateStateChanged) {
-    cancelEvent(&gateStateChangedMsg);
-    scheduleAt(simTime(), &gateStateChangedMsg);
-  }else if(release && gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits()) && (isExpressQueue() || !gateController->currentlyOnHold())) {
-    transmissionSelection->packetEnqueued(this);
-  }
+    // Schedule gate-state-changed event
+    if (gateStateChanged) {
+        cancelEvent(&gateStateChangedMsg);
+        scheduleAt(simTime(), &gateStateChangedMsg);
+    } else if(release && gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits()) && (isExpressQueue() || !gateController->currentlyOnHold())) {
+        transmissionSelection->packetEnqueued(this);
+    }
 }
 
 bool TransmissionGate::isEmpty() {
-  return !isGateOpen() || (!isExpressQueue() && gateController->currentlyOnHold()) || tsAlgorithm->isEmpty(maxTransferableBits());
+    return !isGateOpen()
+            || (!isExpressQueue() && gateController->currentlyOnHold())
+            || tsAlgorithm->isEmpty(maxTransferableBits());
 }
 
 void TransmissionGate::requestPacket() {
-  Enter_Method("requestPacket()");
+    Enter_Method("requestPacket()");
 
-  cancelEvent(&requestPacketMsg);
-  scheduleAt(simTime(), &requestPacketMsg);
+    cancelEvent(&requestPacketMsg);
+    scheduleAt(simTime(), &requestPacketMsg);
 }
 
 void TransmissionGate::packetEnqueued() {
-  Enter_Method("packetEnqueued()");
+    Enter_Method("packetEnqueued()");
 
-  cancelEvent(&packetEnqueuedMsg);
-  scheduleAt(simTime(), &packetEnqueuedMsg);
+    cancelEvent(&packetEnqueuedMsg);
+    scheduleAt(simTime(), &packetEnqueuedMsg);
 }
 
 bool TransmissionGate::isExpressQueue() {
-  return tsAlgorithm->isExpressQueue();
+    return tsAlgorithm->isExpressQueue();
 }
 }
- //namespace nesting
+//namespace nesting

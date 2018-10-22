@@ -20,54 +20,51 @@ namespace nesting {
 Define_Module(EtherVLANTaggedTrafGen);
 
 void EtherVLANTaggedTrafGen::initialize(int stage) {
-  EtherTrafGen::initialize(stage);
+    EtherTrafGen::initialize(stage);
 
-  if (stage == INITSTAGE_LOCAL) {
-    vlanTagEnabled = &par("vlanTagEnabled");
-    pcp = &par("pcp");
-    dei = &par("dei");
-    vid = &par("vid");
-  }
+    if (stage == INITSTAGE_LOCAL) {
+        vlanTagEnabled = &par("vlanTagEnabled");
+        pcp = &par("pcp");
+        dei = &par("dei");
+        vid = &par("vid");
+    }
 }
 
 void EtherVLANTaggedTrafGen::sendBurstPackets() {
-  int n = numPacketsPerBurst->intValue();
-  for (int i = 0; i < n; i++) {
-    seqNum++;
+    int n = numPacketsPerBurst->intValue();
+    for (int i = 0; i < n; i++) {
+        seqNum++;
 
-    char msgname[40];
-    sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
+        char msgname[40];
+        sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-    cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
+        cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
 
-    long len = packetLength->intValue();
-    packet->setByteLength(len);
+        long len = packetLength->intValue();
+        packet->setByteLength(len);
 
-    // Create control info for encap modules
-    Ieee8021QCtrl *ctrlInfo = new Ieee8021QCtrl();
-    ctrlInfo->setEtherType(etherType);
-    ctrlInfo->setDest(destMACAddress);
-    ctrlInfo->setTagged(vlanTagEnabled->boolValue());
-    ctrlInfo->setPCP(pcp->intValue());
-    ctrlInfo->setDEI(dei->boolValue());
-    ctrlInfo->setVID(vid->intValue());
-    packet->setControlInfo(ctrlInfo);
+        // Create control info for encap modules
+        Ieee8021QCtrl *ctrlInfo = new Ieee8021QCtrl();
+        ctrlInfo->setEtherType(etherType);
+        ctrlInfo->setDest(destMACAddress);
+        ctrlInfo->setTagged(vlanTagEnabled->boolValue());
+        ctrlInfo->setPCP(pcp->intValue());
+        ctrlInfo->setDEI(dei->boolValue());
+        ctrlInfo->setVID(vid->intValue());
+        packet->setControlInfo(ctrlInfo);
 
-    EV_TRACE << getFullPath()
-              << ": Send packet `" << packet->getName()
-              << "' dest=" << ctrlInfo->getDestinationAddress()
-              << " length=" << packet->getBitLength()
-              << "B type=" << ctrlInfo->getEtherType()
-              << " vlan-tagged=" << ctrlInfo->isTagged()
-              << " pcp=" << ctrlInfo->getPCP()
-              << " dei=" << ctrlInfo->getDEI()
-              << " vid=" << ctrlInfo->getVID()
-              << endl;
+        EV_TRACE << getFullPath() << ": Send packet `" << packet->getName()
+                        << "' dest=" << ctrlInfo->getDestinationAddress()
+                        << " length=" << packet->getBitLength() << "B type="
+                        << ctrlInfo->getEtherType() << " vlan-tagged="
+                        << ctrlInfo->isTagged() << " pcp=" << ctrlInfo->getPCP()
+                        << " dei=" << ctrlInfo->getDEI() << " vid="
+                        << ctrlInfo->getVID() << endl;
 
-    emit(sentPkSignal, packet);
-    send(packet, "out");
-    packetsSent++;
-  }
+        emit(sentPkSignal, packet);
+        send(packet, "out");
+        packetsSent++;
+    }
 }
 
 } // namespace nesting

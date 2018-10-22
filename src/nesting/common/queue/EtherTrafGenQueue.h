@@ -31,41 +31,47 @@ using namespace std;
 namespace nesting {
 
 /** See the NED file for a detailed description */
-class EtherTrafGenQueue : public cSimpleModule, public IPassiveQueue {
+class EtherTrafGenQueue: public cSimpleModule, public IPassiveQueue {
 protected:
-  /** Sequence number for generated packets. */
-  long seqNum;
+    /** Sequence number for generated packets. */
+    long seqNum;
 
-  /** Destination MAC address of generated packets. */
-  MACAddress destMACAddress;
+    /** Destination MAC address of generated packets. */
+    MACAddress destMACAddress;
 
-  // Parameters from NED file
-  cPar* etherType;
-  cPar* vlanTagEnabled;
-  cPar* pcp;
-  cPar* dei;
-  cPar* vid;
+    // Parameters from NED file
+    cPar* etherType;
+    cPar* vlanTagEnabled;
+    cPar* pcp;
+    cPar* dei;
+    cPar* vid;
 
-  cPar* packetLength;
+    cPar* packetLength;
 
-  /** Amount of packets sent for statistic. */
-  long packetsSent;
+    /** Amount of packets sent for statistic. */
+    long packetsSent;
 
-  // signals
-  simsignal_t sentPkSignal;
+    // signals
+    simsignal_t sentPkSignal;
 protected:
-  virtual void initialize() override;
+    virtual void initialize() override;
 
-  virtual void handleMessage(cMessage *msg) override;
-  virtual cPacket* generatePacket();
+    virtual void handleMessage(cMessage *msg) override;
+    virtual cPacket* generatePacket();
 public:
-  virtual void requestPacket() override;
-  virtual int getNumPendingRequests() override;
-  virtual bool isEmpty() override;
-  virtual void clear() {};
-  virtual cMessage *pop() override;
-  virtual void addListener(IPassiveQueueListener *listener) {};
-  virtual void removeListener(IPassiveQueueListener *listener) {};
+    virtual void requestPacket() override;
+    virtual int getNumPendingRequests() override;
+    virtual bool isEmpty() override;
+    virtual void clear() {
+    }
+    ;
+    virtual cMessage *pop() override;
+    virtual void addListener(IPassiveQueueListener *listener) {
+    }
+    ;
+    virtual void removeListener(IPassiveQueueListener *listener) {
+    }
+    ;
 };
 
 } // namespace nesting

@@ -20,112 +20,115 @@ namespace nesting {
 Define_Module(LengthAwareQueue);
 
 LengthAwareQueue::~LengthAwareQueue() {
-  cancelEvent(&requestPacketMsg);
-  while (!queue.isEmpty()) {
-    delete queue.pop();
-  }
-  queue.clear();
+    cancelEvent(&requestPacketMsg);
+    while (!queue.isEmpty()) {
+        delete queue.pop();
+    }
+    queue.clear();
 }
 
 void LengthAwareQueue::initialize() {
-  rcvdPkSignal = registerSignal("rcvdPk");
-  enqueuePkSignal = registerSignal("enqueuePk");
-  dequeuePkSignal = registerSignal("dequeuePk");
-  dropPkByQueueSignal = registerSignal("dropPkByQueue");
-  queueingTimeSignal = registerSignal("queueingTime");
-  queueLengthSignal = registerSignal("queueLength");
+    rcvdPkSignal = registerSignal("rcvdPk");
+    enqueuePkSignal = registerSignal("enqueuePk");
+    dequeuePkSignal = registerSignal("dequeuePk");
+    dropPkByQueueSignal = registerSignal("dropPkByQueue");
+    queueingTimeSignal = registerSignal("queueingTime");
+    queueLengthSignal = registerSignal("queueLength");
 
-  queue.setName(par("queueName"));
-  availableBufferCapacity = par("bufferCapacity");
-  expressQueue = par("expressQueue");
-  WATCH(numPacketsReceived);
-  WATCH(numPacketsDropped);
-  WATCH(numPacketsEnqueued);
-  WATCH(availableBufferCapacity);
+    queue.setName(par("queueName"));
+    availableBufferCapacity = par("bufferCapacity");
+    expressQueue = par("expressQueue");
+    WATCH(numPacketsReceived);
+    WATCH(numPacketsDropped);
+    WATCH(numPacketsEnqueued);
+    WATCH(availableBufferCapacity);
 
-  // module references
-  tsAlgorithm = getModuleFromPar<TSAlgorithm>(par("transmissionSelectionAlgorithmModule"), this);
+    // module references
+    tsAlgorithm = getModuleFromPar<TSAlgorithm>(
+            par("transmissionSelectionAlgorithmModule"), this);
 
-  // statistics
-  emit(queueLengthSignal, queue.getLength());
+    // statistics
+    emit(queueLengthSignal, queue.getLength());
 }
 
 void LengthAwareQueue::handleMessage(cMessage* msg) {
-  if (msg->isSelfMessage()) {
-    if (msg == &requestPacketMsg) {
-      handleRequestPacketEvent(maxTransmittableBits);
+    if (msg->isSelfMessage()) {
+        if (msg == &requestPacketMsg) {
+            handleRequestPacketEvent(maxTransmittableBits);
+        }
+    } else {
+        cPacket* packet = check_and_cast<cPacket*>(msg);
+        emit(rcvdPkSignal, packet);
+        numPacketsReceived++;
+        enqueue(packet);
     }
-  } else {
-    cPacket* packet = check_and_cast<cPacket*>(msg);
-    emit(rcvdPkSignal, packet);
-    numPacketsReceived++;
-    enqueue(packet);
-  }
 }
 
 void LengthAwareQueue::enqueue(cPacket* packet) {
-  if (availableBufferCapacity >= packet->getBitLength()) {
-    emit(enqueuePkSignal, packet);
-    numPacketsEnqueued++;
-    queue.insert(packet);
-    availableBufferCapacity -= packet->getBitLength();
-    handlePacketEnqueuedEvent(packet);
-  } else {
-    emit(dropPkByQueueSignal, packet);
-    numPacketsDropped++;
-    delete packet;
-  }
+    if (availableBufferCapacity >= packet->getBitLength()) {
+        emit(enqueuePkSignal, packet);
+        numPacketsEnqueued++;
+        queue.insert(packet);
+        availableBufferCapacity -= packet->getBitLength();
+        handlePacketEnqueuedEvent(packet);
+    } else {
+        emit(dropPkByQueueSignal, packet);
+        numPacketsDropped++;
+        delete packet;
+    }
 }
 
 cPacket* LengthAwareQueue::dequeue() {
-  if (queue.isEmpty()) {
-    return nullptr;
-  }
+    if (queue.isEmpty()) {
+        return nullptr;
+    }
 
-  cPacket* packet = static_cast<cPacket*>(queue.pop());
-  availableBufferCapacity += packet->getBitLength();
+    cPacket* packet = static_cast<cPacket*>(queue.pop());
+    availableBufferCapacity += packet->getBitLength();
 
-  return packet;
+    return packet;
 }
 
 void LengthAwareQueue::handleRequestPacketEvent(uint64_t maxBits) {
-  ASSERT(!isEmpty(maxBits));
+    ASSERT(!isEmpty(maxBits));
 
-  cPacket* nextPacket = static_cast<cPacket*>(queue.front());
-  EV_TRACE << getFullPath() << ": Packet requested with max length of " << maxBits << "bits. Next packet has "
-      << static_cast<uint64_t>(nextPacket->getBitLength()) << "bits." << endl;
+    cPacket* nextPacket = static_cast<cPacket*>(queue.front());
+    EV_TRACE << getFullPath() << ": Packet requested with max length of "
+                    << maxBits << "bits. Next packet has "
+                    << static_cast<uint64_t>(nextPacket->getBitLength())
+                    << "bits." << endl;
 
-  cPacket* packetToSend = dequeue();
+    cPacket* packetToSend = dequeue();
 
-  emit(dequeuePkSignal, packetToSend);
-  emit(queueLengthSignal, queue.getLength());
-  emit(queueingTimeSignal, simTime() - packetToSend->getArrivalTime());
+    emit(dequeuePkSignal, packetToSend);
+    emit(queueLengthSignal, queue.getLength());
+    emit(queueingTimeSignal, simTime() - packetToSend->getArrivalTime());
 
-  send(packetToSend, "out");
+    send(packetToSend, "out");
 }
 
 void LengthAwareQueue::handlePacketEnqueuedEvent(cPacket* packet) {
-  EV_TRACE << getFullPath() << ": Handle packet-enqueued event." << endl;
-  tsAlgorithm->packetEnqueued();
+    EV_TRACE << getFullPath() << ": Handle packet-enqueued event." << endl;
+    tsAlgorithm->packetEnqueued();
 }
 
 bool LengthAwareQueue::isEmpty(uint64_t maxBits) {
-  if (queue.isEmpty()) {
-    return true;
-  }
+    if (queue.isEmpty()) {
+        return true;
+    }
 
-  cPacket* nextPacket = static_cast<cPacket*>(queue.front());
-  return static_cast<uint64_t>(nextPacket->getBitLength()) > maxBits;
+    cPacket* nextPacket = static_cast<cPacket*>(queue.front());
+    return static_cast<uint64_t>(nextPacket->getBitLength()) > maxBits;
 }
 
 void LengthAwareQueue::requestPacket(uint64_t maxBits) {
-  Enter_Method("requestPacket(maxBits)");
-  maxTransmittableBits = maxBits;
-  cancelEvent(&requestPacketMsg);
-  scheduleAt(simTime(), &requestPacketMsg);
+    Enter_Method("requestPacket(maxBits)");
+    maxTransmittableBits = maxBits;
+    cancelEvent(&requestPacketMsg);
+    scheduleAt(simTime(), &requestPacketMsg);
 }
 bool LengthAwareQueue::isExpressQueue() {
-  return expressQueue;
+    return expressQueue;
 }
 }
 // namespace nesting

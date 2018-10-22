@@ -20,76 +20,77 @@ namespace nesting {
 Define_Module(TSAlgorithm);
 
 TSAlgorithm::~TSAlgorithm() {
-  cancelEvent(&requestPacketMsg);
-  cancelEvent(&packetEnqueuedMsg);
-  cancelEvent(&gateStateChangedMsg);
+    cancelEvent(&requestPacketMsg);
+    cancelEvent(&packetEnqueuedMsg);
+    cancelEvent(&gateStateChangedMsg);
 }
 
 void TSAlgorithm::initialize() {
-  cModule* rawMACModule = getModuleFromPar<cModule>(par("macModule"), this);
-  mac = check_and_cast<EtherMACBase*>(rawMACModule);
-  queue = getModuleFromPar<LengthAwareQueue>(par("queueModule"), this);
-  transmissionGate = getModuleFromPar<TransmissionGate>(par("gateModule"), this);
+    cModule* rawMACModule = getModuleFromPar<cModule>(par("macModule"), this);
+    mac = check_and_cast<EtherMACBase*>(rawMACModule);
+    queue = getModuleFromPar<LengthAwareQueue>(par("queueModule"), this);
+    transmissionGate = getModuleFromPar<TransmissionGate>(par("gateModule"),
+            this);
 }
 
 void TSAlgorithm::handleMessage(cMessage* msg) {
-  if (msg->isSelfMessage()) {
-    if (msg == &packetEnqueuedMsg) {
-      handlePacketEnqueuedEvent();
+    if (msg->isSelfMessage()) {
+        if (msg == &packetEnqueuedMsg) {
+            handlePacketEnqueuedEvent();
+        } else if (msg == &gateStateChangedMsg) {
+            handleGateStateChangedEvent();
+        } else if (msg == &requestPacketMsg) {
+            handleRequestPacketEvent(maxTransmittableBits);
+        }
+    } else {
+        send(msg, "out");
     }
-    else if (msg == &gateStateChangedMsg) {
-      handleGateStateChangedEvent();
-    }
-    else if (msg == &requestPacketMsg) {
-      handleRequestPacketEvent(maxTransmittableBits);
-    }
-  }
-  else {
-    send(msg, "out");
-  }
 }
 
 void TSAlgorithm::handlePacketEnqueuedEvent() {
-    EV_TRACE << getFullPath() << ": Handle packet-enqueued event (without bit parameter)." << endl;
+    EV_TRACE << getFullPath()
+                    << ": Handle packet-enqueued event (without bit parameter)."
+                    << endl;
 
-  transmissionGate->packetEnqueued();
+    transmissionGate->packetEnqueued();
 }
 
 void TSAlgorithm::handleGateStateChangedEvent() {
-  // Empty method
+    // Empty method
 }
 
 void TSAlgorithm::handleRequestPacketEvent(uint64_t maxBits) {
-    EV_TRACE << getFullPath() << ": Handle request-packet event (" << maxBits << " bits)." << endl;
+    EV_TRACE << getFullPath() << ": Handle request-packet event (" << maxBits
+                    << " bits)." << endl;
 
     queue->requestPacket(maxBits);
 }
 
 void TSAlgorithm::gateStateChanged() {
-  Enter_Method("gateStateChanged()");
-  cancelEvent(&gateStateChangedMsg);
-  scheduleAt(simTime(), &gateStateChangedMsg);
+    Enter_Method("gateStateChanged()");
+    cancelEvent(&gateStateChangedMsg);
+    scheduleAt(simTime(), &gateStateChangedMsg);
 }
 
 void TSAlgorithm::packetEnqueued() {
-  Enter_Method("packetEnqueued()");
-  cancelEvent(&packetEnqueuedMsg);
-  scheduleAt(simTime(), &packetEnqueuedMsg);
+    Enter_Method("packetEnqueued()");
+    cancelEvent(&packetEnqueuedMsg);
+    scheduleAt(simTime(), &packetEnqueuedMsg);
 }
 
 bool TSAlgorithm::isEmpty(uint64_t maxBits) {
-  return queue->isEmpty(maxBits);
+    return queue->isEmpty(maxBits);
 }
 
 void TSAlgorithm::requestPacket(uint64_t maxBits) {
-  Enter_Method("requestPacket(maxBits)");
-  ASSERT(!isEmpty(maxBits));
-  cancelEvent(&requestPacketMsg);
-  maxTransmittableBits = maxBits;
-  scheduleAt(simTime(), &requestPacketMsg);
+    Enter_Method("requestPacket(maxBits)");
+    ASSERT(!isEmpty(maxBits));
+    cancelEvent(&requestPacketMsg);
+    maxTransmittableBits = maxBits;
+    scheduleAt(simTime(), &requestPacketMsg);
 }
 bool TSAlgorithm::isExpressQueue() {
-  return queue->isExpressQueue();
+    return queue->isExpressQueue();
 }
 }
 /* namespace nesting */

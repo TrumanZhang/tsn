@@ -20,9 +20,9 @@ namespace nesting {
 Define_Module(StrictPriority);
 
 void StrictPriority::refreshDisplay() const {
-  char buf[80];
-  sprintf(buf, "strict-priority");
-  getDisplayString().setTagArg("t", 0, buf);
+    char buf[80];
+    sprintf(buf, "strict-priority");
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 } // namespace nesting

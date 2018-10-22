@@ -34,73 +34,73 @@ class TSAlgorithm;
 /**
  * See the NED file for a detailed description.
  */
-class LengthAwareQueue : public cSimpleModule, public IPreemptableQueue  {
+class LengthAwareQueue: public cSimpleModule, public IPreemptableQueue {
 protected:
-  /**
-   * Reference to transmission-selection-algorithm module
-   */
-  TSAlgorithm* tsAlgorithm;
+    /**
+     * Reference to transmission-selection-algorithm module
+     */
+    TSAlgorithm* tsAlgorithm;
 
-  /**
-   * Available buffer capacity in Bits.
-   */
-  long availableBufferCapacity;
+    /**
+     * Available buffer capacity in Bits.
+     */
+    long availableBufferCapacity;
 
-  /**
-   * True if frame preemption is enabled, false otherwise.
-   */
-  bool framePreemptionEnabled;
+    /**
+     * True if frame preemption is enabled, false otherwise.
+     */
+    bool framePreemptionEnabled;
 
-  bool expressQueue;
+    bool expressQueue;
 
-  long numPacketsReceived = 0;
+    long numPacketsReceived = 0;
 
-  long numPacketsDropped = 0;
+    long numPacketsDropped = 0;
 
-  long numPacketsEnqueued = 0;
+    long numPacketsEnqueued = 0;
 
-  uint64_t maxTransmittableBits = 0;
+    uint64_t maxTransmittableBits = 0;
 
-  /**
-   * Internal queue datastructure.
-   */
-  cQueue queue;
+    /**
+     * Internal queue datastructure.
+     */
+    cQueue queue;
 
-  /**
-   * Output gate reference.
-   */
-  cGate *outGate;
+    /**
+     * Output gate reference.
+     */
+    cGate *outGate;
 
-  cMessage requestPacketMsg = cMessage("requestPacket");
+    cMessage requestPacketMsg = cMessage("requestPacket");
 
-  simsignal_t rcvdPkSignal;
-  simsignal_t enqueuePkSignal;
-  simsignal_t dequeuePkSignal;
-  simsignal_t dropPkByQueueSignal;
-  simsignal_t queueingTimeSignal;
-  simsignal_t queueLengthSignal;
+    simsignal_t rcvdPkSignal;
+    simsignal_t enqueuePkSignal;
+    simsignal_t dequeuePkSignal;
+    simsignal_t dropPkByQueueSignal;
+    simsignal_t queueingTimeSignal;
+    simsignal_t queueLengthSignal;
 
 protected:
-  virtual void initialize() override;
+    virtual void initialize() override;
 
-  virtual void handleMessage(cMessage* msg) override;
+    virtual void handleMessage(cMessage* msg) override;
 
-  virtual void enqueue(cPacket* packet);
+    virtual void enqueue(cPacket* packet);
 
-  virtual cPacket* dequeue();
+    virtual cPacket* dequeue();
 
-  virtual void handleRequestPacketEvent(uint64_t maxBits);
+    virtual void handleRequestPacketEvent(uint64_t maxBits);
 
-  virtual void handlePacketEnqueuedEvent(cPacket* packet);
+    virtual void handlePacketEnqueuedEvent(cPacket* packet);
 
 public:
-  virtual ~LengthAwareQueue();
+    virtual ~LengthAwareQueue();
 
-  virtual bool isEmpty(uint64_t maxBits);
+    virtual bool isEmpty(uint64_t maxBits);
 
-  virtual void requestPacket(uint64_t maxBits);
+    virtual void requestPacket(uint64_t maxBits);
 
-  virtual bool isExpressQueue();
+    virtual bool isExpressQueue();
 };
 
 } // namespace nesting

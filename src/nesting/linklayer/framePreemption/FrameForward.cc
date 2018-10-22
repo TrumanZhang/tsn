@@ -16,12 +16,12 @@
 #include "FrameForward.h"
 namespace nesting {
 
-  Define_Module(FrameForward);
+Define_Module(FrameForward);
 
-  void FrameForward::initialize() {
-  }
+void FrameForward::initialize() {
+}
 
-  void FrameForward::handleMessage(cMessage *msg) {
+void FrameForward::handleMessage(cMessage *msg) {
     send(msg, "upperLayerOut");
-  }
+}
 }

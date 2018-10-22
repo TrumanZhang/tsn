@@ -23,27 +23,27 @@ using namespace omnetpp;
 using namespace std;
 namespace nesting {
 
-  /**
-   * This class extends the auto-generated base class for preempted packets and
-   * adds correct ownership handling.
-   */
-  class PreemptedFrame : public PreemptedFrame_Base {
-    private:
-      void copy(const PreemptedFrame& other);
-      virtual void setCorrectName();
-    protected:
-      PreemptedFrame& operator=(const PreemptedFrame& other);
-    public:
-      PreemptedFrame(const cFramePointer& completeFrame);
-      PreemptedFrame(const PreemptedFrame& other);
-      virtual ~PreemptedFrame();
-      virtual void setCompleteFrame(const cFramePointer& completeFrame) override;
-      virtual cFramePointer removeCompleteFrame();
-      virtual PreemptedFrame* dup() const override;
-      virtual void setBytesSent(unsigned int bytesSent) override;
-      virtual void setBytesTotal(unsigned int bytesTotal) override;
-      virtual void setBytesInThisPart(unsigned int bytesInThisPart) override;
-  };
+/**
+ * This class extends the auto-generated base class for preempted packets and
+ * adds correct ownership handling.
+ */
+class PreemptedFrame: public PreemptedFrame_Base {
+private:
+    void copy(const PreemptedFrame& other);
+    virtual void setCorrectName();
+protected:
+    PreemptedFrame& operator=(const PreemptedFrame& other);
+public:
+    PreemptedFrame(const cFramePointer& completeFrame);
+    PreemptedFrame(const PreemptedFrame& other);
+    virtual ~PreemptedFrame();
+    virtual void setCompleteFrame(const cFramePointer& completeFrame) override;
+    virtual cFramePointer removeCompleteFrame();
+    virtual PreemptedFrame* dup() const override;
+    virtual void setBytesSent(unsigned int bytesSent) override;
+    virtual void setBytesTotal(unsigned int bytesTotal) override;
+    virtual void setBytesInThisPart(unsigned int bytesInThisPart) override;
+};
 
 } /* namespace nesting */
 

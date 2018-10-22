@@ -29,15 +29,13 @@ using namespace inet;
 using namespace std;
 
 //added hash function for MACAddress (required for map)
-namespace std
-{
-    template<> struct hash<MACAddress>
+namespace std {
+template<> struct hash<MACAddress> {
+    size_t operator()(MACAddress const& mac) const noexcept
     {
-        size_t operator()(MACAddress const& mac) const noexcept
-        {
-            return std::hash<string>{}(mac.str());
-        }
-    };
+        return std::hash<string> { }(mac.str());
+    }
+};
 }
 
 namespace nesting {
@@ -45,47 +43,47 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class FilteringDatabase : public cSimpleModule, public IClockListener {
+class FilteringDatabase: public cSimpleModule, public IClockListener {
 private:
-  unordered_map<MACAddress, pair<simtime_t, int>> adminFdb;
-  unordered_map<MACAddress, pair<simtime_t, int>> operFdb;
+    unordered_map<MACAddress, pair<simtime_t, int>> adminFdb;
+    unordered_map<MACAddress, pair<simtime_t, int>> operFdb;
 
-  bool changeDatabase = false;
+    bool changeDatabase = false;
 
-  /**
-   * Clock reference, needed to subscribe notifications of cycle iterations
-   */
-  IClock* clock;
+    /**
+     * Clock reference, needed to subscribe notifications of cycle iterations
+     */
+    IClock* clock;
 
-  int cycle = 100;
-  int newCycle = 100;
+    int cycle = 100;
+    int newCycle = 100;
 
-  bool agingActive = false;
-  simtime_t agingThreshold;
+    bool agingActive = false;
+    simtime_t agingThreshold;
 
-  void parseEntries(cXMLElement* xml);
-  void clearAdminFdb();
+    void parseEntries(cXMLElement* xml);
+    void clearAdminFdb();
 
 protected:
-  virtual void initialize(int stage) override;
+    virtual void initialize(int stage) override;
 
-  virtual void handleMessage(cMessage* msg);
+    virtual void handleMessage(cMessage* msg);
 
-  virtual int numInitStages() const override;
+    virtual int numInitStages() const override;
 
 public:
-  FilteringDatabase(bool agingActive, simtime_t agingTreshold);
-  FilteringDatabase();
-  virtual ~FilteringDatabase();
+    FilteringDatabase(bool agingActive, simtime_t agingTreshold);
+    FilteringDatabase();
+    virtual ~FilteringDatabase();
 
-  /** @see IClockListener::tick(IClock*) */
-  virtual void tick(IClock *clock) override;
+    /** @see IClockListener::tick(IClock*) */
+    virtual void tick(IClock *clock) override;
 
-  virtual void loadDatabase(cXMLElement* fdb, int cycle);
+    virtual void loadDatabase(cXMLElement* fdb, int cycle);
 
-  virtual int getPort(MACAddress macAddress, simtime_t curTS);
+    virtual int getPort(MACAddress macAddress, simtime_t curTS);
 
-  void insert(MACAddress macAddress, simtime_t curTS, int port);
+    void insert(MACAddress macAddress, simtime_t curTS, int port);
 };
 
 } // namespace nesting

@@ -31,61 +31,63 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class VLANEncap : public cSimpleModule {
+class VLANEncap: public cSimpleModule {
 private:
 
-  /** detailed prints for testing */
-  bool verbose;
-  /** Parameter from NED file. */
-  bool tagUntaggedFrames;
+    /** detailed prints for testing */
+    bool verbose;
+    /** Parameter from NED file. */
+    bool tagUntaggedFrames;
 
-  /** Parameter from NED file. */
-  int pvid;
+    /** Parameter from NED file. */
+    int pvid;
 private:
-  /**
-   * Processes packets from lower level and possibly performs decapsulation
-   * when the packet is of type Ether1QTag (is a VLAN Tag)
-   * @param packet The packet that was received from lower level.
-   */
-  virtual void processPacketFromLowerLevel(cPacket* packet);
+    /**
+     * Processes packets from lower level and possibly performs decapsulation
+     * when the packet is of type Ether1QTag (is a VLAN Tag)
+     * @param packet The packet that was received from lower level.
+     */
+    virtual void processPacketFromLowerLevel(cPacket* packet);
 
-  /**
-   * Processes packets from higher level and possibly performs
-   * encapsulation when the control information says so.
-   * @param packet The packet received from  higher level.
-   */
-  virtual void processPacketFromHigherLevel(cPacket* packet);
+    /**
+     * Processes packets from higher level and possibly performs
+     * encapsulation when the control information says so.
+     * @param packet The packet received from  higher level.
+     */
+    virtual void processPacketFromHigherLevel(cPacket* packet);
 protected:
-  /** Signal for encapsulation events. */
-  simsignal_t encapPkSignal;
+    /** Signal for encapsulation events. */
+    simsignal_t encapPkSignal;
 
-  /** Signal for decapsulation events. */
-  simsignal_t decapPkSignal;
+    /** Signal for decapsulation events. */
+    simsignal_t decapPkSignal;
 
-  /** Total amount of packets received from higher layer. */
-  long totalFromHigherLayer;
+    /** Total amount of packets received from higher layer. */
+    long totalFromHigherLayer;
 
-  /** Total amount of packets received from lower layer. */
-  long totalFromLowerLayer;
+    /** Total amount of packets received from lower layer. */
+    long totalFromLowerLayer;
 
-  /** Total amount of packets encapsulated. */
-  long totalEncap;
+    /** Total amount of packets encapsulated. */
+    long totalEncap;
 
-  /** Total amount of packets decapsulated. */
-  long totalDecap;
+    /** Total amount of packets decapsulated. */
+    long totalDecap;
 protected:
-  /** @see cSimpleModule::initialize() */
-  virtual void initialize() override;
+    /** @see cSimpleModule::initialize() */
+    virtual void initialize() override;
 
-  /** @see cSimpleModule::handleMessage(cMessage*) */
-  virtual void handleMessage(cMessage *msg) override;
+    /** @see cSimpleModule::handleMessage(cMessage*) */
+    virtual void handleMessage(cMessage *msg) override;
 
-  /** @see cSimpleModule::refreshDisplay() */
-  virtual void refreshDisplay() const override;
+    /** @see cSimpleModule::refreshDisplay() */
+    virtual void refreshDisplay() const override;
 public:
-  virtual ~VLANEncap() {};
+    virtual ~VLANEncap() {
+    }
+    ;
 
-  virtual int getPVID();
+    virtual int getPVID();
 };
 
 } // namespace nesting

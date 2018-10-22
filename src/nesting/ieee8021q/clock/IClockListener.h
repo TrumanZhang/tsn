@@ -30,10 +30,12 @@ class IClock;
  */
 class IClockListener {
 public:
-  virtual ~IClockListener() {};
+    virtual ~IClockListener() {
+    }
+    ;
 
-  /** Notifies a listener about a subscribed clock tick. */
-  virtual void tick(IClock *clock) = 0;
+    /** Notifies a listener about a subscribed clock tick. */
+    virtual void tick(IClock *clock) = 0;
 };
 
 } // namespace nesting

@@ -20,105 +20,105 @@ namespace nesting {
 Define_Module(CreditBasedShaper);
 
 CreditBasedShaper::~CreditBasedShaper() {
-  cancelEvent(&endSpendingCreditMessage);
-  cancelEvent(&reachedZeroCreditMessage);
+    cancelEvent(&endSpendingCreditMessage);
+    cancelEvent(&reachedZeroCreditMessage);
 }
 
 void CreditBasedShaper::initialize() {
-  TSAlgorithm::initialize();
+    TSAlgorithm::initialize();
 
-  // Initialize credit value
-  credit = 0;
-  WATCH(credit);
+    // Initialize credit value
+    credit = 0;
+    WATCH(credit);
 
-  // Initialize idle slope value
-  idleSlopeFactor = par("idleSlopeFactor");
-  WATCH(idleSlopeFactor);
-  if (idleSlopeFactor <= 0 || idleSlopeFactor >= 1) {
-    throw cRuntimeError("Value of idleSlope for credit-based-shaper must be in the range (0,1)");
-  }
+    // Initialize idle slope value
+    idleSlopeFactor = par("idleSlopeFactor");
+    WATCH(idleSlopeFactor);
+    if (idleSlopeFactor <= 0 || idleSlopeFactor >= 1) {
+        throw cRuntimeError(
+                "Value of idleSlope for credit-based-shaper must be in the range (0,1)");
+    }
 
-  // Initialize state
-  updateState(kIdle);
+    // Initialize state
+    updateState(kIdle);
 }
 
 void CreditBasedShaper::handleMessage(cMessage* msg) {
-  if (msg->isSelfMessage()) {
-    if (msg == &endSpendingCreditMessage) {
-      handleEndSpendingCreditEvent();
+    if (msg->isSelfMessage()) {
+        if (msg == &endSpendingCreditMessage) {
+            handleEndSpendingCreditEvent();
+        } else if (msg == &reachedZeroCreditMessage) {
+            handleZeroCreditReachedEvent();
+        } else {
+            TSAlgorithm::handleMessage(msg);
+        }
+    } else {
+        cPacket* packet = check_and_cast<cPacket*>(msg);
+        handleSendPacketEvent(packet);
+        send(packet, "out");
     }
-    else if (msg == &reachedZeroCreditMessage) {
-      handleZeroCreditReachedEvent();
-    }
-    else {
-      TSAlgorithm::handleMessage(msg);
-    }
-  }
-  else {
-    cPacket* packet = check_and_cast<cPacket*>(msg);
-    handleSendPacketEvent(packet);
-    send(packet, "out");
-  }
 }
 
 void CreditBasedShaper::refreshDisplay() const {
-  char buf[80];
-  sprintf(buf, "credit-based\ncredit: %d", static_cast<int>(credit));
-  getDisplayString().setTagArg("t", 0, buf);
+    char buf[80];
+    sprintf(buf, "credit-based\ncredit: %d", static_cast<int>(credit));
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 double CreditBasedShaper::getIdleSlope() {
-  return idleSlopeFactor * getPortTransmitRate();
+    return idleSlopeFactor * getPortTransmitRate();
 }
 
 double CreditBasedShaper::getSendSlope() {
-  return getPortTransmitRate() - getIdleSlope();
+    return getPortTransmitRate() - getIdleSlope();
 }
 
 double CreditBasedShaper::getPortTransmitRate() {
-  return mac->getTxRate();
+    return mac->getTxRate();
 }
 
-double CreditBasedShaper::creditsForTime(double creditPerSecond, simtime_t time) {
-  assert(creditPerSecond > 0);
-  assert(time >= SimTime::ZERO);
+double CreditBasedShaper::creditsForTime(double creditPerSecond,
+        simtime_t time) {
+    assert(creditPerSecond > 0);
+    assert(time >= SimTime::ZERO);
 
-  simtime_t secondsPerCredit = SimTime(1, SIMTIME_S) / creditPerSecond;
-  return time / secondsPerCredit;
+    simtime_t secondsPerCredit = SimTime(1, SIMTIME_S) / creditPerSecond;
+    return time / secondsPerCredit;
 }
 
-simtime_t CreditBasedShaper::timeForCredits(double creditPerSecond, double credit) {
-  assert(creditPerSecond > 0);
-  assert(credit >= 0);
+simtime_t CreditBasedShaper::timeForCredits(double creditPerSecond,
+        double credit) {
+    assert(creditPerSecond > 0);
+    assert(credit >= 0);
 
-  double seconds = credit / creditPerSecond;
-  return seconds * SimTime(1, SIMTIME_S);
+    double seconds = credit / creditPerSecond;
+    return seconds * SimTime(1, SIMTIME_S);
 }
 
 simtime_t CreditBasedShaper::idleTimeToZeroCredit() {
-  assert(credit < 0);
-  return simTime() + timeForCredits(getIdleSlope(), 0 - credit);
+    assert(credit < 0);
+    return simTime() + timeForCredits(getIdleSlope(), 0 - credit);
 }
 
 simtime_t CreditBasedShaper::transmissionTime(cPacket* packet) {
-  simtime_t transmissionTime = timeForCredits(getPortTransmitRate(),
-      Ieee8021q::getFinalEthernet2FrameBitLength(packet));
-  return transmissionTime;
+    simtime_t transmissionTime = timeForCredits(getPortTransmitRate(),
+            Ieee8021q::getFinalEthernet2FrameBitLength(packet));
+    return transmissionTime;
 }
 
 void CreditBasedShaper::updateState(State newState) {
-  state = newState;
-  lastEventTimestamp = simTime();
+    state = newState;
+    lastEventTimestamp = simTime();
 
-  EV_DEBUG << getFullPath() << ": New state: [state=";
+    EV_DEBUG << getFullPath() << ": New state: [state=";
     switch (state) {
-      case kIdle:
+    case kIdle:
         EV_INFO << "idle";
         break;
-      case kSpendCredit:
+    case kSpendCredit:
         EV_INFO << "spendCredit";
         break;
-      case kEarnCredit:
+    case kEarnCredit:
         EV_INFO << "earnCredit";
         break;
     }
@@ -126,137 +126,138 @@ void CreditBasedShaper::updateState(State newState) {
 }
 
 void CreditBasedShaper::spendCredit(cPacket* packet) {
-  double spendCredit = creditsForTime(getSendSlope(), transmissionTime(packet));
-  credit -= spendCredit;
+    double spendCredit = creditsForTime(getSendSlope(),
+            transmissionTime(packet));
+    credit -= spendCredit;
 
-  EV_DEBUG << getFullPath() << ": Spending " << spendCredit << " credit to transmit "
-        << Ieee8021q::getFinalEthernet2FrameBitLength(packet) << "bits (" << packet->getBitLength()
-        << "bits payload without headers)." << endl;
+    EV_DEBUG << getFullPath() << ": Spending " << spendCredit
+                    << " credit to transmit "
+                    << Ieee8021q::getFinalEthernet2FrameBitLength(packet)
+                    << "bits (" << packet->getBitLength()
+                    << "bits payload without headers)." << endl;
 }
 
 void CreditBasedShaper::earnCredits(simtime_t time) {
-  double earnedCredit = creditsForTime(getIdleSlope(), time);
-  credit += earnedCredit;
+    double earnedCredit = creditsForTime(getIdleSlope(), time);
+    credit += earnedCredit;
 
-  EV_DEBUG << getFullPath() << ": Earned " << earnedCredit << " credit." << endl;
+    EV_DEBUG << getFullPath() << ": Earned " << earnedCredit << " credit."
+                    << endl;
 }
 
 void CreditBasedShaper::resetCredit() {
-  credit = 0;
+    credit = 0;
 
-  EV_DEBUG << getFullPath() << ": Resetted credit." << endl;
+    EV_DEBUG << getFullPath() << ": Resetted credit." << endl;
 }
 
 bool CreditBasedShaper::isCreditPositive() {
-  return static_cast<int>(credit) >= 0;
+    return static_cast<int>(credit) >= 0;
 }
 
 bool CreditBasedShaper::isPacketReadyForTransmission() {
-  uint64_t mtuSize = Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
-  return !queue->isEmpty(mtuSize);
+    uint64_t mtuSize = Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+    return !queue->isEmpty(mtuSize);
 }
 
 void CreditBasedShaper::handleGateStateChangedEvent() {
-  if (transmissionGate->isGateOpen()) {
-      EV_TRACE << getFullPath() << ": Handle gate opened event." << endl;
-    if (state == kIdle && isPacketReadyForTransmission()) {
-      updateState(kEarnCredit);
-      if (!isCreditPositive()) {
-        scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
-      }
+    if (transmissionGate->isGateOpen()) {
+        EV_TRACE << getFullPath() << ": Handle gate opened event." << endl;
+        if (state == kIdle && isPacketReadyForTransmission()) {
+            updateState(kEarnCredit);
+            if (!isCreditPositive()) {
+                scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
+            }
+        }
+    } else {
+        EV_TRACE << getFullPath() << ": Handle gate closed event." << endl;
+        if (state == kEarnCredit) {
+            cancelEvent(&reachedZeroCreditMessage);
+            earnCredits(simTime() - lastEventTimestamp);
+            updateState(kIdle);
+        }
     }
-  }
-  else {
-      EV_TRACE << getFullPath() << ": Handle gate closed event." << endl;
-    if (state == kEarnCredit) {
-      cancelEvent(&reachedZeroCreditMessage);
-      earnCredits(simTime() - lastEventTimestamp);
-      updateState(kIdle);
-    }
-  }
 }
 
 void CreditBasedShaper::handlePacketEnqueuedEvent() {
-  assert(isPacketReadyForTransmission());
+    assert(isPacketReadyForTransmission());
 
     EV_TRACE << getFullPath() << ": Handle packet enqueued event." << endl;
 
-  if (state == kIdle && transmissionGate->isGateOpen()) {
-    updateState(kEarnCredit);
-  }
-  else if (state == kEarnCredit) {
-    cancelEvent(&reachedZeroCreditMessage);
-    earnCredits(simTime() - lastEventTimestamp);
-    updateState(kEarnCredit);
-  }
+    if (state == kIdle && transmissionGate->isGateOpen()) {
+        updateState(kEarnCredit);
+    } else if (state == kEarnCredit) {
+        cancelEvent(&reachedZeroCreditMessage);
+        earnCredits(simTime() - lastEventTimestamp);
+        updateState(kEarnCredit);
+    }
 
-  // If new state is earning credits then maybe send self message to signal
-  // when zero credits are reached.
-  if (state == kEarnCredit && !isCreditPositive()) {
-    scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
-  }
+    // If new state is earning credits then maybe send self message to signal
+    // when zero credits are reached.
+    if (state == kEarnCredit && !isCreditPositive()) {
+        scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
+    }
 
-  // If positive amount of credit is available pass packetEnqueued event to
-  // subsequent queues.
-  if (isCreditPositive()) {
-    transmissionGate->packetEnqueued();
-  }
+    // If positive amount of credit is available pass packetEnqueued event to
+    // subsequent queues.
+    if (isCreditPositive()) {
+        transmissionGate->packetEnqueued();
+    }
 }
 
 void CreditBasedShaper::handleSendPacketEvent(cPacket* packet) {
-  assert(state != kSpendCredit);
-  assert(isCreditPositive());
-  assert(!reachedZeroCreditMessage.isScheduled());
+    assert(state != kSpendCredit);
+    assert(isCreditPositive());
+    assert(!reachedZeroCreditMessage.isScheduled());
 
     EV_TRACE << getFullPath() << ": Handle send packet event." << endl;
 
-  if (state == kEarnCredit) {
-    earnCredits(simTime() - lastEventTimestamp);
-  }
+    if (state == kEarnCredit) {
+        earnCredits(simTime() - lastEventTimestamp);
+    }
 
-  spendCredit(packet);
+    spendCredit(packet);
 
-  scheduleAt(simTime() + transmissionTime(packet), &endSpendingCreditMessage);
-  updateState(kSpendCredit);
+    scheduleAt(simTime() + transmissionTime(packet), &endSpendingCreditMessage);
+    updateState(kSpendCredit);
 }
 
 void CreditBasedShaper::handleEndSpendingCreditEvent() {
-  assert(state == kSpendCredit);
+    assert(state == kSpendCredit);
 
     EV_TRACE << getFullPath() << ": Handle end spending credit event." << endl;
 
-  if (!isPacketReadyForTransmission() && isCreditPositive()) {
-    resetCredit();
-    updateState(kIdle);
-  }
-  else if (isPacketReadyForTransmission() && transmissionGate->isGateOpen()) {
-    updateState(kEarnCredit);
-    if (credit < 0) {
-      scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
+    if (!isPacketReadyForTransmission() && isCreditPositive()) {
+        resetCredit();
+        updateState(kIdle);
+    } else if (isPacketReadyForTransmission()
+            && transmissionGate->isGateOpen()) {
+        updateState(kEarnCredit);
+        if (credit < 0) {
+            scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
+        }
+    } else {
+        updateState(kIdle);
     }
-  }
-  else {
-    updateState(kIdle);
-  }
 }
 
 void CreditBasedShaper::handleZeroCreditReachedEvent() {
-  assert(state == kEarnCredit);
-  assert(transmissionGate->isGateOpen());
+    assert(state == kEarnCredit);
+    assert(transmissionGate->isGateOpen());
 
     EV_TRACE << getFullPath() << ": Handle zero credit reached event." << endl;
 
-  earnCredits(simTime() - lastEventTimestamp);
-  updateState(kEarnCredit);
-  assert(isCreditPositive());
+    earnCredits(simTime() - lastEventTimestamp);
+    updateState(kEarnCredit);
+    assert(isCreditPositive());
 
-  if (isCreditPositive() && isPacketReadyForTransmission()) {
-    transmissionGate->packetEnqueued();
-  }
+    if (isCreditPositive() && isPacketReadyForTransmission()) {
+        transmissionGate->packetEnqueued();
+    }
 }
 
 bool CreditBasedShaper::isEmpty(uint64_t maxBits) {
-  return !isCreditPositive() || queue->isEmpty(maxBits);
+    return !isCreditPositive() || queue->isEmpty(maxBits);
 }
 
 } // namespace nesting

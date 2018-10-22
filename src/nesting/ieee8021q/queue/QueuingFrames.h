@@ -27,31 +27,25 @@ using namespace omnetpp;
 namespace nesting {
 
 /** See NED file for a detailed description */
-class QueuingFrames : public cSimpleModule {
+class QueuingFrames: public cSimpleModule {
 private:
-  /** Number of queues per port */
-  int numberOfQueues;
+    /** Number of queues per port */
+    int numberOfQueues;
 
-  /**
-   * A static implementation of the traffic class mapping from the standard
-   */
-  int standardTrafficClassMapping[Ieee8021q::kNumberOfPCPValues][Ieee8021q::kNumberOfPCPValues] =
-  {
-      { 0, 0, 0, 0, 0, 0, 0, 0 },
-      { 0, 0, 0, 0, 1, 1, 1, 1 },
-      { 0, 0, 0, 0, 1, 1, 2, 2 },
-      { 0, 0, 1, 1, 2, 2, 3, 3 },
-      { 0, 0, 1, 1, 2, 2, 3, 4 },
-      { 1, 0, 2, 2, 3, 3, 4, 5 },
-      { 1, 0, 2, 3, 4, 4, 5, 6 },
-      { 1, 0, 2, 3, 4, 5, 6, 7 }
-  };
+    /**
+     * A static implementation of the traffic class mapping from the standard
+     */
+    int standardTrafficClassMapping[Ieee8021q::kNumberOfPCPValues][Ieee8021q::kNumberOfPCPValues] =
+            { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1, 1, 1 }, { 0, 0, 0,
+                    0, 1, 1, 2, 2 }, { 0, 0, 1, 1, 2, 2, 3, 3 }, { 0, 0, 1, 1,
+                    2, 2, 3, 4 }, { 1, 0, 2, 2, 3, 3, 4, 5 }, { 1, 0, 2, 3, 4,
+                    4, 5, 6 }, { 1, 0, 2, 3, 4, 5, 6, 7 } };
 
-  int getFramePriority(int numberOfQueues);
+    int getFramePriority(int numberOfQueues);
 protected:
-  virtual void initialize();
+    virtual void initialize();
 
-  virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 };
 
 } // namespace nesting

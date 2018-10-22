@@ -34,17 +34,20 @@ class IClockListener;
  */
 class IClock {
 public:
-  virtual ~IClock() {};
+    virtual ~IClock() {
+    }
+    ;
 
-  /** Returns the clock's local time. */
-  virtual simtime_t getTime() = 0;
+    /** Returns the clock's local time. */
+    virtual simtime_t getTime() = 0;
 
-  /** Return clockrate as a simtime object. */
-  virtual simtime_t getClockRate() = 0;
+    /** Return clockrate as a simtime object. */
+    virtual simtime_t getClockRate() = 0;
 
-  virtual void subscribeTick(IClockListener* listener, unsigned int idleTicks) = 0;
+    virtual void subscribeTick(IClockListener* listener,
+            unsigned int idleTicks) = 0;
 
-  virtual void unsubscribeTicks(IClockListener* listener) = 0;
+    virtual void unsubscribeTicks(IClockListener* listener) = 0;
 };
 
 } // namespace nesting

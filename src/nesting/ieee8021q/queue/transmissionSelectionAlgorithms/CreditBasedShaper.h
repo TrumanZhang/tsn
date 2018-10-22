@@ -31,161 +31,161 @@ namespace nesting {
 /**
  * See the NED file for a detailed description.
  */
-class CreditBasedShaper : public TSAlgorithm {
+class CreditBasedShaper: public TSAlgorithm {
 protected:
-  /**
-   * Enumeration to represent the internal state of the credit-based-shaper
-   * transmission selection algorithm. The state can be (1) earning credits,
-   * (2) spending credits or (3) staying idle.
-   */
-  enum State {
-    kEarnCredit, kSpendCredit, kIdle
-  };
+    /**
+     * Enumeration to represent the internal state of the credit-based-shaper
+     * transmission selection algorithm. The state can be (1) earning credits,
+     * (2) spending credits or (3) staying idle.
+     */
+    enum State {
+        kEarnCredit, kSpendCredit, kIdle
+    };
 protected:
-  /**
-   * The rate of change of credit as factor of the transmission rate of the
-   * MAC module.
-   */
-  double idleSlopeFactor;
+    /**
+     * The rate of change of credit as factor of the transmission rate of the
+     * MAC module.
+     */
+    double idleSlopeFactor;
 
-  /**
-   * Credit balance.
-   */
-  double credit;
+    /**
+     * Credit balance.
+     */
+    double credit;
 
-  /**
-   * Internal state.
-   */
-  State state;
+    /**
+     * Internal state.
+     */
+    State state;
 
-  /**
-   * Time-stamp when the last state change was performed. This value is used
-   * to calculate e.g. earned credits.
-   */
-  simtime_t lastEventTimestamp;
+    /**
+     * Time-stamp when the last state change was performed. This value is used
+     * to calculate e.g. earned credits.
+     */
+    simtime_t lastEventTimestamp;
 
-  /**
-   * Self message used to signal the end of a credit spending period.
-   */
-  cMessage endSpendingCreditMessage = cMessage("endSpendingCredit");
+    /**
+     * Self message used to signal the end of a credit spending period.
+     */
+    cMessage endSpendingCreditMessage = cMessage("endSpendingCredit");
 
-  /**
-   * Self message used to signal that zero credits are reached. This is
-   * necessary because reaching a positive amount of credits can trigger a
-   * packet-enqueued event subsequent queuing components.
-   */
-  cMessage reachedZeroCreditMessage = cMessage("reachedZeroCredit");
+    /**
+     * Self message used to signal that zero credits are reached. This is
+     * necessary because reaching a positive amount of credits can trigger a
+     * packet-enqueued event subsequent queuing components.
+     */
+    cMessage reachedZeroCreditMessage = cMessage("reachedZeroCredit");
 protected:
-  /** @copydoc cSimpleModule::initialize() */
-  virtual void initialize() override;
+    /** @copydoc cSimpleModule::initialize() */
+    virtual void initialize() override;
 
-  /** @copydoc cSimpleModule::handleMessage(cMessage*) */
-  virtual void handleMessage(cMessage* msg) override;
+    /** @copydoc cSimpleModule::handleMessage(cMessage*) */
+    virtual void handleMessage(cMessage* msg) override;
 
-  /** @copydoc cSimpleModule::refreshDisplay() const */
-  virtual void refreshDisplay() const override;
+    /** @copydoc cSimpleModule::refreshDisplay() const */
+    virtual void refreshDisplay() const override;
 
-  /** This method calculates the idleSlope value in credits per second. */
-  virtual double getIdleSlope();
+    /** This method calculates the idleSlope value in credits per second. */
+    virtual double getIdleSlope();
 
-  /** This method calculates the sendSlope value in credits per second. */
-  virtual double getSendSlope();
+    /** This method calculates the sendSlope value in credits per second. */
+    virtual double getSendSlope();
 
-  /**
-   * This method returns the associated MAC port transmit rate in bits per
-   * second.
-   */
-  virtual double getPortTransmitRate();
+    /**
+     * This method returns the associated MAC port transmit rate in bits per
+     * second.
+     */
+    virtual double getPortTransmitRate();
 
-  /**
-   * For a given credit rate per second and a given time interval, this
-   * method calculates the associated amount of credits.
-   *
-   * @param creditPerSecond The rate of earned/spend credit in credits
-   *                        per second. This value must be greater than
-   *                        zero.
-   * @param time            The time interval to calculate the earned/spend
-   *                        credits for. This value must be greater or equal
-   *                        than zero.
-   * @return                The amount of credit earned/generated.
-   */
-  virtual double creditsForTime(double creditPerSecond, simtime_t time);
+    /**
+     * For a given credit rate per second and a given time interval, this
+     * method calculates the associated amount of credits.
+     *
+     * @param creditPerSecond The rate of earned/spend credit in credits
+     *                        per second. This value must be greater than
+     *                        zero.
+     * @param time            The time interval to calculate the earned/spend
+     *                        credits for. This value must be greater or equal
+     *                        than zero.
+     * @return                The amount of credit earned/generated.
+     */
+    virtual double creditsForTime(double creditPerSecond, simtime_t time);
 
-  /**
-   * For a given credit earning/spending rate in credits per second and a
-   * given amount of credits. This method calculates how long it takes to
-   * spend/accumulate the amount of credit.
-   *
-   * @param creditPerSecond The rate of earned/spend credit in credits
-   *                        per second. This value must be greater than
-   *                        zero.
-   * @param credit          The amount of credit to earn/spend.
-   * @result                The time interval that is needed to earn/spend
-   *                        the given amount of credit.
-   */
-  virtual simtime_t timeForCredits(double creditPerSecond, double credit);
+    /**
+     * For a given credit earning/spending rate in credits per second and a
+     * given amount of credits. This method calculates how long it takes to
+     * spend/accumulate the amount of credit.
+     *
+     * @param creditPerSecond The rate of earned/spend credit in credits
+     *                        per second. This value must be greater than
+     *                        zero.
+     * @param credit          The amount of credit to earn/spend.
+     * @result                The time interval that is needed to earn/spend
+     *                        the given amount of credit.
+     */
+    virtual simtime_t timeForCredits(double creditPerSecond, double credit);
 
-  /**
-   * Returns the time needed to earn enough credits to reach zero or rather a
-   * positive amount of credit.
-   */
-  virtual simtime_t idleTimeToZeroCredit();
+    /**
+     * Returns the time needed to earn enough credits to reach zero or rather a
+     * positive amount of credit.
+     */
+    virtual simtime_t idleTimeToZeroCredit();
 
-  /** Calculates the time needed to transmit a packet. */
-  virtual simtime_t transmissionTime(cPacket* packet);
+    /** Calculates the time needed to transmit a packet. */
+    virtual simtime_t transmissionTime(cPacket* packet);
 
-  /** Transitions the module into a new state. */
-  virtual void updateState(State newState);
+    /** Transitions the module into a new state. */
+    virtual void updateState(State newState);
 
-  /** Spend the necessary amount of credit for a given packet to transmit. */
-  virtual void spendCredit(cPacket* packet);
+    /** Spend the necessary amount of credit for a given packet to transmit. */
+    virtual void spendCredit(cPacket* packet);
 
-  /** Earn the amount of credits respective to a given time interval. */
-  virtual void earnCredits(simtime_t time);
+    /** Earn the amount of credits respective to a given time interval. */
+    virtual void earnCredits(simtime_t time);
 
-  /** Resets credit to zero. */
-  virtual void resetCredit();
+    /** Resets credit to zero. */
+    virtual void resetCredit();
 
-  /** Returns true if credit is greater or equal to zero. */
-  virtual bool isCreditPositive();
+    /** Returns true if credit is greater or equal to zero. */
+    virtual bool isCreditPositive();
 
-  /**
-   * Returns true if a packet is ready for transmission on the input queue.
-   */
-  virtual bool isPacketReadyForTransmission();
+    /**
+     * Returns true if a packet is ready for transmission on the input queue.
+     */
+    virtual bool isPacketReadyForTransmission();
 
-  /**
-   * Handle state changes and triggering events due to gate change events.
-   */
-  virtual void handleGateStateChangedEvent() override;
+    /**
+     * Handle state changes and triggering events due to gate change events.
+     */
+    virtual void handleGateStateChangedEvent() override;
 
-  /**
-   * Handle state changes and triggering events after new packets to transmit
-   * become available.
-   */
-  virtual void handlePacketEnqueuedEvent() override;
+    /**
+     * Handle state changes and triggering events after new packets to transmit
+     * become available.
+     */
+    virtual void handlePacketEnqueuedEvent() override;
 
-  /**
-   * Handle state changes and triggering events due to transmitting packets.
-   */
-  virtual void handleSendPacketEvent(cPacket* packet);
+    /**
+     * Handle state changes and triggering events due to transmitting packets.
+     */
+    virtual void handleSendPacketEvent(cPacket* packet);
 
-  /**
-   * Handle state changes and triggering events after finishing spending
-   * credit.
-   */
-  virtual void handleEndSpendingCreditEvent();
+    /**
+     * Handle state changes and triggering events after finishing spending
+     * credit.
+     */
+    virtual void handleEndSpendingCreditEvent();
 
-  /**
-   * Handle state changes and triggering events after acquiring zero credits
-   * and therefore becoming able to transmit packets.
-   */
-  virtual void handleZeroCreditReachedEvent();
+    /**
+     * Handle state changes and triggering events after acquiring zero credits
+     * and therefore becoming able to transmit packets.
+     */
+    virtual void handleZeroCreditReachedEvent();
 
 public:
-  ~CreditBasedShaper();
+    ~CreditBasedShaper();
 
-  virtual bool isEmpty(uint64_t maxBits) override;
+    virtual bool isEmpty(uint64_t maxBits) override;
 };
 
 } // namespace nesting

@@ -36,59 +36,59 @@ class LengthAwareQueue;
 /**
  * See the NED file for a detailed description.
  */
-class TSAlgorithm : public cSimpleModule, public IPreemptableQueue {
+class TSAlgorithm: public cSimpleModule, public IPreemptableQueue {
 protected:
-  /**
-   * Reference to the MAC module.
-   */
-  EtherMACBase* mac;
+    /**
+     * Reference to the MAC module.
+     */
+    EtherMACBase* mac;
 
-  /**
-   * Reference to the length-aware input queue module.
-   */
-  LengthAwareQueue* queue;
+    /**
+     * Reference to the length-aware input queue module.
+     */
+    LengthAwareQueue* queue;
 
-  /**
-   * Reference to the transmission-gate module.
-   */
-  TransmissionGate* transmissionGate;
+    /**
+     * Reference to the transmission-gate module.
+     */
+    TransmissionGate* transmissionGate;
 
-  cMessage packetEnqueuedMsg = cMessage("packetEnqueued");
+    cMessage packetEnqueuedMsg = cMessage("packetEnqueued");
 
-  cMessage gateStateChangedMsg = cMessage("gateStateChanged");
+    cMessage gateStateChangedMsg = cMessage("gateStateChanged");
 
-  cMessage requestPacketMsg = cMessage("requestPacket");
+    cMessage requestPacketMsg = cMessage("requestPacket");
 
-  uint64_t maxTransmittableBits;
+    uint64_t maxTransmittableBits;
 protected:
-  /**
-   * @see cMessage::initialize()
-   */
-  virtual void initialize() override;
+    /**
+     * @see cMessage::initialize()
+     */
+    virtual void initialize() override;
 
-  /**
-   * @see cMessage::handleMessage(cMessage*)
-   */
-  virtual void handleMessage(cMessage* msg) override;
+    /**
+     * @see cMessage::handleMessage(cMessage*)
+     */
+    virtual void handleMessage(cMessage* msg) override;
 
-  virtual void handlePacketEnqueuedEvent();
+    virtual void handlePacketEnqueuedEvent();
 
-  virtual void handleGateStateChangedEvent();
+    virtual void handleGateStateChangedEvent();
 
-  virtual void handleRequestPacketEvent(uint64_t maxBits);
+    virtual void handleRequestPacketEvent(uint64_t maxBits);
 
 public:
-  virtual ~TSAlgorithm();
+    virtual ~TSAlgorithm();
 
-  virtual void gateStateChanged();
+    virtual void gateStateChanged();
 
-  virtual void packetEnqueued();
+    virtual void packetEnqueued();
 
-  virtual bool isEmpty(uint64_t maxBits);
+    virtual bool isEmpty(uint64_t maxBits);
 
-  virtual void requestPacket(uint64_t maxBits);
+    virtual void requestPacket(uint64_t maxBits);
 
-  virtual bool isExpressQueue();
+    virtual bool isExpressQueue();
 
 };
 

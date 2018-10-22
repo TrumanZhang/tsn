@@ -31,12 +31,13 @@ namespace nesting {
  */
 class HostScheduleBuilder final {
 public:
-  /**
-   * Creates a schedule for a host containing sendtime, size and the object to be sent
-   *
-   * TODO link to XML file specification
-   */
-  static HostSchedule<Ieee8021QCtrl>* createHostScheduleFromXML(cXMLElement *xml, cXMLElement *rootXml);
+    /**
+     * Creates a schedule for a host containing sendtime, size and the object to be sent
+     *
+     * TODO link to XML file specification
+     */
+    static HostSchedule<Ieee8021QCtrl>* createHostScheduleFromXML(
+            cXMLElement *xml, cXMLElement *rootXml);
 };
 
 } // namespace nesting

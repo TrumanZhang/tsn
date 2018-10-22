@@ -26,56 +26,59 @@ using namespace inet;
 
 namespace nesting {
 
-  /**
-   * Static class holding constants relevant to the IEEE 802.1Q standard.
-   */
-  class Ieee8021q final {
-    public:
-      const static int kEthernet2MinPayloadByteLength = 42;
-      const static int kEthernet2MinPayloadBitLength = kEthernet2MinPayloadByteLength * 8;
-      const static int kEthernet2MaximumTransmissionUnitByteLength = 1500;
-      const static int kEthernet2MaximumTransmissionUnitBitLength = kEthernet2MaximumTransmissionUnitByteLength * 8;
+/**
+ * Static class holding constants relevant to the IEEE 802.1Q standard.
+ */
+class Ieee8021q final {
+public:
+    const static int kEthernet2MinPayloadByteLength = 42;
+    const static int kEthernet2MinPayloadBitLength =
+            kEthernet2MinPayloadByteLength * 8;
+    const static int kEthernet2MaximumTransmissionUnitByteLength = 1500;
+    const static int kEthernet2MaximumTransmissionUnitBitLength =
+            kEthernet2MaximumTransmissionUnitByteLength * 8;
 
-      const static int kVLANTagByteLength = 4;
-      const static int kVLANTagBitLength = kVLANTagByteLength * 8;
+    const static int kVLANTagByteLength = 4;
+    const static int kVLANTagBitLength = kVLANTagByteLength * 8;
 
-      const static int kDefaultPCPValue = 0;
-      const static int kNumberOfPCPValues = 8;
+    const static int kDefaultPCPValue = 0;
+    const static int kNumberOfPCPValues = 8;
 
-      const static bool kDefaultDEIValue = false;
+    const static bool kDefaultDEIValue = false;
 
-      const static int kMinValidVID = 1;
-      const static int kMaxValidVID = 4094;
-      const static int kDefaultVID = 1;
+    const static int kMinValidVID = 1;
+    const static int kMaxValidVID = 4094;
+    const static int kDefaultVID = 1;
 
-      const static int kMaxSupportedQueues = kNumberOfPCPValues;
-      const static int kMinSupportedQueues = 1;
+    const static int kMaxSupportedQueues = kNumberOfPCPValues;
+    const static int kMinSupportedQueues = 1;
 
-      const static int selfMessageSchedulingPriority = 1;
+    const static int selfMessageSchedulingPriority = 1;
 
-      const static int kFramePreemptionMinFinalPayloadSize = 60;
-      const static int kFramePreemptionMinNonFinalPayloadSize = 60; //or 124,188,252
+    const static int kFramePreemptionMinFinalPayloadSize = 60;
+    const static int kFramePreemptionMinNonFinalPayloadSize = 60; //or 124,188,252
 
-      /**
-       * This method calculates the final packet size of a payload-packet after
-       * going through the encapsulation processes of the lower layers of the
-       * IEEE802.1Q switch.
-       *
-       * This method is meant as a temporary solution to calculate final packet
-       * sizes for the functionality of some IEEE802.1Q relevant functionalities
-       * like the credit based shaper. Changes to the LowerLayer-compound module
-       * of the IEEE802.1Q ethernet switch can break the functionality of this
-       * method.
-       */
-      static uint64_t getFinalEthernet2FrameBitLength(cPacket* packet) {
-        Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(packet->getControlInfo());
+    /**
+     * This method calculates the final packet size of a payload-packet after
+     * going through the encapsulation processes of the lower layers of the
+     * IEEE802.1Q switch.
+     *
+     * This method is meant as a temporary solution to calculate final packet
+     * sizes for the functionality of some IEEE802.1Q relevant functionalities
+     * like the credit based shaper. Changes to the LowerLayer-compound module
+     * of the IEEE802.1Q ethernet switch can break the functionality of this
+     * method.
+     */
+    static uint64_t getFinalEthernet2FrameBitLength(cPacket* packet) {
+        Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
+                packet->getControlInfo());
 
         // Add payload length
         uint64_t bitLength = packet->getBitLength();
 
         // Add q-tag length
         if (ctrlInfo->isTagged()) {
-          bitLength += kVLANTagBitLength;
+            bitLength += kVLANTagBitLength;
         }
 
         // Add MAC header length
@@ -86,10 +89,10 @@ namespace nesting {
         bitLength += SFD_BYTES;
 
         return bitLength;
-      }
-  };
+    }
+};
 
-  typedef bitset<static_cast<unsigned long>(Ieee8021q::kMaxSupportedQueues)> GateBitvector;
+typedef bitset<static_cast<unsigned long>(Ieee8021q::kMaxSupportedQueues)> GateBitvector;
 
 } // namespace nesting
 

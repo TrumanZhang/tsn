@@ -43,68 +43,68 @@ class EtherMACFullDuplexPreemptable;
 
 namespace nesting {
 
-  /**
-   * See the NED file for a detailed description
-   */
-  class GateController : public cSimpleModule, public IClockListener {
-    private:
-      /** Current schedule. Is never null. */
-      unique_ptr<Schedule<GateBitvector>> currentSchedule;
+/**
+ * See the NED file for a detailed description
+ */
+class GateController: public cSimpleModule, public IClockListener {
+private:
+    /** Current schedule. Is never null. */
+    unique_ptr<Schedule<GateBitvector>> currentSchedule;
 
-      /**
-       * Next schedule to load after the current schedule finishes it's cycle.
-       * Can be null.
-       */
-      unique_ptr<Schedule<GateBitvector>> nextSchedule;
+    /**
+     * Next schedule to load after the current schedule finishes it's cycle.
+     * Can be null.
+     */
+    unique_ptr<Schedule<GateBitvector>> nextSchedule;
 
-      /** Index for the current entry in the schedule. */
-      unsigned int scheduleIndex;
+    /** Index for the current entry in the schedule. */
+    unsigned int scheduleIndex;
 
-      /**
-       * Clock reference, needed to get the current time and subscribe
-       * clock events.
-       */
-      IClock* clock;
+    /**
+     * Clock reference, needed to get the current time and subscribe
+     * clock events.
+     */
+    IClock* clock;
 
-      /** Reference to transmission gate vector module */
-      vector<TransmissionGate*> transmissionGates;
+    /** Reference to transmission gate vector module */
+    vector<TransmissionGate*> transmissionGates;
 
-      EtherMACFullDuplexPreemptable* macModule;
-      string switchString;
-      string portString;
-      simtime_t lastChange;
-    protected:
-      /** @see cSimpleModule::initialize(int) */
-      virtual void initialize(int stage) override;
+    EtherMACFullDuplexPreemptable* macModule;
+    string switchString;
+    string portString;
+    simtime_t lastChange;
+protected:
+    /** @see cSimpleModule::initialize(int) */
+    virtual void initialize(int stage) override;
 
-      /** @see cSimpleModule::numInitStages() */
-      virtual int numInitStages() const override;
+    /** @see cSimpleModule::numInitStages() */
+    virtual int numInitStages() const override;
 
-      /** @see cSimpleModule::handleMessage(cMessage*) */
-      virtual void handleMessage(cMessage *msg) override;
+    /** @see cSimpleModule::handleMessage(cMessage*) */
+    virtual void handleMessage(cMessage *msg) override;
 
-      /** Opens all transmission gates. */
-      virtual void openAllGates(); // TODO use setGateStates internal
+    /** Opens all transmission gates. */
+    virtual void openAllGates(); // TODO use setGateStates internal
 
-      virtual void setGateStates(GateBitvector bitvector, bool release);
+    virtual void setGateStates(GateBitvector bitvector, bool release);
 
-    public:
-      virtual ~GateController();
+public:
+    virtual ~GateController();
 
-      /** @see IClockListener::tick(IClock*) */
-      virtual void tick(IClock *clock) override;
+    /** @see IClockListener::tick(IClock*) */
+    virtual void tick(IClock *clock) override;
 
-      /** Calculate the maximum bit size that can be transmitted until the next gate state change.
-       *  Returns an unsigned integer value.
-       **/
-      virtual unsigned int calculateMaxBit(int gateIndex);
+    /** Calculate the maximum bit size that can be transmitted until the next gate state change.
+     *  Returns an unsigned integer value.
+     **/
+    virtual unsigned int calculateMaxBit(int gateIndex);
 
-      /** extracts and loads the correct schedule from xml file, or an empty one if none is defined */
-      virtual void loadScheduleOrDefault(cXMLElement* xml);
+    /** extracts and loads the correct schedule from xml file, or an empty one if none is defined */
+    virtual void loadScheduleOrDefault(cXMLElement* xml);
 
-      virtual bool currentlyOnHold();
+    virtual bool currentlyOnHold();
 
-  };
+};
 
 } // namespace nesting
 

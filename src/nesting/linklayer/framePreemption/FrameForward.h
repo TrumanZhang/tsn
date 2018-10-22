@@ -22,11 +22,11 @@ using namespace omnetpp;
 
 namespace nesting {
 
-  class FrameForward : public cSimpleModule {
-    protected:
-      virtual void initialize();
-      virtual void handleMessage(cMessage *msg);
-  };
+class FrameForward: public cSimpleModule {
+protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+};
 
 } /* namespace nesting */
 #endif

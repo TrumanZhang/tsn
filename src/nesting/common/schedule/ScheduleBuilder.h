@@ -30,18 +30,20 @@ namespace nesting {
  */
 class ScheduleBuilder final {
 public:
-  /**
-   * Creates a schedule for containing bit vectors for transmission gates
-   * from an XML file.
-   *
-   * TODO link to XML file specification
-   */
-  static Schedule<GateBitvector>* createGateBitvectorSchedule(cXMLElement *xml);
+    /**
+     * Creates a schedule for containing bit vectors for transmission gates
+     * from an XML file.
+     *
+     * TODO link to XML file specification
+     */
+    static Schedule<GateBitvector>* createGateBitvectorSchedule(
+            cXMLElement *xml);
 
-  /**
-   * Creates a schedule containing one entry that opens all gates for the whole cycle duration
-   */
-  static Schedule<GateBitvector>* createDefaultBitvectorSchedule(cXMLElement *xml);
+    /**
+     * Creates a schedule containing one entry that opens all gates for the whole cycle duration
+     */
+    static Schedule<GateBitvector>* createDefaultBitvectorSchedule(
+            cXMLElement *xml);
 };
 
 } // namespace nesting

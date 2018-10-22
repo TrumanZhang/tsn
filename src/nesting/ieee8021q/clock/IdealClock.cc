@@ -20,15 +20,15 @@ namespace nesting {
 Define_Module(IdealClock);
 
 ClockBase::ScheduledTick IdealClock::lastTick() {
-  ScheduledTick result;
-  simtime_t elapsedTime = simTime() - lastGlobalTickTimestamp;
-  result.ticks = elapsedTime.raw() / clockRate.raw();
-  result.timestamp = lastGlobalTickTimestamp + result.ticks * clockRate;
-  return result;
+    ScheduledTick result;
+    simtime_t elapsedTime = simTime() - lastGlobalTickTimestamp;
+    result.ticks = elapsedTime.raw() / clockRate.raw();
+    result.timestamp = lastGlobalTickTimestamp + result.ticks * clockRate;
+    return result;
 }
 
 simtime_t IdealClock::scheduleTick(unsigned int idleTicks) {
-  return lastGlobalTickTimestamp + clockRate * idleTicks;
+    return lastGlobalTickTimestamp + clockRate * idleTicks;
 }
 
 } // namespace nesting

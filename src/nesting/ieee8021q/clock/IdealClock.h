@@ -29,15 +29,17 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class IdealClock : public ClockBase {
+class IdealClock: public ClockBase {
 protected:
-  /** @copydoc ScheduleTick ClockBase::lastTick() */
-  virtual ScheduledTick lastTick() override;
+    /** @copydoc ScheduleTick ClockBase::lastTick() */
+    virtual ScheduledTick lastTick() override;
 
-  /** @copydoc simtime_t ClockBase::scheduleTick(unsigned int) */
-  virtual simtime_t scheduleTick(unsigned int idleTicks) override;
+    /** @copydoc simtime_t ClockBase::scheduleTick(unsigned int) */
+    virtual simtime_t scheduleTick(unsigned int idleTicks) override;
 public:
-  virtual ~IdealClock() {};
+    virtual ~IdealClock() {
+    }
+    ;
 };
 
 } // namespace nesting

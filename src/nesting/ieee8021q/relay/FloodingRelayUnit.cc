@@ -20,26 +20,28 @@ namespace nesting {
 Define_Module(FloodingRelayUnit);
 
 void FloodingRelayUnit::initialize() {
-  if (gateSize("in") != gateSize("out")) {
-    throw cRuntimeError("The sizes of in[] and out[] vector gates must be equal.");
-  }
+    if (gateSize("in") != gateSize("out")) {
+        throw cRuntimeError(
+                "The sizes of in[] and out[] vector gates must be equal.");
+    }
 }
 
 void FloodingRelayUnit::handleMessage(cMessage *msg) {
-  Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(msg->removeControlInfo());
+    Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
+            msg->removeControlInfo());
 
-  for (int i = 0; i < gateSize("out"); i++) {
-    cGate *outputGate = gate("out", i);
-    if (!msg->arrivedOn("in", i)) {
-      cMessage* dupMsg = msg->dup();
-      Ieee8021QCtrl* dupCtrlInfo = new Ieee8021QCtrl(*ctrlInfo);
-      dupMsg->setControlInfo(dupCtrlInfo);
-      send(dupMsg, outputGate);
+    for (int i = 0; i < gateSize("out"); i++) {
+        cGate *outputGate = gate("out", i);
+        if (!msg->arrivedOn("in", i)) {
+            cMessage* dupMsg = msg->dup();
+            Ieee8021QCtrl* dupCtrlInfo = new Ieee8021QCtrl(*ctrlInfo);
+            dupMsg->setControlInfo(dupCtrlInfo);
+            send(dupMsg, outputGate);
+        }
     }
-  }
 
-  delete msg;
-  delete ctrlInfo;
+    delete msg;
+    delete ctrlInfo;
 }
 
 } // namespace nesting

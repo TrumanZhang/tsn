@@ -17,34 +17,39 @@
 
 namespace nesting {
 
-Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(cXMLElement *xml) {
-  Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
+Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
+        cXMLElement *xml) {
+    Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 
-  vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
-  for (cXMLElement* entry : entries) {
-    // Get length
-    const char* lengthCString = entry->getFirstChildWithTag("length")->getNodeValue();
-    unsigned int length = atoi(lengthCString);
+    vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    for (cXMLElement* entry : entries) {
+        // Get length
+        const char* lengthCString =
+                entry->getFirstChildWithTag("length")->getNodeValue();
+        unsigned int length = atoi(lengthCString);
 
-    // Get bitvector
-    const char* bitvectorCString = entry->getFirstChildWithTag("bitvector")->getNodeValue();
-    string originalVector = string(bitvectorCString);
-    reverse(originalVector.begin(), originalVector.end());
-    GateBitvector bitvector = GateBitvector(originalVector);
+        // Get bitvector
+        const char* bitvectorCString =
+                entry->getFirstChildWithTag("bitvector")->getNodeValue();
+        string originalVector = string(bitvectorCString);
+        reverse(originalVector.begin(), originalVector.end());
+        GateBitvector bitvector = GateBitvector(originalVector);
 
-    schedule->addEntry(length, bitvector);
-  }
+        schedule->addEntry(length, bitvector);
+    }
 
-  return schedule;
+    return schedule;
 }
 
-Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(cXMLElement *xml) {
-  Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
-  const char* lengthCString = xml->getFirstChildWithTag("cycle")->getNodeValue();
-  unsigned int length = atoi(lengthCString);
-  string gateString(Ieee8021q::kMaxSupportedQueues, '1');
-  GateBitvector bitvector = GateBitvector(gateString);
-  schedule->addEntry(length, bitvector);
-  return schedule;
+Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
+        cXMLElement *xml) {
+    Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
+    const char* lengthCString =
+            xml->getFirstChildWithTag("cycle")->getNodeValue();
+    unsigned int length = atoi(lengthCString);
+    string gateString(Ieee8021q::kMaxSupportedQueues, '1');
+    GateBitvector bitvector = GateBitvector(gateString);
+    schedule->addEntry(length, bitvector);
+    return schedule;
 }
 } // namespace nesting

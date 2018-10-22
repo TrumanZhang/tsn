@@ -32,61 +32,64 @@ namespace nesting {
 template<typename T>
 class Schedule {
 protected:
-  /**
-   * Schedule entries, that consist of a length in abstract time units and
-   * a scheduled object.
-   */
-  vector<tuple<int, T>> entries;
+    /**
+     * Schedule entries, that consist of a length in abstract time units and
+     * a scheduled object.
+     */
+    vector<tuple<int, T>> entries;
 
-  /**
-   * Total length of all schedule entries combined in abstract time units.
-   */
-  int totalLength = 0;
+    /**
+     * Total length of all schedule entries combined in abstract time units.
+     */
+    int totalLength = 0;
 public:
-  Schedule() {}
+    Schedule() {
+    }
 
-  virtual ~Schedule() {};
+    virtual ~Schedule() {
+    }
+    ;
 
-  /** Returns the number of entries of the schedule. */
-  virtual unsigned int size() const {
-    return entries.size();
-  }
+    /** Returns the number of entries of the schedule. */
+    virtual unsigned int size() const {
+        return entries.size();
+    }
 
-  /** Returns the scheduled object at a given index. */
-  virtual T getScheduledObject(unsigned int index) const {
-    return get < 1 > (entries[index]);
-  }
+    /** Returns the scheduled object at a given index. */
+    virtual T getScheduledObject(unsigned int index) const {
+        return get < 1 > (entries[index]);
+    }
 
-  /**
-   * Returns the time unit, how long an object at a given index is
-   * scheduled.
-   */
-  virtual unsigned int getLength(unsigned int index) const {
-    return get < 0 > (entries[index]);
-  }
+    /**
+     * Returns the time unit, how long an object at a given index is
+     * scheduled.
+     */
+    virtual unsigned int getLength(unsigned int index) const {
+        return get < 0 > (entries[index]);
+    }
 
-  /** Returns the total length of the schedule in abstract time units. */
-  virtual unsigned int getLength() const {
-    return totalLength;
-  }
+    /** Returns the total length of the schedule in abstract time units. */
+    virtual unsigned int getLength() const {
+        return totalLength;
+    }
 
-  /** Returns true if the schedule contains no entries. Otherwise false. */
-  virtual bool isEmpty() const {
-    return entries.empty();
-  }
+    /** Returns true if the schedule contains no entries. Otherwise false. */
+    virtual bool isEmpty() const {
+        return entries.empty();
+    }
 
-  /**
-   * Adds a new entry add the end of the schedule.
-   *
-   * @param length          The length of the schedule entry in abstract
-   *                        time units.
-   * @param scheduledObject The schedule objects associated with the
-   *                        scheduled entry.
-   */
-  virtual void addEntry(int length, T scheduledObject) {
-    totalLength += length;
-    entries.push_back(make_tuple(length, scheduledObject));
-  }
+    /**
+     * Adds a new entry add the end of the schedule.
+     *
+     * @param length          The length of the schedule entry in abstract
+     *                        time units.
+     * @param scheduledObject The schedule objects associated with the
+     *                        scheduled entry.
+     */
+    virtual void addEntry(int length, T scheduledObject) {
+        totalLength += length;
+        entries.push_back(make_tuple(length, scheduledObject));
+    }
 };
 
 } // namespace nesting

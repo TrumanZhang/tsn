@@ -34,143 +34,143 @@ using namespace std;
 
 namespace nesting {
 
-  class GateController;
-  class TransmissionSelection;
-  class TSAlgorithm;
+class GateController;
+class TransmissionSelection;
+class TSAlgorithm;
 
-  /**
-   * See the NED file for a detailed description
-   */
-  class TransmissionGate : public cSimpleModule, public IPreemptableQueue {
-    private:
-      /**
-       * Reference to the gate-controller module.
-       */
-      GateController* gateController;
+/**
+ * See the NED file for a detailed description
+ */
+class TransmissionGate: public cSimpleModule, public IPreemptableQueue {
+private:
+    /**
+     * Reference to the gate-controller module.
+     */
+    GateController* gateController;
 
-      /**
-       * Reference to the transmission-selection module. Packet-enqueued events
-       * are signaled to this module whenever a packet becomes ready for
-       * transmission.
-       */
-      TransmissionSelection* transmissionSelection;
+    /**
+     * Reference to the transmission-selection module. Packet-enqueued events
+     * are signaled to this module whenever a packet becomes ready for
+     * transmission.
+     */
+    TransmissionSelection* transmissionSelection;
 
-      /**
-       * Reference to the transmission-selection-algorithm-module which is the
-       * input module where packets are requested from.
-       */
-      TSAlgorithm* tsAlgorithm;
+    /**
+     * Reference to the transmission-selection-algorithm-module which is the
+     * input module where packets are requested from.
+     */
+    TSAlgorithm* tsAlgorithm;
 
-      /**
-       * Clock reference, needed to get the current time
-       */
-      IClock* clock;
+    /**
+     * Clock reference, needed to get the current time
+     */
+    IClock* clock;
 
-      /**
-       * If length-aware-scheduling is disabled, the transmission gate module
-       * will only request packets up to ethernet2 MTU size from the input module,
-       * which means every packet ready for transmission is fine.
-       *
-       * If length-aware-scheduling is enabled, the maximum size of requested
-       * packet is equivalent on how many bits will fit through the gate before
-       * it will close.
-       */
-      bool lengthAwareSchedulingEnabled;
+    /**
+     * If length-aware-scheduling is disabled, the transmission gate module
+     * will only request packets up to ethernet2 MTU size from the input module,
+     * which means every packet ready for transmission is fine.
+     *
+     * If length-aware-scheduling is enabled, the maximum size of requested
+     * packet is equivalent on how many bits will fit through the gate before
+     * it will close.
+     */
+    bool lengthAwareSchedulingEnabled;
 
-      /**
-       * Open state of gate. If the gate is open, packets can go through this
-       * module. Otherwise they can't.
-       */
-      bool gateOpen = true;
+    /**
+     * Open state of gate. If the gate is open, packets can go through this
+     * module. Otherwise they can't.
+     */
+    bool gateOpen = true;
 
-      /**
-       * Self-message to trigger internal request-packet event.
-       */
-      cMessage requestPacketMsg = cMessage("requestPacket");
+    /**
+     * Self-message to trigger internal request-packet event.
+     */
+    cMessage requestPacketMsg = cMessage("requestPacket");
 
-      /**
-       * Self-message to trigger internal packet-enqueued event.
-       */
-      cMessage packetEnqueuedMsg = cMessage("packetEnqueued");
+    /**
+     * Self-message to trigger internal packet-enqueued event.
+     */
+    cMessage packetEnqueuedMsg = cMessage("packetEnqueued");
 
-      /**
-       * Self-message to trigger internal gate-state-changed event.
-       */
-      cMessage gateStateChangedMsg = cMessage("gateStateChanged");
+    /**
+     * Self-message to trigger internal gate-state-changed event.
+     */
+    cMessage gateStateChangedMsg = cMessage("gateStateChanged");
 
-    protected:
-      /*
-       * @see cSimpleModule::initialize()
-       */
-      virtual void initialize() override;
+protected:
+    /*
+     * @see cSimpleModule::initialize()
+     */
+    virtual void initialize() override;
 
-      /**
-       * @see cSimpleModule::handleMessage(cMessage*)
-       */
-      virtual void handleMessage(cMessage* msg) override;
-      /**
-       * @see cSimpleModule::refreshDisplay()
-       */
-      virtual void refreshDisplay() const override;
+    /**
+     * @see cSimpleModule::handleMessage(cMessage*)
+     */
+    virtual void handleMessage(cMessage* msg) override;
+    /**
+     * @see cSimpleModule::refreshDisplay()
+     */
+    virtual void refreshDisplay() const override;
 
-      /**
-       * Notifies the output module (transmission-selection), that a packet
-       * became ready for transmission.
-       */
-      virtual void notifyPacketEnqueued();
+    /**
+     * Notifies the output module (transmission-selection), that a packet
+     * became ready for transmission.
+     */
+    virtual void notifyPacketEnqueued();
 
-      /**
-       * Notifies the input module (transmission-selection-algorithm), that the
-       * gate-open state changed.
-       */
-      virtual void notifyGateStateChanged();
+    /**
+     * Notifies the input module (transmission-selection-algorithm), that the
+     * gate-open state changed.
+     */
+    virtual void notifyGateStateChanged();
 
-      virtual void handleRequestPacketEvent();
+    virtual void handleRequestPacketEvent();
 
-      virtual void handlePacketEnqueuedEvent();
+    virtual void handlePacketEnqueuedEvent();
 
-      virtual void handleGateStateChangedEvent();
+    virtual void handleGateStateChangedEvent();
 
-      /**
-       * Calculates the maximum amount of transferable bits until the gate
-       * closes. If length-aware-scheduling is disabled, ethernet2 MTU size is
-       * returned.
-       */
-      virtual uint64_t maxTransferableBits();
+    /**
+     * Calculates the maximum amount of transferable bits until the gate
+     * closes. If length-aware-scheduling is disabled, ethernet2 MTU size is
+     * returned.
+     */
+    virtual uint64_t maxTransferableBits();
 
-    public:
-      ~TransmissionGate();
+public:
+    ~TransmissionGate();
 
-      /**
-       * Returns true if gate is opened, false otherwise.
-       */
-      virtual bool isGateOpen();
+    /**
+     * Returns true if gate is opened, false otherwise.
+     */
+    virtual bool isGateOpen();
 
-      /**
-       * Sets new gate state.
-       */
-      virtual void setGateState(bool gateOpen, bool release);
+    /**
+     * Sets new gate state.
+     */
+    virtual void setGateState(bool gateOpen, bool release);
 
-      /**
-       * Tells if the gate is empty from a queuing perspective.
-       */
-      virtual bool isEmpty();
+    /**
+     * Tells if the gate is empty from a queuing perspective.
+     */
+    virtual bool isEmpty();
 
-      /**
-       * Requests a packet from this module. If a packet is requested even tough
-       * there is no packet ready for transmission, an error is thrown.
-       */
-      virtual void requestPacket();
+    /**
+     * Requests a packet from this module. If a packet is requested even tough
+     * there is no packet ready for transmission, an error is thrown.
+     */
+    virtual void requestPacket();
 
-      /**
-       * Notifies the transmission-gate, that a packet got ready for transmission
-       * on the input module.
-       */
-      virtual void packetEnqueued();
+    /**
+     * Notifies the transmission-gate, that a packet got ready for transmission
+     * on the input module.
+     */
+    virtual void packetEnqueued();
 
-      virtual bool isExpressQueue();
+    virtual bool isExpressQueue();
 
-  };
+};
 
 } // namespace nesting
 

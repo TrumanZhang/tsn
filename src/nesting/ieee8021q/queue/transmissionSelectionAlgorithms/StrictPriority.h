@@ -27,11 +27,13 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class StrictPriority : public TSAlgorithm {
+class StrictPriority: public TSAlgorithm {
 protected:
-  virtual void gateStateChanged() override {};
+    virtual void gateStateChanged() override {
+    }
+    ;
 
-  virtual void refreshDisplay() const override;
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace nesting

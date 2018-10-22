@@ -28,45 +28,45 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class SchedEtherVLANTrafGen : public cSimpleModule, public IClockListener {
+class SchedEtherVLANTrafGen: public cSimpleModule, public IClockListener {
 private:
 
-  /** Current schedule. Is never null. */
-  unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
+    /** Current schedule. Is never null. */
+    unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
 
-  /**
-   * Next schedule to load after the current schedule finishes it's cycle.
-   * Can be null.
-   */
-  unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
+    /**
+     * Next schedule to load after the current schedule finishes it's cycle.
+     * Can be null.
+     */
+    unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
-  /** Index for the current entry in the schedule. */
-  long int index = 0;
+    /** Index for the current entry in the schedule. */
+    long int index = 0;
 
-  IClock *clock;
+    IClock *clock;
 
 protected:
 
-  // receive statistics
-  long TSNpacketsSent = 0;
-  long packetsReceived = 0;
-  simsignal_t sentPkSignal;
-  simsignal_t rcvdPkSignal;
+    // receive statistics
+    long TSNpacketsSent = 0;
+    long packetsReceived = 0;
+    simsignal_t sentPkSignal;
+    simsignal_t rcvdPkSignal;
 
-  int seqNum = 0;
+    int seqNum = 0;
 
-  virtual void initialize(int stage) override;
-  virtual void sendPacket();
-  virtual void receivePacket(cPacket *msg);
-  virtual void handleMessage(cMessage *msg) override;
+    virtual void initialize(int stage) override;
+    virtual void sendPacket();
+    virtual void receivePacket(cPacket *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
-  virtual int numInitStages() const override;
-  virtual int scheduleNextTickEvent();
+    virtual int numInitStages() const override;
+    virtual int scheduleNextTickEvent();
 public:
-  virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock) override;
 
-  /** Loads a new schedule into the gate controller. */
-  virtual void loadScheduleOrDefault(cXMLElement* xml);
+    /** Loads a new schedule into the gate controller. */
+    virtual void loadScheduleOrDefault(cXMLElement* xml);
 };
 
 } // namespace nesting

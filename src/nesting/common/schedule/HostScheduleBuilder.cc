@@ -17,43 +17,48 @@
 
 namespace nesting {
 
-HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(cXMLElement *xml, cXMLElement *rootXml) {
-  HostSchedule<Ieee8021QCtrl>* schedule = new HostSchedule<Ieee8021QCtrl>();
+HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
+        cXMLElement *xml, cXMLElement *rootXml) {
+    HostSchedule<Ieee8021QCtrl>* schedule = new HostSchedule<Ieee8021QCtrl>();
 
-  //extract cycle from second xml argument (xml root)
-  int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
-  schedule->setCycle(cycle);
+    //extract cycle from second xml argument (xml root)
+    int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
+    schedule->setCycle(cycle);
 
-  vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
-  for (cXMLElement* entry : entries) {
-    // Get time
-    const char* timeCString = entry->getFirstChildWithTag("start")->getNodeValue();
-    unsigned int time = atoi(timeCString);
+    vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    for (cXMLElement* entry : entries) {
+        // Get time
+        const char* timeCString =
+                entry->getFirstChildWithTag("start")->getNodeValue();
+        unsigned int time = atoi(timeCString);
 
-    // Get size
-    const char* sizeCString = entry->getFirstChildWithTag("size")->getNodeValue();
-    unsigned int size = atoi(sizeCString);
+        // Get size
+        const char* sizeCString =
+                entry->getFirstChildWithTag("size")->getNodeValue();
+        unsigned int size = atoi(sizeCString);
 
-    // Get Ieee8021QCtrl
+        // Get Ieee8021QCtrl
 
-    Ieee8021QCtrl etherctrl = Ieee8021QCtrl();
-    const char* queueCString = entry->getFirstChildWithTag("queue")->getNodeValue();
-    etherctrl.setPCP(atoi(queueCString));
+        Ieee8021QCtrl etherctrl = Ieee8021QCtrl();
+        const char* queueCString =
+                entry->getFirstChildWithTag("queue")->getNodeValue();
+        etherctrl.setPCP(atoi(queueCString));
 
-    const char* addressCString = entry->getFirstChildWithTag("dest")->getNodeValue();
+        const char* addressCString =
+                entry->getFirstChildWithTag("dest")->getNodeValue();
 
-    inet::MACAddress destination = inet::MACAddress(addressCString);
-    etherctrl.setDestinationAddress(destination);
+        inet::MACAddress destination = inet::MACAddress(addressCString);
+        etherctrl.setDestinationAddress(destination);
 
-    etherctrl.setEtherType(0x8100);
-    etherctrl.setTagged(true);
-    etherctrl.setVID(0);
-    etherctrl.setDEI(false);
+        etherctrl.setEtherType(0x8100);
+        etherctrl.setTagged(true);
+        etherctrl.setVID(0);
+        etherctrl.setDEI(false);
 
-    schedule->addEntry(time, size, etherctrl);
-  }
+        schedule->addEntry(time, size, etherctrl);
+    }
 
-  return schedule;
+    return schedule;
 }
 
 } // namespace nesting

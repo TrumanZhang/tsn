@@ -19,13 +19,14 @@ class IClock;
  */
 class IPreemptableQueue {
 public:
-  virtual ~IPreemptableQueue() {};
+    virtual ~IPreemptableQueue() {
+    }
+    ;
 
-  virtual bool isExpressQueue() = 0;
+    virtual bool isExpressQueue() = 0;
 };
 
 } // namespace nesting
-
 
 #endif /* NESTING_IEEE8021Q_QUEUE_FRAMEPREEMPTION_IPREEMPTABLEQUEUE_H_ */
 

@@ -32,28 +32,28 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class ScheduleSwap : public cSimpleModule, public IClockListener {
+class ScheduleSwap: public cSimpleModule, public IClockListener {
 private:
-  /** Current schedule. Is never null. */
-  cXMLElement* scheduleXml;
+    /** Current schedule. Is never null. */
+    cXMLElement* scheduleXml;
 
-  /** Index for the current entry in the schedule. */
-  unsigned int scheduleIndex;
+    /** Index for the current entry in the schedule. */
+    unsigned int scheduleIndex;
 
-  /**
-   * Clock reference, needed to get the current time and subscribe
-   * clock events.
-   */
-  IClock* clock;
+    /**
+     * Clock reference, needed to get the current time and subscribe
+     * clock events.
+     */
+    IClock* clock;
 protected:
-  virtual void initialize(int stage) override;
-  virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg);
 
-  /** @see cSimpleModule::numInitStages() */
-  virtual int numInitStages() const override;
+    /** @see cSimpleModule::numInitStages() */
+    virtual int numInitStages() const override;
 public:
-  /** @see IClockListener::tick(IClock*) */
-  virtual void tick(IClock *clock) override;
+    /** @see IClockListener::tick(IClock*) */
+    virtual void tick(IClock *clock) override;
 };
 }
 #endif

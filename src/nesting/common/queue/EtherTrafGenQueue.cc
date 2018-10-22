@@ -38,92 +38,92 @@ namespace nesting {
 Define_Module(EtherTrafGenQueue);
 
 void EtherTrafGenQueue::initialize() {
-  // Signals
-  sentPkSignal = registerSignal("sentPk");
+    // Signals
+    sentPkSignal = registerSignal("sentPk");
 
-  // Initialize sequence-number for generated packets
-  seqNum = 0;
+    // Initialize sequence-number for generated packets
+    seqNum = 0;
 
-  // NED parameters
-  etherType = &par("etherType");
-  vlanTagEnabled = &par("vlanTagEnabled");
-  pcp = &par("pcp");
-  dei = &par("dei");
-  vid = &par("vid");
-  packetLength = &par("packetLength");
-  const char *destAddress = par("destAddress");
-  if (!destMACAddress.tryParse(destAddress)) {
-    throw new cRuntimeError("Invalid MAC Address");
-  }
+    // NED parameters
+    etherType = &par("etherType");
+    vlanTagEnabled = &par("vlanTagEnabled");
+    pcp = &par("pcp");
+    dei = &par("dei");
+    vid = &par("vid");
+    packetLength = &par("packetLength");
+    const char *destAddress = par("destAddress");
+    if (!destMACAddress.tryParse(destAddress)) {
+        throw new cRuntimeError("Invalid MAC Address");
+    }
 
-  // Statistics
-  packetsSent = 0;
-  WATCH(packetsSent);
+    // Statistics
+    packetsSent = 0;
+    WATCH(packetsSent);
 
 }
 
 void EtherTrafGenQueue::handleMessage(cMessage *msg) {
-  throw cRuntimeError("cannot handle messages.");
+    throw cRuntimeError("cannot handle messages.");
 }
 
 cPacket* EtherTrafGenQueue::generatePacket() {
-  seqNum++;
+    seqNum++;
 
-  char msgname[40];
-  sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
+    char msgname[40];
+    sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-  cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
+    cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
 
-  long len = packetLength->intValue();
-  packet->setByteLength(len);
+    long len = packetLength->intValue();
+    packet->setByteLength(len);
 
-  Ieee8021QCtrl *etherctrl = new Ieee8021QCtrl();
+    Ieee8021QCtrl *etherctrl = new Ieee8021QCtrl();
 
-  etherctrl->setEtherType(etherType->intValue());
-  etherctrl->setDest(destMACAddress);
-  etherctrl->setTagged(vlanTagEnabled->boolValue());
-  etherctrl->setPCP(pcp->intValue());
-  etherctrl->setDEI(dei->boolValue());
-  etherctrl->setVID(vid->intValue());
+    etherctrl->setEtherType(etherType->intValue());
+    etherctrl->setDest(destMACAddress);
+    etherctrl->setTagged(vlanTagEnabled->boolValue());
+    etherctrl->setPCP(pcp->intValue());
+    etherctrl->setDEI(dei->boolValue());
+    etherctrl->setVID(vid->intValue());
 
-  packet->setControlInfo(etherctrl);
+    packet->setControlInfo(etherctrl);
 
-  return packet;
+    return packet;
 }
 
 void EtherTrafGenQueue::requestPacket() {
-  Enter_Method("requestPacket(...)");
+    Enter_Method("requestPacket(...)");
 
-  cPacket* packet = generatePacket();
+    cPacket* packet = generatePacket();
 
-  Ieee8021QCtrl* ctrlInfo = static_cast<Ieee8021QCtrl*>(
-  packet->getControlInfo()
-  );
+    Ieee8021QCtrl* ctrlInfo = static_cast<Ieee8021QCtrl*>(
+    packet->getControlInfo()
+    );
 
-  if(par("verbose")) {
-    EV_TRACE << getFullPath() << ": Send packet `" << packet->getName() << "' dest=" << ctrlInfo->getDestinationAddress()
-    << " length=" << packet->getBitLength() << "B type=" << ctrlInfo->getEtherType()
-    << " vlan-tagged=" << ctrlInfo->isTagged() << " pcp=" << ctrlInfo->getPCP()
-    << " dei=" << ctrlInfo->getDEI() << " vid=" << ctrlInfo->getVID() << "\n";
-  }
-  emit(sentPkSignal, packet);
-  send(packet, "out");
-  packetsSent++;
+    if(par("verbose")) {
+        EV_TRACE << getFullPath() << ": Send packet `" << packet->getName() << "' dest=" << ctrlInfo->getDestinationAddress()
+        << " length=" << packet->getBitLength() << "B type=" << ctrlInfo->getEtherType()
+        << " vlan-tagged=" << ctrlInfo->isTagged() << " pcp=" << ctrlInfo->getPCP()
+        << " dei=" << ctrlInfo->getDEI() << " vid=" << ctrlInfo->getVID() << "\n";
+    }
+    emit(sentPkSignal, packet);
+    send(packet, "out");
+    packetsSent++;
 }
 
 int EtherTrafGenQueue::getNumPendingRequests() {
-  // Requests are always served immediately,
-  // therefore no pending requests exist.
-  return 0;
+    // Requests are always served immediately,
+    // therefore no pending requests exist.
+    return 0;
 }
 
 bool EtherTrafGenQueue::isEmpty() {
-  // Queue is never empty
-  return false;
+    // Queue is never empty
+    return false;
 }
 
 cMessage* EtherTrafGenQueue::pop() {
-  return generatePacket();
+    return generatePacket();
 }
 
 } // namespace nesting

@@ -35,8 +35,9 @@ class TransmissionSelection;
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class EtherMACFullDuplexPreemptable : public EtherMACFullDuplex, public IPassiveQueueListener {
-  private:
+class EtherMACFullDuplexPreemptable: public EtherMACFullDuplex,
+        public IPassiveQueueListener {
+private:
     TransmissionSelection* transmissionSelectionModule;
 
     cMessage *recheckForQueuedExpressFrameMsg = nullptr;
@@ -63,7 +64,7 @@ class EtherMACFullDuplexPreemptable : public EtherMACFullDuplex, public IPassive
     virtual simtime_t isPreemptionLaterPossible();
     virtual simtime_t calculateTransmissionDuration(int bytes);
     virtual void preemptCurrentFrame();
-  protected:
+protected:
     static simsignal_t preemptCurrentFrameSignal;
     static simsignal_t transmittedExpressFrameSignal;
     static simsignal_t transmittedPreemptableFrameSignal;
@@ -83,7 +84,7 @@ class EtherMACFullDuplexPreemptable : public EtherMACFullDuplex, public IPassive
     virtual void processFrameFromUpperLayer(EtherFrame *frame) override;
     virtual void startFrameTransmission() override;
     virtual void refreshDisplay() const override;
-  public:
+public:
     virtual void packetEnqueued(IPassiveQueue *queue);
     virtual void hold(simtime_t delay);
     virtual void release();
