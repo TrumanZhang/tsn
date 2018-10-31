@@ -15,7 +15,7 @@
 
 package nesting.node.ethernet.host;
 
-import inet.linklayer.ethernet.EtherMACFullDuplex;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 import nesting.application.ethernet.EtherVLANTaggedTrafGen;
 import nesting.linklayer.ethernet.VLANEncap;

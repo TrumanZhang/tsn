@@ -129,9 +129,9 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
 
         // Create and insert entry for different individual address types
         if (vid == 0) {
-            MACAddress macAddress;
+            MacAddress macAddress;
             if (!macAddress.tryParse(macAddressStr.c_str())) {
-                throw new cRuntimeError("Cannot parse invalid MAC address.");
+                throw new cRuntimeError("Cannot parse invalid Mac address.");
             }
             adminFdb.insert( { macAddress, pair<simtime_t, int>(0, port) });
         } else {
@@ -160,12 +160,12 @@ void FilteringDatabase::handleMessage(cMessage *msg) {
     throw cRuntimeError("Must not receive messages.");
 }
 
-void FilteringDatabase::insert(MACAddress macAddress, simtime_t curTS,
+void FilteringDatabase::insert(MacAddress macAddress, simtime_t curTS,
         int port) {
     operFdb[macAddress] = std::pair<simtime_t, int>(curTS, port);
 }
 
-int FilteringDatabase::getPort(MACAddress macAddress, simtime_t curTS) {
+int FilteringDatabase::getPort(MacAddress macAddress, simtime_t curTS) {
     simtime_t ts;
     int port;
 

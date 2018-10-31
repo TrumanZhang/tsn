@@ -44,7 +44,7 @@ protected:
 protected:
     /**
      * The rate of change of credit as factor of the transmission rate of the
-     * MAC module.
+     * Mac module.
      */
     double idleSlopeFactor;
 
@@ -92,7 +92,7 @@ protected:
     virtual double getSendSlope();
 
     /**
-     * This method returns the associated MAC port transmit rate in bits per
+     * This method returns the associated Mac port transmit rate in bits per
      * second.
      */
     virtual double getPortTransmitRate();

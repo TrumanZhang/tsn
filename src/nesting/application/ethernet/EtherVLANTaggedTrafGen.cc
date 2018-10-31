@@ -46,7 +46,7 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         // Create control info for encap modules
         Ieee8021QCtrl *ctrlInfo = new Ieee8021QCtrl();
         ctrlInfo->setEtherType(etherType);
-        ctrlInfo->setDest(destMACAddress);
+        ctrlInfo->setDest(destMacAddress);
         ctrlInfo->setTagged(vlanTagEnabled->boolValue());
         ctrlInfo->setPCP(pcp->intValue());
         ctrlInfo->setDEI(dei->boolValue());

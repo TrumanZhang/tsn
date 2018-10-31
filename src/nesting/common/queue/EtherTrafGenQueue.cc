@@ -80,7 +80,7 @@ cPacket* EtherTrafGenQueue::generatePacket() {
     Ieee8021QCtrl *etherctrl = new Ieee8021QCtrl();
 
     etherctrl->setEtherType(etherType->intValue());
-    etherctrl->setDest(destMACAddress);
+    etherctrl->setDest(destMacAddress);
     etherctrl->setTagged(vlanTagEnabled->boolValue());
     etherctrl->setPCP(pcp->intValue());
     etherctrl->setDEI(dei->boolValue());

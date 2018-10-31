@@ -15,7 +15,7 @@
 
 package nesting.node.ethernet;
 
-import inet.linklayer.ethernet.EtherMACFullDuplex;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 import nesting.application.ethernet.SchedEtherVLANTrafGen;
 import nesting.ieee8021q.clock.IClock;
@@ -47,7 +47,7 @@ module VLANEtherHost
         vlanEncap: VLANEncap {
             @display("p=138,174");
         }
-        mac: EtherMACFullDuplex {
+        mac: EtherMacFullDuplex {
             @display("p=138,402;q=txQueue");
         }
         clock: <default("IdealClock")> like IClock {

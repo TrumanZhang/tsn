@@ -15,7 +15,7 @@
 
 package nesting.node.ethernet.host;
 
-import inet.linklayer.ethernet.EtherMACFullDuplex;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 
 //
@@ -33,7 +33,7 @@ module EtherHostBase {
         etherEncap: <default("EtherEncap")> like IEtherEncap {
             @display("p=171,147");
         }
-        mac: EtherMACFullDuplex {
+        mac: EtherMacFullDuplex {
             @display("p=171,58");
         }
     connections:

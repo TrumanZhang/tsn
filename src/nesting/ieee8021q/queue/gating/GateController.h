@@ -23,7 +23,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
-#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
 #include "../TransmissionSelection.h"
 #include "../../clock/IClock.h"

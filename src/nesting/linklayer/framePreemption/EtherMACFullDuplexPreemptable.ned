@@ -17,13 +17,13 @@
 //
 
 
-import inet.linklayer.ethernet.EtherMACFullDuplex;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 
 //@namespace(inet);
 
 package nesting.linklayer.framePreemption;
 
-simple EtherMACFullDuplexPreemptable extends EtherMACFullDuplex
+simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
 {
     parameters:
         @class(EtherMACFullDuplexPreemptable);

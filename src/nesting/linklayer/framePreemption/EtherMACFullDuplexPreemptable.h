@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "../../ieee8021q/queue/TransmissionSelection.h"
 #include "../../ieee8021q/Ieee8021q.h"
 
@@ -35,7 +35,7 @@ class TransmissionSelection;
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class EtherMACFullDuplexPreemptable: public EtherMACFullDuplex,
+class EtherMACFullDuplexPreemptable: public EtherMacFullDuplex,
         public IPassiveQueueListener {
 private:
     TransmissionSelection* transmissionSelectionModule;

@@ -55,7 +55,7 @@ EtherMACFullDuplexPreemptable::~EtherMACFullDuplexPreemptable() {
 }
 
 void EtherMACFullDuplexPreemptable::initialize(int stage) {
-    EtherMACFullDuplex::initialize(stage);
+    EtherMacFullDuplex::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         transmissionSelectionModule = getModuleFromPar<TransmissionSelection>(
@@ -374,7 +374,7 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
     }
     transmittingExpressFrame = false;
     transmittingPreemptableFrame = false;
-    EtherMACFullDuplex::handleEndTxPeriod();
+    EtherMacFullDuplex::handleEndTxPeriod();
 }
 
 void EtherMACFullDuplexPreemptable::handleEndIFGPeriod() {

@@ -46,7 +46,7 @@ protected:
 
     /**
      * This vector keeps references to listeners that are notified about
-     * packet-enqueued-events. In the default case this should be the MAC
+     * packet-enqueued-events. In the default case this should be the Mac
      * module.
      */
     std::vector<IPassiveQueueListener*> listeners;

@@ -20,7 +20,7 @@
 #include <list>
 
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "../../linklayer/common/Ieee8021QCtrl_m.h"
 
@@ -37,7 +37,7 @@ protected:
     long seqNum;
 
     /** Destination MAC address of generated packets. */
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
 
     // Parameters from NED file
     cPar* etherType;

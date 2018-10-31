@@ -20,7 +20,7 @@
 #include <tuple>
 #include <unordered_map>
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "../../linklayer/common/Ieee8021QCtrl_m.h"
 #include "../clock/IClockListener.h"
 
@@ -28,10 +28,10 @@ using namespace omnetpp;
 using namespace inet;
 using namespace std;
 
-//added hash function for MACAddress (required for map)
+//added hash function for MacAddress (required for map)
 namespace std {
-template<> struct hash<MACAddress> {
-    size_t operator()(MACAddress const& mac) const noexcept
+template<> struct hash<MacAddress> {
+    size_t operator()(MacAddress const& mac) const noexcept
     {
         return std::hash<string> { }(mac.str());
     }
@@ -45,8 +45,8 @@ namespace nesting {
  */
 class FilteringDatabase: public cSimpleModule, public IClockListener {
 private:
-    unordered_map<MACAddress, pair<simtime_t, int>> adminFdb;
-    unordered_map<MACAddress, pair<simtime_t, int>> operFdb;
+    unordered_map<MacAddress, pair<simtime_t, int>> adminFdb;
+    unordered_map<MacAddress, pair<simtime_t, int>> operFdb;
 
     bool changeDatabase = false;
 
@@ -81,9 +81,9 @@ public:
 
     virtual void loadDatabase(cXMLElement* fdb, int cycle);
 
-    virtual int getPort(MACAddress macAddress, simtime_t curTS);
+    virtual int getPort(MacAddress macAddress, simtime_t curTS);
 
-    void insert(MACAddress macAddress, simtime_t curTS, int port);
+    void insert(MacAddress macAddress, simtime_t curTS, int port);
 };
 
 } // namespace nesting

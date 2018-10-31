@@ -47,7 +47,7 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         const char* addressCString =
                 entry->getFirstChildWithTag("dest")->getNodeValue();
 
-        inet::MACAddress destination = inet::MACAddress(addressCString);
+        inet::MacAddress destination = inet::MacAddress(addressCString);
         etherctrl.setDestinationAddress(destination);
 
         etherctrl.setEtherType(0x8100);

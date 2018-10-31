@@ -19,7 +19,7 @@
 #include "omnetpp.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
 #include "../gating/TransmissionGate.h"
 #include "../framePreemption/LengthAwareQueue.h"
@@ -39,9 +39,9 @@ class LengthAwareQueue;
 class TSAlgorithm: public cSimpleModule, public IPreemptableQueue {
 protected:
     /**
-     * Reference to the MAC module.
+     * Reference to the Mac module.
      */
-    EtherMACBase* mac;
+    EtherMacBase* mac;
 
     /**
      * Reference to the length-aware input queue module.

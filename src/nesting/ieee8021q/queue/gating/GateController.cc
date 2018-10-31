@@ -129,7 +129,7 @@ void GateController::tick(IClock *clock) {
                 break;
             }
         }
-        //If the MAC component was on hold and no express gate is opened, release it
+        //If the Mac component was on hold and no express gate is opened, release it
         releaseNeeded = !someExpressGateOpen && currentlyOnHold();
         if(releaseNeeded) {
             macModule->release();
