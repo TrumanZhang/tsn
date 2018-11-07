@@ -17,9 +17,10 @@
 
 namespace nesting {
 
-HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
+HostSchedule<Ieee8021QCtrl_2>* HostScheduleBuilder::createHostScheduleFromXML(
         cXMLElement *xml, cXMLElement *rootXml) {
-    HostSchedule<Ieee8021QCtrl>* schedule = new HostSchedule<Ieee8021QCtrl>();
+    HostSchedule<Ieee8021QCtrl_2>* schedule =
+            new HostSchedule<Ieee8021QCtrl_2>();
 
     //extract cycle from second xml argument (xml root)
     int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
@@ -38,24 +39,27 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         unsigned int size = atoi(sizeCString);
 
         // Get Ieee8021QCtrl
-
-        Ieee8021QCtrl etherctrl = Ieee8021QCtrl();
+        auto etherctrl = makeShared<Ieee802_1QHeader>();
+        auto macCtrl = makeShared<EthernetMacHeader>();
         const char* queueCString =
                 entry->getFirstChildWithTag("queue")->getNodeValue();
-        etherctrl.setPCP(atoi(queueCString));
+        etherctrl->setPcp(atoi(queueCString));
 
         const char* addressCString =
                 entry->getFirstChildWithTag("dest")->getNodeValue();
 
         inet::MacAddress destination = inet::MacAddress(addressCString);
-        etherctrl.setDestinationAddress(destination);
+        macCtrl->setDest(destination);
+        macCtrl->setTypeOrLength(ETHERTYPE_8021Q_TAG);
+        // etherctrl.setTagged(true); no tagged in Ieee802_1QHeader
+        etherctrl->setVID(0);
+        etherctrl->setDe(false);
 
-        etherctrl.setEtherType(0x8100);
-        etherctrl.setTagged(true);
-        etherctrl.setVID(0);
-        etherctrl.setDEI(false);
+        Ieee8021QCtrl_2 header;
+        header.macHeader = macCtrl;
+        header.q1Header = etherctrl;
 
-        schedule->addEntry(time, size, etherctrl);
+        schedule->addEntry(time, size, header);
     }
 
     return schedule;

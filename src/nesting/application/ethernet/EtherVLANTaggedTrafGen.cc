@@ -38,31 +38,37 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         char msgname[40];
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-        cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
-
+        // create new packet
         long len = packetLength->intValue();
-        packet->setByteLength(len);
+        auto data = makeShared<ByteCountChunk>(B(len));
+        auto *packet = new Packet(msgname, data);
 
-        // Create control info for encap modules
-        Ieee8021QCtrl *ctrlInfo = new Ieee8021QCtrl();
-        ctrlInfo->setEtherType(etherType);
-        ctrlInfo->setDest(destMacAddress);
-        ctrlInfo->setTagged(vlanTagEnabled->boolValue());
-        ctrlInfo->setPCP(pcp->intValue());
-        ctrlInfo->setDEI(dei->boolValue());
-        ctrlInfo->setVID(vid->intValue());
-        packet->setControlInfo(ctrlInfo);
+        // create control info for encap modules
+        // ctrlInfo->setTagged(vlanTagEnabled->boolValue()); , see if omitting this causes problems further down the road
+        auto ethMacHeader = makeShared<EthernetMacHeader>();
+        ethMacHeader->setDest(destMacAddress);
+        if (vlanTagEnabled) {
+            ethMacHeader->setTypeOrLength(ETHERTYPE_8021Q_TAG); // ok here?
+        } // else ethertype = default = 0
+
+        // create VLAN control info
+        auto ieee8021q = makeShared<Ieee802_1QHeader>();
+        ieee8021q->setPcp(pcp->intValue());
+        ieee8021q->setDe(dei->boolValue());
+        ieee8021q->setVID(vid->intValue());
+
+        packet->insertAtFront(ieee8021q);
+        packet->insertAtFront(ethMacHeader); // 8021q header according to standard should be placed in the EthernetMacHeader
 
         EV_TRACE << getFullPath() << ": Send packet `" << packet->getName()
-                        << "' dest=" << ctrlInfo->getDestinationAddress()
-                        << " length=" << packet->getBitLength() << "B type="
-                        << ctrlInfo->getEtherType() << " vlan-tagged="
-                        << ctrlInfo->isTagged() << " pcp=" << ctrlInfo->getPCP()
-                        << " dei=" << ctrlInfo->getDEI() << " vid="
-                        << ctrlInfo->getVID() << endl;
+                        << "' dest=" << ethMacHeader->getDest() << " length="
+                        << packet->getBitLength() << "B type="
+                        << ethMacHeader->getTypeOrLength() << " vlan-tagged="
+                        << ethMacHeader->getTypeOrLength() << " pcp="
+                        << ieee8021q->getPcp() << " dei=" << ieee8021q->getDe()
+                        << " vid=" << ieee8021q->getVID() << endl;
 
-        emit(sentPkSignal, packet);
-        send(packet, "out");
+        // emit(sentPkSignal, packet); no sentPkSignal in EtherTrafGen in Inet 4.0.0
         packetsSent++;
     }
 }

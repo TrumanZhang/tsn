@@ -42,7 +42,7 @@ void SchedEtherVLANTrafGen::initialize(int stage) {
         //clock module reference from ned parameter
 
         currentSchedule = unique_ptr < HostSchedule
-                < Ieee8021QCtrl >> (new HostSchedule<Ieee8021QCtrl>());
+                < Ieee8021QCtrl_2 >> (new HostSchedule<Ieee8021QCtrl_2>());
         cXMLElement* xml = par("initialSchedule").xmlValue();
         loadScheduleOrDefault(xml);
 
@@ -70,14 +70,17 @@ void SchedEtherVLANTrafGen::sendPacket() {
     char msgname[40];
     sprintf(msgname, "pk-%d-%d", getId(), seqNum);
 
-    cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
+    // create new packet
+    long len = currentSchedule->getSize(index);
+    auto data = makeShared<ByteCountChunk>(B(len));
+    auto *datapacket = new Packet(msgname, data);
 
     seqNum++;
 
-    datapacket->setByteLength(currentSchedule->getSize(index));
-    Ieee8021QCtrl* etherctrl = new Ieee8021QCtrl(
-            currentSchedule->getScheduledObject(index));
-    datapacket->setControlInfo(etherctrl);
+    // not needed because setByteLength not in new Packet API datapacket->setByteLength(currentSchedule->getSize(index));
+    Ieee8021QCtrl_2 header = currentSchedule->getScheduledObject(index);
+    datapacket->insertAtFront(header.q1Header);
+    datapacket->insertAtFront(header.macHeader);
 
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
@@ -138,7 +141,7 @@ int SchedEtherVLANTrafGen::scheduleNextTickEvent() {
 
 void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
     string hostName = this->getModuleByPath(par("hostModule"))->getFullName();
-    HostSchedule<Ieee8021QCtrl>* schedule;
+    HostSchedule<Ieee8021QCtrl_2>* schedule;
     bool realScheduleFound = false;
     //try to extract the part of the schedule belonging to this host
     for (cXMLElement* hostxml : xml->getChildren()) {
@@ -160,7 +163,7 @@ void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
         schedule = HostScheduleBuilder::createHostScheduleFromXML(defaultXml,
                 xml);
     }
-    unique_ptr < HostSchedule < Ieee8021QCtrl >> schedulePtr(schedule);
+    unique_ptr<HostSchedule<Ieee8021QCtrl>> schedulePtr(schedule);
 
     nextSchedule.reset();
     nextSchedule = move(schedulePtr);
