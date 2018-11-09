@@ -15,6 +15,7 @@
 #include "../../ieee8021q/clock/IClock.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include <omnetpp/cxmlelement.h>
 #include <vector>
 #include "../../common/schedule/HostSchedule.h"

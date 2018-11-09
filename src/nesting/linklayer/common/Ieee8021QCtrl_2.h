@@ -2,8 +2,8 @@
 
 namespace nesting {
 struct Ieee8021QCtrl_2 {
-    Ieee802_1QHeader q1Header;
-    EthernetMacHeader macHeader;
+    IntrusivePtr<Ieee802_1QHeader> q1Header;
+    IntrusivePtr<EthernetMacHeader> macHeader;
 };
 
 } // namespace nesting

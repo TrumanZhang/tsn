@@ -163,7 +163,7 @@ void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
         schedule = HostScheduleBuilder::createHostScheduleFromXML(defaultXml,
                 xml);
     }
-    unique_ptr<HostSchedule<Ieee8021QCtrl>> schedulePtr(schedule);
+    unique_ptr<HostSchedule<Ieee8021QCtrl_2>> schedulePtr(schedule);
 
     nextSchedule.reset();
     nextSchedule = move(schedulePtr);
