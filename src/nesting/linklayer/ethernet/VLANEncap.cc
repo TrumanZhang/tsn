@@ -52,103 +52,73 @@ void VLANEncap::handleMessage(cMessage* msg) {
     }
 }
 
-void VLANEncap::processPacketFromHigherLevel(cPacket* packet) {
+void VLANEncap::processPacketFromHigherLevel(Packet *packet) {
     EV_INFO << getFullPath() << ": Received " << packet << " from upper layer."
                    << endl;
 
     totalFromHigherLayer++;
 
-    // Packet control info
-    Ieee8021QCtrl* oldCtrlInfo = check_and_cast<Ieee8021QCtrl*>(
-            packet->removeControlInfo());
-    Ieee802Ctrl* newCtrlInfo = new Ieee802Ctrl(*oldCtrlInfo);
-
-    // Encapsulate VLAN Tag depending on Ieee8021QCtrl info
-    if (oldCtrlInfo->isTagged() || tagUntaggedFrames) {
-        Ethernet1QTag* ether1QTag = new Ethernet1QTag(packet->getName());
-        ether1QTag->setPcp(oldCtrlInfo->getPCP());
-        ether1QTag->setDe(oldCtrlInfo->getDEI());
-        ether1QTag->setVID(oldCtrlInfo->getVID());
-        ether1QTag->setByteLength(Ieee8021q::kVLANTagByteLength);
-        ether1QTag->encapsulate(packet);
-
+    // Encapsulate VLAN Header
+    if (packet->findTag<VLANTagReq>()) {
+        auto vlanTag = packet->getTag<VLANTagReq>();
+        const auto& vlanHeader = makeShared<Ieee802_1QHeader>();
+        vlanHeader->setPcp(vlanTag->getPcp());
+        vlanHeader->setDe(vlanTag->getDe());
+        vlanHeader->setVID(vlanTag->getVID());
+        packet->insertAtFront(vlanHeader);
+        delete packet->removeTagIfPresent<VLANTagReq>();
         // Statistics and logging
         EV_INFO << getFullPath() << ":Encapsulating higher layer packet `"
                        << packet->getName() << "' into VLAN tag" << endl;
-
         totalEncap++;
         emit(encapPkSignal, packet);
-
-        // Ether1QTag is the new packet
-        packet = ether1QTag;
-
     }
-
-    // Old control info is not needed anymore
-    delete oldCtrlInfo;
-
-    packet->setControlInfo(newCtrlInfo);
 
     EV_TRACE << getFullPath() << ": Packet-length is "
                     << packet->getByteLength() << " and Destination is "
-                    << newCtrlInfo->getDest()
+                    << packet->getTag<MacAddressReq>()->getDestAddress()
                     << " before sending packet to lower layer" << endl;
 
     send(packet, "lowerLayerOut");
 }
 
-void VLANEncap::processPacketFromLowerLevel(cPacket* packet) {
+void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
     EV_INFO << getFullPath() << ": Received " << packet << " from lower layer."
                    << endl;
 
     totalFromLowerLayer++;
 
-    // Packet control info
-    Ieee802Ctrl* oldCtrlInfo = check_and_cast<Ieee802Ctrl*>(
-            packet->removeControlInfo());
-    Ieee8021QCtrl* newCtrlInfo = new Ieee8021QCtrl();
-
-    // Copy the values from the old, less detailed control info into the new one
-    newCtrlInfo->Ieee802Ctrl::operator=(*oldCtrlInfo);
-    delete oldCtrlInfo;
-
     // Decapsulate packet if it is a VLAN Tag, otherwise just insert default
     // values into the control information
-    if (Ethernet1QTag* ethernet1QTag = dynamic_cast<Ethernet1QTag*>(packet)) {
-        newCtrlInfo->setPCP(ethernet1QTag->getPcp());
-        newCtrlInfo->setDEI(ethernet1QTag->getDe());
-        int vid = ethernet1QTag->getVID();
+    if (packet->hasAtFront<Ieee802_1QHeader>()) {
+        auto vlanHeader = packet->popAtFront<Ieee802_1QHeader>();
+        auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
+        vlanTag->setPcp(vlanHeader->getPcp());
+        vlanTag->setDe(vlanHeader->getDe());
+        short vid = vlanHeader->getVID();
         if (vid < Ieee8021q::kMinValidVID || vid > Ieee8021q::kMaxValidVID) {
             vid = pvid;
         }
-        newCtrlInfo->setVID(ethernet1QTag->getVID());
-        newCtrlInfo->setTagged(true);
-        packet = ethernet1QTag->decapsulate();
-
-        // Statistics and logging
-        EV_TRACE << getFullPath() << ": Decapsulating packet `"
-                        << ethernet1QTag->getName()
-                        << "', passing up contained packet `"
+        vlanTag->setVID(vid);
+        EV_TRACE << getFullPath() << ": Decapsulating packet and `"
+                        << "' passing up contained packet `"
                         << packet->getName() << "' to higher layer" << endl;
 
         totalDecap++;
         emit(decapPkSignal, ethernet1QTag);
-
-        // Delete decapsulated packet
-        delete ethernet1QTag;
+        delete vlanHeader;
     } else {
-        newCtrlInfo->setPCP(Ieee8021q::kDefaultPCPValue);
-        newCtrlInfo->setDEI(Ieee8021q::kDefaultDEIValue);
-        newCtrlInfo->setVID(pvid);
+        auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
+        vlanTag->setPcp(Ieee8021q::kDefaultPCPValue);
+        vlanTag->setDe(Ieee8021q::kDefaultDEIValue);
+        vlanTag->setVID(pvid);
     }
-
-    packet->setControlInfo(newCtrlInfo);
 
     EV_TRACE << getFullPath() << ": Packet-length is "
                     << packet->getByteLength() << ", destination is "
-                    << newCtrlInfo->getDest() << ", PCP Value is "
-                    << newCtrlInfo->getPCP() << " before sending packet up"
-                    << endl;
+                    << packet->getTag<MacAddressInd>()->getDestAddress()
+                    << ", PCP Value is " << vlanTag->getPcp()
+                    << " before sending packet up" << endl;
 
     // Send packet to upper layer
     send(packet, "upperLayerOut");
