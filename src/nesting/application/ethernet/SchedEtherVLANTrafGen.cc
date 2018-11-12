@@ -71,16 +71,23 @@ void SchedEtherVLANTrafGen::sendPacket() {
     sprintf(msgname, "pk-%d-%d", getId(), seqNum);
 
     // create new packet
+    Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
     long len = currentSchedule->getSize(index);
-    auto data = makeShared<ByteCountChunk>(B(len));
-    auto *datapacket = new Packet(msgname, data);
+    const auto& payload = makeShared<ByteCountChunk>(B(len));
+    datapacket->insertAtBack(payload);
 
     seqNum++;
 
-    // not needed because setByteLength not in new Packet API datapacket->setByteLength(currentSchedule->getSize(index));
+    // get scheduled control data
     Ieee8021QCtrl_2 header = currentSchedule->getScheduledObject(index);
-    datapacket->insertAtFront(header.q1Header);
-    datapacket->insertAtFront(header.macHeader);
+    // create mac control info
+    auto macTag = datapacket->addTag<MacAddressReq>();
+    macTag->setDestAddress(header.macTag.getDestAddress());
+    // create VLAN control info
+    auto ieee8021q = datapacket->addTag<VLANTagReq>();
+    ieee8021q->setPcp(header.q1Tag.getPcp());
+    ieee8021q->setDe(header.q1Tag.getDe());
+    ieee8021q->setVID(header.q1Tag.getVID());
 
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)

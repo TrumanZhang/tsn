@@ -19,10 +19,10 @@
 #include <omnetpp.h>
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
-// #include "../../linklayer/common/Ieee8021QCtrl_m.h"
+#include "../../linklayer/common/VLANTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 using namespace omnetpp;
 using namespace inet;

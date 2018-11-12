@@ -40,22 +40,20 @@ HostSchedule<Ieee8021QCtrl_2>* HostScheduleBuilder::createHostScheduleFromXML(
 
         // Get Ieee8021QCtrl
         Ieee8021QCtrl_2 header;
-        header.q1Header = makeShared<Ieee802_1QHeader>();
-        header.macHeader = makeShared<EthernetMacHeader>();
+        header.q1Tag = VLANTagReq();
+        header.macTag = MacAddressReq();
         const char* queueCString =
                 entry->getFirstChildWithTag("queue")->getNodeValue();
-        header.q1Header->setPcp(atoi(queueCString));
+        header.q1Tag.setPcp(atoi(queueCString));
 
         const char* addressCString =
                 entry->getFirstChildWithTag("dest")->getNodeValue();
 
         inet::MacAddress destination = inet::MacAddress(addressCString);
-        header.macHeader->setDest(destination);
-        header.macHeader->setTypeOrLength(ETHERTYPE_8021Q_TAG);
+        header.macTag.setDestAddress(destination);
         // etherctrl.setTagged(true); no tagged in Ieee802_1QHeader
-        header.q1Header->setVID(0);
-        header.q1Header->setDe(false);
-
+        header.q1Tag.setVID(0);
+        header.q1Tag.setDe(false);
 
         schedule->addEntry(time, size, header);
     }
