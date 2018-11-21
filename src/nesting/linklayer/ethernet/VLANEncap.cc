@@ -43,7 +43,7 @@ void VLANEncap::initialize() {
 }
 
 void VLANEncap::handleMessage(cMessage* msg) {
-    cPacket* packet = check_and_cast<cPacket*>(msg);
+    Packet* packet = check_and_cast<Packet*>(msg);
 
     if (packet->arrivedOn("lowerLayerIn")) {
         processPacketFromLowerLevel(packet);
@@ -90,11 +90,15 @@ void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
 
     // Decapsulate packet if it is a VLAN Tag, otherwise just insert default
     // values into the control information
+    EV_TRACE << getFullPath() << ": Packet-length is "
+                    << packet->getByteLength() << ", destination is "
+                    << packet->getTag<MacAddressInd>()->getDestAddress();
     if (packet->hasAtFront<Ieee802_1QHeader>()) {
         auto vlanHeader = packet->popAtFront<Ieee802_1QHeader>();
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(vlanHeader->getPcp());
         vlanTag->setDe(vlanHeader->getDe());
+        EV_TRACE << ", PCP Value is " << vlanTag->getPcp();
         short vid = vlanHeader->getVID();
         if (vid < Ieee8021q::kMinValidVID || vid > Ieee8021q::kMaxValidVID) {
             vid = pvid;
@@ -105,8 +109,8 @@ void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
                         << packet->getName() << "' to higher layer" << endl;
 
         totalDecap++;
-        emit(decapPkSignal, ethernet1QTag);
-        delete vlanHeader;
+        emit(decapPkSignal, packet);
+        // delete &vlanHeader;
     } else {
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(Ieee8021q::kDefaultPCPValue);
@@ -114,11 +118,7 @@ void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
         vlanTag->setVID(pvid);
     }
 
-    EV_TRACE << getFullPath() << ": Packet-length is "
-                    << packet->getByteLength() << ", destination is "
-                    << packet->getTag<MacAddressInd>()->getDestAddress()
-                    << ", PCP Value is " << vlanTag->getPcp()
-                    << " before sending packet up" << endl;
+    EV_TRACE << " before sending packet up" << endl;
 
     // Send packet to upper layer
     send(packet, "upperLayerOut");
