@@ -16,6 +16,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include <omnetpp/cxmlelement.h>
 #include <vector>
 #include "../../common/schedule/HostSchedule.h"
@@ -53,6 +56,8 @@ protected:
     long packetsReceived = 0;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
+    int ssap = -1;
+    int dsap = -1;
 
     int seqNum = 0;
 

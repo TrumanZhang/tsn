@@ -75,6 +75,12 @@ void SchedEtherVLANTrafGen::sendPacket() {
     long len = currentSchedule->getSize(index);
     const auto& payload = makeShared<ByteCountChunk>(B(len));
     datapacket->insertAtBack(payload);
+    datapacket->removeTagIfPresent<PacketProtocolTag>();
+    datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(
+            &Protocol::ieee8022);
+    auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
+    sapTag->setSsap(ssap);
+    sapTag->setDsap(dsap);
 
     seqNum++;
 

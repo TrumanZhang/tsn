@@ -43,6 +43,12 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         long len = packetLength->intValue();
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         datapacket->insertAtBack(payload);
+        datapacket->removeTagIfPresent<PacketProtocolTag>();
+        datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(
+                &Protocol::ieee8022);
+        auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
+        sapTag->setSsap(ssap);
+        sapTag->setDsap(dsap);
 
         // create control info for encap modules
         // ctrlInfo->setTagged(vlanTagEnabled->boolValue()); , see if omitting this causes problems further down the road
