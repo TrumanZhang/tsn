@@ -22,7 +22,13 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Protocol.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "../../linklayer/common/VLANTag_m.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -37,7 +43,7 @@ protected:
     long seqNum;
 
     /** Destination MAC address of generated packets. */
-    MacAddress destMACAddress;
+    MacAddress destMacAddress;
 
     // Parameters from NED file
     cPar* etherType;
@@ -45,6 +51,8 @@ protected:
     cPar* pcp;
     cPar* dei;
     cPar* vid;
+    int ssap = -1;
+    int dsap = -1;
 
     cPar* packetLength;
 
@@ -57,7 +65,7 @@ protected:
     virtual void initialize() override;
 
     virtual void handleMessage(cMessage *msg) override;
-    virtual cPacket* generatePacket();
+    virtual Packet* generatePacket();
 public:
     virtual void requestPacket() override;
     virtual int getNumPendingRequests() override;

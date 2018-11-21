@@ -51,7 +51,6 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         sapTag->setDsap(dsap);
 
         // create control info for encap modules
-        // ctrlInfo->setTagged(vlanTagEnabled->boolValue()); , see if omitting this causes problems further down the road
         auto macTag = datapacket->addTag<MacAddressReq>();
         macTag->setDestAddress(destMacAddress);
 
