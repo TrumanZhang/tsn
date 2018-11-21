@@ -17,7 +17,6 @@ package nesting.node.ethernet.host;
 
 import inet.common.queue.Sink;
 import nesting.common.queue.EtherTrafGenQueue;
-
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
 // physical medium allows. This module's main use case is to simulate a
