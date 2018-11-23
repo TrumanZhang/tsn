@@ -38,8 +38,8 @@ void QueuingFrames::initialize() {
 void QueuingFrames::handleMessage(cMessage *msg) {
     Packet *packet = check_and_cast<Packet *>(msg);
 
-    // TODO check whether outgoing or incoming tag is found
-    VLANTagBase vlanTag = packet->getTag<VLANTagBase>();
+    // TODO check if correct tag is found
+    auto vlanTag = packet->getTag<VLANTagBase>();
 
     int pcpValue = vlanTag->getPcp();
 
