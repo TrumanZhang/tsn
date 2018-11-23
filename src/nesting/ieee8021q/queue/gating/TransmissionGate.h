@@ -23,6 +23,7 @@
 #include "../transmissionSelectionAlgorithms/TSAlgorithm.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
+#include "inet/common/packet/Packet.h"
 #include "../../clock/IClock.h"
 #include "GateController.h"
 #include "../TransmissionSelection.h"

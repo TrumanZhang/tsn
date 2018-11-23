@@ -31,7 +31,6 @@
 #include "../../clock/IClockListener.h"
 #include "../../Ieee8021q.h"
 #include "TransmissionGate.h"
-#include "../../../common/schedule/Schedule.h"
 #include "../../../common/schedule/ScheduleBuilder.h"
 #include "../../../linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
 using namespace inet;

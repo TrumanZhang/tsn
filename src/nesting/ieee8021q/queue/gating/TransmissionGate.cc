@@ -56,7 +56,7 @@ void TransmissionGate::handleMessage(cMessage* msg) {
             handleRequestPacketEvent();
         }
     } else {
-        cPacket* packet = check_and_cast<cPacket *>(msg);
+        Packet* packet = check_and_cast<Packet *>(msg);
         EV_TRACE << getFullPath() << ": Sending packet '" << packet->getName()
                         << "' of size " << packet->getByteLength() << "B ("
                         << packet->getBitLength() << " bit) at time "
