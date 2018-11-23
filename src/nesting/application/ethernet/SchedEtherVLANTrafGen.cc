@@ -61,7 +61,7 @@ void SchedEtherVLANTrafGen::handleMessage(cMessage *msg) {
     if (msg->isSelfMessage()) {
         //disregard for now
     } else {
-        receivePacket(check_and_cast<cPacket *>(msg));
+        receivePacket(check_and_cast<Packet *>(msg));
     }
 }
 
@@ -78,9 +78,11 @@ void SchedEtherVLANTrafGen::sendPacket() {
     datapacket->removeTagIfPresent<PacketProtocolTag>();
     datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(
             &Protocol::ieee8022);
+    // TODO check if protocol is correct
     auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
     sapTag->setSsap(ssap);
     sapTag->setDsap(dsap);
+    // TODO check if sapTag is correct
 
     seqNum++;
 
@@ -104,7 +106,7 @@ void SchedEtherVLANTrafGen::sendPacket() {
     TSNpacketsSent++;
 }
 
-void SchedEtherVLANTrafGen::receivePacket(cPacket *msg) {
+void SchedEtherVLANTrafGen::receivePacket(Packet *msg) {
     EV_TRACE << getFullPath() << ": Received packet '" << msg->getName()
                     << "' with length " << msg->getByteLength() << "B at time "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;

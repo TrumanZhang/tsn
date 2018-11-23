@@ -27,6 +27,8 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 
+// TODO check if includes can be discarded
+
 using namespace omnetpp;
 using namespace inet;
 

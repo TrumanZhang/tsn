@@ -30,6 +30,8 @@
 #include "inet/common/packet/Packet.h"
 #include "../../linklayer/common/VLANTag_m.h"
 
+// TODO check if includes can be discarded
+
 using namespace omnetpp;
 using namespace inet;
 using namespace std;

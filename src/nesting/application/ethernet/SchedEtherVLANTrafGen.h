@@ -24,6 +24,8 @@
 #include "../../common/schedule/HostSchedule.h"
 #include "../../common/schedule/HostScheduleBuilder.h"
 
+// TODO check if includes can be discarded
+
 using namespace omnetpp;
 using namespace inet;
 
@@ -63,7 +65,7 @@ protected:
 
     virtual void initialize(int stage) override;
     virtual void sendPacket();
-    virtual void receivePacket(cPacket *msg);
+    virtual void receivePacket(Packet *msg);
     virtual void handleMessage(cMessage *msg) override;
 
     virtual int numInitStages() const override;
