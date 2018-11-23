@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 
 #include "TSAlgorithm.h"
 #include "../../Ieee8021q.h"
@@ -132,13 +133,13 @@ protected:
     virtual simtime_t idleTimeToZeroCredit();
 
     /** Calculates the time needed to transmit a packet. */
-    virtual simtime_t transmissionTime(cPacket* packet);
+    virtual simtime_t transmissionTime(Packet* packet);
 
     /** Transitions the module into a new state. */
     virtual void updateState(State newState);
 
     /** Spend the necessary amount of credit for a given packet to transmit. */
-    virtual void spendCredit(cPacket* packet);
+    virtual void spendCredit(Packet* packet);
 
     /** Earn the amount of credits respective to a given time interval. */
     virtual void earnCredits(simtime_t time);
@@ -168,7 +169,7 @@ protected:
     /**
      * Handle state changes and triggering events due to transmitting packets.
      */
-    virtual void handleSendPacketEvent(cPacket* packet);
+    virtual void handleSendPacketEvent(Packet* packet);
 
     /**
      * Handle state changes and triggering events after finishing spending
