@@ -36,12 +36,12 @@ void QueuingFrames::initialize() {
 }
 
 void QueuingFrames::handleMessage(cMessage *msg) {
-    cPacket *packet = check_and_cast<cPacket *>(msg);
+    Packet *packet = check_and_cast<Packet *>(msg);
 
-    Ieee8021QCtrl* controler = check_and_cast<Ieee8021QCtrl*>(
-            packet->getControlInfo());
+    // TODO check whether outgoing or incoming tag is found
+    VLANTagBase vlanTag = packet->getTag<VLANTagBase>();
 
-    int pcpValue = controler->getPCP();
+    int pcpValue = vlanTag->getPcp();
 
     // Check whether the PCP value is correct.
     if (pcpValue > Ieee8021q::kNumberOfPCPValues) {
@@ -57,8 +57,8 @@ void QueuingFrames::handleMessage(cMessage *msg) {
 
     // Get the corresponding gate and transmit the frame to it.
     EV_TRACE << getFullPath() << ": Sending packet '" << packet
-                    << "' with pcp value '" << controler->getPCP()
-                    << "' to queue " << queueIndex << endl;
+                    << "' with pcp value '" << pcpValue << "' to queue "
+                    << queueIndex << endl;
 
     cGate* outputGate = gate("out", queueIndex);
     send(msg, outputGate);

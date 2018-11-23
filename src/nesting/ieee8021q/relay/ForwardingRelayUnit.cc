@@ -87,6 +87,7 @@ void ForwardingRelayUnit::processUnicast(Packet* packet) {
 MacAddressTagBase ForwardingRelayUnit::getMacTag(Packet* packet) {
     auto macTagReq = packet->findTag<MacAddressReq>();
     auto macTagInd = packet->findTag<MacAddressInd>();
+    // TODO check which of these tags are found
     if (macTagReq) {
         return macTagReq;
     } else if (macTagInd) {
