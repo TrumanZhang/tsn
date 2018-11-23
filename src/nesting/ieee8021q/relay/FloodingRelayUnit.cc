@@ -27,21 +27,22 @@ void FloodingRelayUnit::initialize() {
 }
 
 void FloodingRelayUnit::handleMessage(cMessage *msg) {
-    Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
-            msg->removeControlInfo());
+    // Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
+    //        msg->removeControlInfo());
 
     for (int i = 0; i < gateSize("out"); i++) {
         cGate *outputGate = gate("out", i);
         if (!msg->arrivedOn("in", i)) {
             cMessage* dupMsg = msg->dup();
-            Ieee8021QCtrl* dupCtrlInfo = new Ieee8021QCtrl(*ctrlInfo);
-            dupMsg->setControlInfo(dupCtrlInfo);
+            // Ieee8021QCtrl* dupCtrlInfo = new Ieee8021QCtrl(*ctrlInfo);
+            // dupMsg->setControlInfo(dupCtrlInfo);
             send(dupMsg, outputGate);
+            // TODO test if msg duplcation duplicates tags and other packet data
         }
     }
 
     delete msg;
-    delete ctrlInfo;
+    // delete ctrlInfo;
 }
 
 } // namespace nesting
