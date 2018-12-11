@@ -77,6 +77,7 @@ void LengthAwareQueue::enqueue(cPacket* packet) {
         handlePacketEnqueuedEvent(packet);
         delete packet;
     }
+    emit(queueLengthSignal, queue.getLength());
 }
 
 cPacket* LengthAwareQueue::dequeue() {
@@ -86,6 +87,8 @@ cPacket* LengthAwareQueue::dequeue() {
 
     cPacket* packet = static_cast<cPacket*>(queue.pop());
     availableBufferCapacity += packet->getBitLength();
+    
+    emit(queueLengthSignal, queue.getLength());
 
     return packet;
 }
@@ -102,9 +105,8 @@ void LengthAwareQueue::handleRequestPacketEvent(uint64_t maxBits) {
     cPacket* packetToSend = dequeue();
 
     emit(dequeuePkSignal, packetToSend);
-    emit(queueLengthSignal, queue.getLength());
     emit(queueingTimeSignal, simTime() - packetToSend->getArrivalTime());
-
+    
     send(packetToSend, "out");
 }
 
