@@ -18,16 +18,15 @@
 
 #include <omnetpp.h>
 
+#include "inet/common/Simsignals.h"
 #include "inet/applications/ethernet/EtherTrafGen.h"
-#include "../../linklayer/common/VLANTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/Protocol.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
-
-// TODO check if includes can be discarded
+#include "../../linklayer/common/VLANTag_m.h"
 
 using namespace omnetpp;
 using namespace inet;

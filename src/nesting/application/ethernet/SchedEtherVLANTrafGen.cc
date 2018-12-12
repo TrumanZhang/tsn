@@ -42,7 +42,7 @@ void SchedEtherVLANTrafGen::initialize(int stage) {
         //clock module reference from ned parameter
 
         currentSchedule = unique_ptr < HostSchedule
-                < Ieee8021QCtrl_2 >> (new HostSchedule<Ieee8021QCtrl_2>());
+                < Ieee8021QCtrl >> (new HostSchedule<Ieee8021QCtrl>());
         cXMLElement* xml = par("initialSchedule").xmlValue();
         loadScheduleOrDefault(xml);
 
@@ -76,18 +76,17 @@ void SchedEtherVLANTrafGen::sendPacket() {
     const auto& payload = makeShared<ByteCountChunk>(B(len));
     datapacket->insertAtBack(payload);
     datapacket->removeTagIfPresent<PacketProtocolTag>();
-    datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(
-            &Protocol::ieee8022);
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
+            &Protocol::ipv4);
     // TODO check if protocol is correct
     auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
     sapTag->setSsap(ssap);
     sapTag->setDsap(dsap);
-    // TODO check if sapTag is correct
 
     seqNum++;
 
     // get scheduled control data
-    Ieee8021QCtrl_2 header = currentSchedule->getScheduledObject(index);
+    Ieee8021QCtrl header = currentSchedule->getScheduledObject(index);
     // create mac control info
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(header.macTag.getDestAddress());
@@ -156,7 +155,7 @@ int SchedEtherVLANTrafGen::scheduleNextTickEvent() {
 
 void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
     string hostName = this->getModuleByPath(par("hostModule"))->getFullName();
-    HostSchedule<Ieee8021QCtrl_2>* schedule;
+    HostSchedule<Ieee8021QCtrl>* schedule;
     bool realScheduleFound = false;
     //try to extract the part of the schedule belonging to this host
     for (cXMLElement* hostxml : xml->getChildren()) {
@@ -178,7 +177,7 @@ void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
         schedule = HostScheduleBuilder::createHostScheduleFromXML(defaultXml,
                 xml);
     }
-    unique_ptr<HostSchedule<Ieee8021QCtrl_2>> schedulePtr(schedule);
+    unique_ptr<HostSchedule<Ieee8021QCtrl>> schedulePtr(schedule);
 
     nextSchedule.reset();
     nextSchedule = move(schedulePtr);

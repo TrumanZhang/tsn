@@ -44,13 +44,12 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         datapacket->insertAtBack(payload);
         datapacket->removeTagIfPresent<PacketProtocolTag>();
-        datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(
-                &Protocol::ieee8022);
+        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
+                &Protocol::ipv4);
         // TODO check which protocol to insert
         auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
         sapTag->setSsap(ssap);
         sapTag->setDsap(dsap);
-        // TODO check if set sapTag is correct
 
         // create control info for encap modules
         auto macTag = datapacket->addTag<MacAddressReq>();
@@ -80,8 +79,7 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         }
         EV_TRACE << endl;
 
-        // emit(sentPkSignal, packet); no sentPkSignal in EtherTrafGen in Inet 4.0.0
-        // TODO check if this signal is needed
+        emit(packetSentSignal, datapacket);
         packetsSent++;
     }
 }

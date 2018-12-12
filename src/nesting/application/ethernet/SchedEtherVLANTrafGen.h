@@ -1,8 +1,17 @@
-/*
- * SchedVLANEtherTrafGen.h
- *
- *
- */
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+//
 
 #ifndef NESTING_APPLICATION_ETHERNET_SCHEDETHERVLANTRAFGEN_H_
 #define NESTING_APPLICATION_ETHERNET_SCHEDETHERVLANTRAFGEN_H_
@@ -11,8 +20,6 @@
 #include <memory>
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
-#include "../../ieee8021q/clock/IClock.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -23,8 +30,7 @@
 #include <vector>
 #include "../../common/schedule/HostSchedule.h"
 #include "../../common/schedule/HostScheduleBuilder.h"
-
-// TODO check if includes can be discarded
+#include "../../ieee8021q/clock/IClock.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -38,13 +44,13 @@ class SchedEtherVLANTrafGen: public cSimpleModule, public IClockListener {
 private:
 
     /** Current schedule. Is never null. */
-    unique_ptr<HostSchedule<Ieee8021QCtrl_2>> currentSchedule;
+    unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
 
     /**
      * Next schedule to load after the current schedule finishes it's cycle.
      * Can be null.
      */
-    unique_ptr<HostSchedule<Ieee8021QCtrl_2>> nextSchedule;
+    unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
     long int index = 0;
