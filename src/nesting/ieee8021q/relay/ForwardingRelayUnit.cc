@@ -28,7 +28,7 @@ void ForwardingRelayUnit::initialize() {
 
 void ForwardingRelayUnit::handleMessage(cMessage *msg) {
     Packet* packet = check_and_cast<Packet*>(msg);
-    auto macTag = getMacTag(packet);
+    auto macTag = packet->getTag<MacAddressInd>();
 
     // Distinguish between broadcast-, multicast- and unicast-ethernet frames
     if (macTag->getDestAddress().isBroadcast()) {
@@ -60,7 +60,7 @@ void ForwardingRelayUnit::processMulticast(Packet* packet) {
 
 void ForwardingRelayUnit::processUnicast(Packet* packet) {
     // Control info is needed to retrieve destination MAC address
-    auto macTag = getMacTag(packet);
+    auto macTag = packet->getTag<MacAddressInd>();
 
     //Learning MAC port mappings
     fdb->insert(macTag->getSrcAddress(), simTime(),
@@ -82,18 +82,6 @@ void ForwardingRelayUnit::processUnicast(Packet* packet) {
     }
 
     delete packet;
-}
-
-MacAddressTagBase ForwardingRelayUnit::getMacTag(Packet* packet) {
-    auto macTagReq = packet->findTag<MacAddressReq>();
-    auto macTagInd = packet->findTag<MacAddressInd>();
-    // TODO check which of these tags are found
-    if (macTagReq) {
-        return macTagReq;
-    } else if (macTagInd) {
-        return macTagInd;
-    } else
-        return nullptr;
 }
 
 } // namespace nesting

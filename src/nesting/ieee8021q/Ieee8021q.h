@@ -18,8 +18,9 @@
 
 #include <bitset>
 
-#include "inet/linklayer/ethernet/Ethernet.h"
-#include "../linklayer/common/Ieee8021QCtrl_m.h"
+//#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/common/packet/Packet.h"
+#include "../linklayer/common/VLANTag_m.h"
 
 using namespace std;
 using namespace inet;
@@ -69,24 +70,24 @@ public:
      * of the IEEE802.1Q ethernet switch can break the functionality of this
      * method.
      */
-    static uint64_t getFinalEthernet2FrameBitLength(cPacket* packet) {
-        Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
-                packet->getControlInfo());
+    static uint64_t getFinalEthernet2FrameBitLength(Packet* packet) {
 
         // Add payload length
         uint64_t bitLength = packet->getBitLength();
 
         // Add q-tag length
-        if (ctrlInfo->isTagged()) {
+        auto vlanTag = packet->findTag<VLANTagInd>();
+        if (vlanTag) {
             bitLength += kVLANTagBitLength;
         }
 
         // Add MAC header length
-        bitLength += ETHER_MAC_FRAME_BYTES;
+//        bitLength += ETHER_MAC_FRAME_BYTES;
 
         // Add physical header length
-        bitLength += PREAMBLE_BYTES;
-        bitLength += SFD_BYTES;
+//        bitLength += PREAMBLE_BYTES;
+//        bitLength += SFD_BYTES;
+        // TODO check Ethernet.h
 
         return bitLength;
     }

@@ -20,9 +20,10 @@
 
 #include "HostSchedule.h"
 #include "../../ieee8021q/Ieee8021q.h"
-#include "../../linklayer/common/Ieee8021QCtrl_2.h"
+#include "../../linklayer/common/Ieee8021QCtrl.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 using namespace omnetpp;
 
@@ -38,7 +39,7 @@ public:
      *
      * TODO link to XML file specification
      */
-    static HostSchedule<Ieee8021QCtrl_2>* createHostScheduleFromXML(
+    static HostSchedule<Ieee8021QCtrl>* createHostScheduleFromXML(
             cXMLElement *xml, cXMLElement *rootXml);
 };
 

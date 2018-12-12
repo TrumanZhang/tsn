@@ -78,13 +78,12 @@ Packet* EtherTrafGenQueue::generatePacket() {
     const auto& payload = makeShared<ByteCountChunk>(B(len));
     datapacket->insertAtBack(payload);
     datapacket->removeTagIfPresent<PacketProtocolTag>();
-    datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(
-            &Protocol::ieee8022);
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
+            &Protocol::ipv4);
     // TODO check if protocol is correct
     auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
     sapTag->setSsap(ssap);
     sapTag->setDsap(dsap);
-    // TODO check if sapTag is correct
 
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(destMacAddress);
@@ -102,15 +101,16 @@ Packet* EtherTrafGenQueue::generatePacket() {
         ieee8021q->setDe(de);
         ieee8021q->setVID(VID);
     }
-
-    // TODO check if etherType needs to be set
-    // etherctrl->setEtherType(etherType->intValue());
-
     return datapacket;
 }
 
 void EtherTrafGenQueue::requestPacket() {
     Enter_Method("requestPacket(...)");
+
+    if(doNotSendFirstInitPacket) {
+        doNotSendFirstInitPacket = false;
+        return;
+    }
 
     Packet* packet = generatePacket();
 

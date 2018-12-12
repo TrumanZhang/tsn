@@ -20,26 +20,38 @@ namespace nesting {
 
 Define_Module(VLANEncap);
 
-void VLANEncap::initialize() {
-    // Signals
-    encapPkSignal = registerSignal("encapPk");
-    decapPkSignal = registerSignal("decapPk");
+void VLANEncap::initialize(int stage) {
+    if (stage == INITSTAGE_LOCAL) {
+        // Signals
+        encapPkSignal = registerSignal("encapPk");
+        decapPkSignal = registerSignal("decapPk");
 
-    verbose = par("verbose");
-    tagUntaggedFrames = par("tagUntaggedFrames");
-    pvid = par("pvid");
+        verbose = par("verbose");
+        tagUntaggedFrames = par("tagUntaggedFrames");
+        pvid = par("pvid");
 
-    totalFromHigherLayer = 0;
-    WATCH(totalFromHigherLayer);
+        totalFromHigherLayer = 0;
+        WATCH(totalFromHigherLayer);
 
-    totalFromLowerLayer = 0;
-    WATCH(totalFromLowerLayer);
+        totalFromLowerLayer = 0;
+        WATCH(totalFromLowerLayer);
 
-    totalEncap = 0;
-    WATCH(totalEncap);
+        totalEncap = 0;
+        WATCH(totalEncap);
 
-    totalDecap = 0;
-    WATCH(totalDecap);
+        totalDecap = 0;
+        WATCH(totalDecap);
+    } else if (stage == INITSTAGE_LINK_LAYER) {
+        if (par("registerProtocol").boolValue()) {
+            registerService(Protocol::ipv4, gate("upperLayerIn"),
+            nullptr);
+            registerProtocol(Protocol::ipv4, nullptr, gate("upperLayerOut"));
+            registerService(Protocol::ipv4, gate("lowerLayerIn"),
+            nullptr);
+            registerProtocol(Protocol::ipv4, nullptr, gate("lowerLayerOut"));
+            // TODO check if protocol is correct
+        }
+    }
 }
 
 void VLANEncap::handleMessage(cMessage* msg) {
@@ -110,7 +122,6 @@ void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
 
         totalDecap++;
         emit(decapPkSignal, packet);
-        // delete &vlanHeader;
     } else {
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(Ieee8021q::kDefaultPCPValue);

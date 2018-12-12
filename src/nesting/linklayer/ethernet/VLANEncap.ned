@@ -42,16 +42,20 @@ package nesting.linklayer.ethernet;
 //
 // @see ~EtherEncap, ~Ieee802Ctrl, ~Ieee8021QCtrl, ~Ethernet1QTag
 //
-simple VLANEncap {
+import inet.linklayer.ethernet.IEtherEncap;
+
+simple VLANEncap like IEtherEncap
+{
     parameters:
         @display("i=block/square");
         @class(VLANEncap);
         bool tagUntaggedFrames = default(false);	// If true, the encap process will add a VLAN Tag to untagged frames. This alters the frame size.
         int pvid = default(1);						// Default port-VID inserted in control info of (vlan-)untagged frames. 
+        bool registerProtocol = default(false);
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
-        @statistic[encapPk](title="packets encapsulated";source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[decapPk](title="packets decapsulated";source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         bool verbose = default(false);
     gates:
         input upperLayerIn @labels(Ieee8021QCtrl/down);

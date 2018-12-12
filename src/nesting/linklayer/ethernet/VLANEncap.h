@@ -22,6 +22,7 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "../common/VLANTag_m.h"
 #include "../../ieee8021q/Ieee8021q.h"
 
@@ -77,13 +78,17 @@ protected:
     long totalDecap;
 protected:
     /** @see cSimpleModule::initialize() */
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
 
     /** @see cSimpleModule::handleMessage(cMessage*) */
     virtual void handleMessage(cMessage *msg) override;
 
     /** @see cSimpleModule::refreshDisplay() */
     virtual void refreshDisplay() const override;
+
+    virtual int numInitStages() const override {
+        return INITSTAGE_LINK_LAYER + 1;
+    }
 public:
     virtual ~VLANEncap() {
     }

@@ -22,7 +22,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
 #include "FilteringDatabase.h"
 
 using namespace omnetpp;
@@ -45,8 +44,6 @@ protected:
     virtual void processBroadcast(Packet* packet);
     virtual void processMulticast(Packet* packet);
     virtual void processUnicast(Packet* packet);
-    virtual cPacket* duplicatePacketWithCtrlInfo(cPacket* packet);
-    MacAddressTagBase getMacTag(Packet* packet);
 
 public:
     //TODO: Fix filtering database aging parameter!

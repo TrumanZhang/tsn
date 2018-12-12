@@ -17,10 +17,10 @@
 
 namespace nesting {
 
-HostSchedule<Ieee8021QCtrl_2>* HostScheduleBuilder::createHostScheduleFromXML(
+HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         cXMLElement *xml, cXMLElement *rootXml) {
-    HostSchedule<Ieee8021QCtrl_2>* schedule =
-            new HostSchedule<Ieee8021QCtrl_2>();
+    HostSchedule<Ieee8021QCtrl>* schedule =
+            new HostSchedule<Ieee8021QCtrl>();
 
     //extract cycle from second xml argument (xml root)
     int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
@@ -39,9 +39,9 @@ HostSchedule<Ieee8021QCtrl_2>* HostScheduleBuilder::createHostScheduleFromXML(
         unsigned int size = atoi(sizeCString);
 
         // Get Ieee8021QCtrl
-        Ieee8021QCtrl_2 header;
+        Ieee8021QCtrl header;
         header.q1Tag = VLANTagReq();
-        header.macTag = MacAddressReq();
+        header.macTag = inet::MacAddressReq();
         const char* queueCString =
                 entry->getFirstChildWithTag("queue")->getNodeValue();
         header.q1Tag.setPcp(atoi(queueCString));

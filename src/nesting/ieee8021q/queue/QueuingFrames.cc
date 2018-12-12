@@ -38,10 +38,25 @@ void QueuingFrames::initialize() {
 void QueuingFrames::handleMessage(cMessage *msg) {
     Packet *packet = check_and_cast<Packet *>(msg);
 
-    // TODO check if correct tag is found
-    auto vlanTag = packet->getTag<VLANTagBase>();
+    // switch ingoing VLAN Tag to outgoing Tag
+    auto vlanTagIn = packet->removeTag<VLANTagInd>();
+    int pcpValue = vlanTagIn->getPcp();
+    auto vlanTagOut = packet->addTag<VLANTagReq>();
+    vlanTagOut->setPcp(pcpValue);
+    vlanTagOut->setDe(vlanTagIn->getDe());
+    vlanTagOut->setVID(vlanTagIn->getVID());
 
-    int pcpValue = vlanTag->getPcp();
+    // switch ingoing MAC Tag to outgoing MAC Tag
+    auto macTagIn = packet->removeTag<MacAddressInd>();
+    auto macTagOut = packet->addTag<MacAddressReq>();
+    macTagOut->setDestAddress(macTagIn->getDestAddress());
+    macTagOut->setSrcAddress(macTagIn->getSrcAddress());
+
+    delete macTagIn;
+    delete vlanTagIn;
+
+    // remove encapsulation
+    packet->trim();
 
     // Check whether the PCP value is correct.
     if (pcpValue > Ieee8021q::kNumberOfPCPValues) {

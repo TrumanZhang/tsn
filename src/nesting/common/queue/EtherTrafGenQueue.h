@@ -30,8 +30,6 @@
 #include "inet/common/packet/Packet.h"
 #include "../../linklayer/common/VLANTag_m.h"
 
-// TODO check if includes can be discarded
-
 using namespace omnetpp;
 using namespace inet;
 using namespace std;
@@ -43,6 +41,9 @@ class EtherTrafGenQueue: public cSimpleModule, public IPassiveQueue {
 protected:
     /** Sequence number for generated packets. */
     long seqNum;
+
+    /** EtherMacBase requests a packet twice during init, tmp fix so that this module only delivers one packet */
+    bool doNotSendFirstInitPacket = true;
 
     /** Destination MAC address of generated packets. */
     MacAddress destMacAddress;

@@ -21,7 +21,6 @@
 #include <unordered_map>
 
 #include "inet/linklayer/common/MacAddress.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
 #include "../clock/IClockListener.h"
 
 using namespace omnetpp;
