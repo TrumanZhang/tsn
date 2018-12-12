@@ -103,7 +103,6 @@ simtime_t CreditBasedShaper::idleTimeToZeroCredit() {
 simtime_t CreditBasedShaper::transmissionTime(Packet* packet) {
     simtime_t transmissionTime = timeForCredits(getPortTransmitRate(),
             Ieee8021q::getFinalEthernet2FrameBitLength(packet));
-    // TODO verify if getFinalEthernet2FrameBitLength calculates correctly (compare with final packet size in simulation)
     return transmissionTime;
 }
 
