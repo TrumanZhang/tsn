@@ -18,67 +18,56 @@ package nesting.node.ethernet;
 import inet.common.queue.Delayer;
 import inet.networklayer.common.InterfaceTable;
 import nesting.ieee8021q.clock.IClock;
-import nesting.ieee8021q.queue.Queuing;
-import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.FilteringDatabase;
+import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.RelayUnit;
-import nesting.linklayer.LowerLayer;
+import nesting.linklayer.VLANEthernetInterfaceSwitch;
 
 
-//
-// This module implements an ethernet switch conform to the Ieee802.1Qbv, 
-// Ieee802.1Qbu and Ieee802.1Qav standard.
-//
-// @see ~Queuing, ~LowerLayer, ~RelayUnit, ~FrameAssembler, ~Delayer, ~IClock
-// @see ~FilteringDatabase, ~ScheduleSwap
-//
 module EthernetSwitch
 {
     parameters:
         @networkNode();
-        @display("i=device/switch;bgb=,521");
+        @display("i=device/switch;bgb=308,466");
         **.interfaceTableModule = default("");
     gates:
         inout ethg[];
     submodules:
-        queuing[sizeof(ethg)]: Queuing {
-            @display("p=195,370,r,200");
-            tsAlgorithms[*].macModule = "^.^.lowerLayer[" + string(index) + "].mac";
-            gateController.macModule = "^.^.lowerLayer[" + string(index) + "].mac";
-        }
-        lowerLayer[sizeof(ethg)]: LowerLayer {
-            mac.queueModule = "^.^.queuing[" + string(index) + "].transmissionSelection";
+        eth[sizeof(ethg)]: VLANEthernetInterfaceSwitch {
+            //            mac.queueModule = "^.^.queuing[" + string(index) + "].transmissionSelection";
+            mac.queueModule = "^.^.eth[" + string(index) + "].queue.transmissionSelection";
             mac.mtu = 1500B;
-            @display("p=140,440,r,200");
+            queue.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
+            queue.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
+            @display("p=132,391");
         }
         relayUnit: <default("ForwardingRelayUnit")> like RelayUnit {
             numberOfPorts = sizeof(ethg);
-            @display("p=473,165");
+            @display("p=219,189");
         }
         processingDelay[sizeof(ethg)]: Delayer {
-            @display("p=85,350,r,200;i=block/delay");
+            @display("p=132,268,r,200;i=block/delay");
             delay = default(4us);
         }
         clock: <default("IdealClock")> like IClock {
-            @display("p=273,65;is=s");
+            @display("p=182,31;is=s");
         }
         filteringDatabase: FilteringDatabase {
-            @display("p=73,165;is=s");
+            @display("p=60,105;is=s");
         }
         scheduleSwap: ScheduleSwap {
-            @display("p=273,165;i=block/switch;is=s");
+            @display("p=182,105;i=block/switch;is=s");
         }
         interfaceTable: InterfaceTable {
-            @display("p=73,65;is=s");
+            @display("p=60,31;is=s");
         }
 
     connections:
         for i=0..sizeof(ethg)-1 {
-            lowerLayer[i].phys <--> ethg[i];
-            lowerLayer[i].upperLayerOut --> processingDelay[i].in;
+            eth[i].phys <--> ethg[i];
+            eth[i].upperLayerOut --> processingDelay[i].in;
             processingDelay[i].out --> relayUnit.in[i];
-            relayUnit.out[i] --> queuing[i].in;
-            queuing[i].eOut --> lowerLayer[i].upperLayerEIn;
-            queuing[i].pOut --> lowerLayer[i].upperLayerPIn;
+            relayUnit.out[i] --> eth[i].upperLayerIn;
         }
 }
+

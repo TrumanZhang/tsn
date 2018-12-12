@@ -34,7 +34,7 @@ module VLANHost extends VLANHostBase
         @networkNode();
     submodules:
         app: EtherVLANTaggedTrafGen {
-            @display("p=171,415");
+            @display("p=142,70");
         }
     connections:
         app.out --> vlanEncap.upperLayerIn;

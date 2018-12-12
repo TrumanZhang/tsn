@@ -13,20 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet.host;
+package nesting.node.ethernet;
 
-import nesting.linklayer.ethernet.VLANEncap;
+import inet.common.queue.Sink;
 
-//
-// Base module to implement VLAN capable hosts.
-//
-module VLANHostBase extends EtherHostBase
+simple SinkInOut extends Sink
 {
-    submodules:
-        vlanEncap: VLANEncap {
-            @display("p=142,171");
-        }
-    connections:
-        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
-        eth.upperLayerIn <-- vlanEncap.lowerLayerOut;
+    gates:
+        output out[];
 }

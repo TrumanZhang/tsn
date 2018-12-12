@@ -18,10 +18,14 @@ package nesting.node.ethernet.host;
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 
+
+import inet.linklayer.contract.IEthernetInterface;
+
 //
 // Base module for the further implementation of ethernet capable hosts.
 //
-module EtherHostBase {
+module EtherHostBase
+{
     parameters:
         *.interfaceTableModule = default("");
         @networkNode();
@@ -30,14 +34,10 @@ module EtherHostBase {
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        etherEncap: <default("EtherEncap")> like IEtherEncap {
-            @display("p=171,147");
-        }
-        mac: EtherMacFullDuplex {
-            @display("p=171,58");
+        eth: <default("VLANEthernetInterfaceHost")> like IEthernetInterface {
+            parameters:
+                @display("p=142,283,row,150;q=txQueue");
         }
     connections:
-        mac.phys <--> ethg;
-        mac.upperLayerOut --> etherEncap.lowerLayerIn;
-        mac.upperLayerIn <-- etherEncap.lowerLayerOut;
+        eth.phys <--> ethg;
 }

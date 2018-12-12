@@ -49,22 +49,18 @@ module VLANEtherHost
             parameters:
                 @display("p=330,215;is=s");
         }
-        //etherEncap: <default("EtherEncap")> like IEtherEncap {
-        //    @display("p=138,246");
-        //}
+
         vlanEncap: VLANEncap {
             @display("p=138,149");
         }
-        //mac: EtherMacFullDuplex {
-        //    @display("p=138,342;q=txQueue");
-        //}
+
         clock: <default("IdealClock")> like IClock {
             @display("p=330,69");
         }
         scheduleSwap: ScheduleSwap {
             usedInHost = true;
 
-            @display("p=330,149;b=40,40");
+            @display("p=330,149;b=29,25");
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
@@ -76,12 +72,6 @@ module VLANEtherHost
 
         vlanEncap.lowerLayerOut --> eth.upperLayerIn;
         eth.upperLayerOut --> vlanEncap.lowerLayerIn;
-
-        // etherEncap.lowerLayerOut --> mac.upperLayerIn;
-        // mac.upperLayerOut --> etherEncap.lowerLayerIn;
-
-        //etherEncap.lowerLayerOut --> eth.upperLayerIn;
-        //eth.upperLayerOut --> etherEncap.lowerLayerIn;
 
         eth.phys <--> ethg;
 }

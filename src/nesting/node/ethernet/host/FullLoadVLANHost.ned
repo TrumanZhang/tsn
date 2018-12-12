@@ -27,13 +27,13 @@ module FullLoadVLANHost extends VLANHostBase
     parameters:
         @display("bgb=363,398");
         @networkNode();
-        mac.queueModule = "^.trafGenQueue";
+        eth.mac.queueModule = "^.^.trafGenQueue";
     submodules:
         trafGenQueue: EtherTrafGenQueue {
-            @display("p=252,324");
+            @display("p=192,69");
         }
         sink: Sink {
-            @display("p=100,324");
+            @display("p=84,69");
         }
     connections:
         trafGenQueue.out --> vlanEncap.upperLayerIn;
