@@ -19,6 +19,8 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "../../ieee8021q/queue/TransmissionSelection.h"
 #include "../../ieee8021q/Ieee8021q.h"
 
@@ -55,7 +57,7 @@ private:
     simtime_t preemptableTransmissionStart;
     unsigned int preemptedBytesReceived;
     unsigned int preemptedBytesSent;
-    Packet* receivedPreemptedFrame = nullptr;
+    EthernetSignal* receivedPreemptedFrame = nullptr;
 
     virtual int calculatePreemptedPayloadBytesSent(simtime_t timeToCheck);
     virtual bool isPreemptionNowPossible();
@@ -79,7 +81,7 @@ protected:
     virtual void handleEndIFGPeriod() override;
     virtual void getNextFrameFromQueue() override;
     virtual bool checkForAndRequestExpressFrame();
-    // virtual void processFrameFromUpperLayer(Packet *frame) override;
+    virtual void handleUpperPacket(Packet *frame) override;
     virtual void startFrameTransmission() override;
     virtual void refreshDisplay() const override;
 public:
