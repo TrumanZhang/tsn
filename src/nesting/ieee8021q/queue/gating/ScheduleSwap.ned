@@ -28,7 +28,7 @@ simple ScheduleSwap
         string clockModule = default("^.clock"); // Path to the ~IClock module
         string switchModule = default("^"); // Path to the ~EthernetSwitch module
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
-        string gateControllerModules = default("^.queuing[%d].gateController"); // Wildcard path that is used to determine the paths to ~GateController modules
+        string gateControllerModules = default("^.eth[%d].queuing.gateController"); // Wildcard path that is used to determine the paths to ~GateController modules
         string tsnGenModule = default("^.tsn_app"); // Path to the ~SchedEtherVLANTrafGen module that generates TSN traffic
         xml schedule = default(xml("<schedules></schedules>")); // Internal micro schedule that manages the micro schedules
         bool usedInHost = default(false);
