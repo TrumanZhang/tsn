@@ -36,7 +36,7 @@ simple TransmissionGate
         string gateControllerModule; // Path to the gate controller module
         string transmissionSelectionModule; // Path to the transmission selection module
         string transmissionSelectionAlgorithmModule; // Path to the transmission selection algorithm module
-        string clockModule = default("^.^.clock");
+        string clockModule = default("^.^.^.clock");
         bool lengthAwareSchedulingEnabled = default(true);
         bool verbose = default(false);
     gates:

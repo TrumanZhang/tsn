@@ -121,7 +121,7 @@ uint64_t TransmissionGate::maxTransferableBits() {
 
         return maxbit;
     }
-    return Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+    return kEthernet2MaximumTransmissionUnitBitLength.get();
 }
 
 bool TransmissionGate::isGateOpen() {
