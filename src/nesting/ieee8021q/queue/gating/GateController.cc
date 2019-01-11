@@ -192,7 +192,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
             % currentSchedule->size();
 
     GateBitvector bitvector = currentSchedule->getScheduledObject(currentIndex);
-    while (bits < Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength) {
+    while (bits < kEthernet2MaximumTransmissionUnitBitLength.get()) {
         //if the bitvector is now closed, return all bit summed up until now
         if (!bitvector.test(gateIndex)) {
             return static_cast<int>(bits);
@@ -239,7 +239,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
         }
     }
     //otherwise, return the full MTU bits
-    return Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+    return kEthernet2MaximumTransmissionUnitBitLength.get();
 
 }
 

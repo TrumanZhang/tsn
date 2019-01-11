@@ -23,7 +23,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
-#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
 #include "../TransmissionSelection.h"
 #include "../../clock/IClock.h"
@@ -33,7 +32,7 @@
 #include "TransmissionGate.h"
 #include "../../../common/schedule/ScheduleBuilder.h"
 #include "../../../linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
-using namespace inet;
+
 using namespace omnetpp;
 using namespace std;
 

@@ -28,7 +28,7 @@ void QueuingFrames::initialize() {
     //Precondition: numberOfQueues must have a valid number, i.e <= number of
     // all possible pcp values.
 
-    if (numberOfQueues > Ieee8021q::kNumberOfPCPValues || numberOfQueues < 1) {
+    if (numberOfQueues > kNumberOfPCPValues || numberOfQueues < 1) {
         throw new cRuntimeError(
                 "Invalid assignment of numberOfQueues. Number of queues should not "
                         "be bigger than the number of all possible pcp values!");
@@ -36,7 +36,7 @@ void QueuingFrames::initialize() {
 }
 
 void QueuingFrames::handleMessage(cMessage *msg) {
-    Packet *packet = check_and_cast<Packet *>(msg);
+    inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
 
     // switch ingoing VLAN Tag to outgoing Tag
     auto vlanTagIn = packet->removeTag<VLANTagInd>();
@@ -47,8 +47,8 @@ void QueuingFrames::handleMessage(cMessage *msg) {
     vlanTagOut->setVID(vlanTagIn->getVID());
 
     // switch ingoing MAC Tag to outgoing MAC Tag
-    auto macTagIn = packet->removeTag<MacAddressInd>();
-    auto macTagOut = packet->addTag<MacAddressReq>();
+    auto macTagIn = packet->removeTag<inet::MacAddressInd>();
+    auto macTagOut = packet->addTag<inet::MacAddressReq>();
     macTagOut->setDestAddress(macTagIn->getDestAddress());
     macTagOut->setSrcAddress(macTagIn->getSrcAddress());
 
@@ -59,7 +59,7 @@ void QueuingFrames::handleMessage(cMessage *msg) {
     packet->trim();
 
     // Check whether the PCP value is correct.
-    if (pcpValue > Ieee8021q::kNumberOfPCPValues) {
+    if (pcpValue > kNumberOfPCPValues) {
         throw new cRuntimeError(
                 "Invalid assignment of PCP value. The value of PCP should not be "
                         "bigger than the number of supported queues.");

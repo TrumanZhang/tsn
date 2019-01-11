@@ -24,12 +24,13 @@ package nesting.ieee8021q.queue.gating;
 //
 // @see ~Clock, ~TransmissionGate
 //
-simple GateController {
+simple GateController
+{
     parameters:
         @display("i=block/table");
         @class(GateController);
-        string clockModule = default("^.^.clock");
-        string switchModule = default("^.^");
+        string clockModule = default("^.^.^.clock");
+        string switchModule = default("^.^.^");
         string queuingModule = default("^");
         string macModule;
         string transmissionGateVectorModule = default("^.tGates[0]");

@@ -47,7 +47,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
     const char* lengthCString =
             xml->getFirstChildWithTag("cycle")->getNodeValue();
     unsigned int length = atoi(lengthCString);
-    string gateString(Ieee8021q::kMaxSupportedQueues, '1');
+    string gateString(kMaxSupportedQueues, '1');
     GateBitvector bitvector = GateBitvector(gateString);
     schedule->addEntry(length, bitvector);
     return schedule;
