@@ -25,7 +25,6 @@
 #include "../../Ieee8021q.h"
 
 using namespace omnetpp;
-using namespace inet;
 
 namespace nesting {
 

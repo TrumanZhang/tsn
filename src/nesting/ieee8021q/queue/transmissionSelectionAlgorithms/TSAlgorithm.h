@@ -18,8 +18,8 @@
 
 #include "omnetpp.h"
 
+#include "../../../linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
 #include "../gating/TransmissionGate.h"
 #include "../framePreemption/LengthAwareQueue.h"
@@ -32,6 +32,7 @@ namespace nesting {
 
 class TransmissionGate;
 class LengthAwareQueue;
+class EtherMACFullDuplexPreemptable;
 
 /**
  * See the NED file for a detailed description.
@@ -41,7 +42,7 @@ protected:
     /**
      * Reference to the Mac module.
      */
-    EtherMacBase* mac;
+    EtherMACFullDuplexPreemptable* mac;
 
     /**
      * Reference to the length-aware input queue module.

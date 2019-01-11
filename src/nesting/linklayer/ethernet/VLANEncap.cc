@@ -21,7 +21,7 @@ namespace nesting {
 Define_Module(VLANEncap);
 
 void VLANEncap::initialize(int stage) {
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == inet::INITSTAGE_LOCAL) {
         // Signals
         encapPkSignal = registerSignal("encapPk");
         decapPkSignal = registerSignal("decapPk");
@@ -41,21 +41,23 @@ void VLANEncap::initialize(int stage) {
 
         totalDecap = 0;
         WATCH(totalDecap);
-    } else if (stage == INITSTAGE_LINK_LAYER) {
+    } else if (stage == inet::INITSTAGE_LINK_LAYER) {
         if (par("registerProtocol").boolValue()) {
-            registerService(Protocol::ipv4, gate("upperLayerIn"),
+            registerService(inet::Protocol::ipv4, gate("upperLayerIn"),
             nullptr);
-            registerProtocol(Protocol::ipv4, nullptr, gate("upperLayerOut"));
-            registerService(Protocol::ipv4, gate("lowerLayerIn"),
+            registerProtocol(inet::Protocol::ipv4, nullptr,
+                    gate("upperLayerOut"));
+            registerService(inet::Protocol::ipv4, gate("lowerLayerIn"),
             nullptr);
-            registerProtocol(Protocol::ipv4, nullptr, gate("lowerLayerOut"));
+            registerProtocol(inet::Protocol::ipv4, nullptr,
+                    gate("lowerLayerOut"));
             // TODO check if protocol is correct
         }
     }
 }
 
 void VLANEncap::handleMessage(cMessage* msg) {
-    Packet* packet = check_and_cast<Packet*>(msg);
+    inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
 
     if (packet->arrivedOn("lowerLayerIn")) {
         processPacketFromLowerLevel(packet);
@@ -64,7 +66,7 @@ void VLANEncap::handleMessage(cMessage* msg) {
     }
 }
 
-void VLANEncap::processPacketFromHigherLevel(Packet *packet) {
+void VLANEncap::processPacketFromHigherLevel(inet::Packet *packet) {
     EV_INFO << getFullPath() << ": Received " << packet << " from upper layer."
                    << endl;
 
@@ -73,7 +75,7 @@ void VLANEncap::processPacketFromHigherLevel(Packet *packet) {
     // Encapsulate VLAN Header
     if (packet->findTag<VLANTagReq>()) {
         auto vlanTag = packet->getTag<VLANTagReq>();
-        const auto& vlanHeader = makeShared<Ieee802_1QHeader>();
+        const auto& vlanHeader = inet::makeShared<inet::Ieee802_1QHeader>();
         vlanHeader->setPcp(vlanTag->getPcp());
         vlanHeader->setDe(vlanTag->getDe());
         vlanHeader->setVID(vlanTag->getVID());
@@ -88,13 +90,13 @@ void VLANEncap::processPacketFromHigherLevel(Packet *packet) {
 
     EV_TRACE << getFullPath() << ": Packet-length is "
                     << packet->getByteLength() << " and Destination is "
-                    << packet->getTag<MacAddressReq>()->getDestAddress()
+                    << packet->getTag<inet::MacAddressReq>()->getDestAddress()
                     << " before sending packet to lower layer" << endl;
 
     send(packet, "lowerLayerOut");
 }
 
-void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
+void VLANEncap::processPacketFromLowerLevel(inet::Packet *packet) {
     EV_INFO << getFullPath() << ": Received " << packet << " from lower layer."
                    << endl;
 
@@ -104,15 +106,15 @@ void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
     // values into the control information
     EV_TRACE << getFullPath() << ": Packet-length is "
                     << packet->getByteLength() << ", destination is "
-                    << packet->getTag<MacAddressInd>()->getDestAddress();
-    if (packet->hasAtFront<Ieee802_1QHeader>()) {
-        auto vlanHeader = packet->popAtFront<Ieee802_1QHeader>();
+                    << packet->getTag<inet::MacAddressInd>()->getDestAddress();
+    if (packet->hasAtFront<inet::Ieee802_1QHeader>()) {
+        auto vlanHeader = packet->popAtFront<inet::Ieee802_1QHeader>();
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(vlanHeader->getPcp());
         vlanTag->setDe(vlanHeader->getDe());
         EV_TRACE << ", PCP Value is " << vlanTag->getPcp();
         short vid = vlanHeader->getVID();
-        if (vid < Ieee8021q::kMinValidVID || vid > Ieee8021q::kMaxValidVID) {
+        if (vid < kMinValidVID || vid > kMaxValidVID) {
             vid = pvid;
         }
         vlanTag->setVID(vid);
@@ -124,8 +126,8 @@ void VLANEncap::processPacketFromLowerLevel(Packet *packet) {
         emit(decapPkSignal, packet);
     } else {
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
-        vlanTag->setPcp(Ieee8021q::kDefaultPCPValue);
-        vlanTag->setDe(Ieee8021q::kDefaultDEIValue);
+        vlanTag->setPcp(kDefaultPCPValue);
+        vlanTag->setDe(kDefaultDEIValue);
         vlanTag->setVID(pvid);
     }
 

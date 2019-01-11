@@ -35,10 +35,10 @@ module EthernetSwitch
     submodules:
         eth[sizeof(ethg)]: VLANEthernetInterfaceSwitch {
             //            mac.queueModule = "^.^.queuing[" + string(index) + "].transmissionSelection";
-            mac.queueModule = "^.^.eth[" + string(index) + "].queue.transmissionSelection";
+            mac.queueModule = "^.^.eth[" + string(index) + "].queuing.transmissionSelection";
             mac.mtu = 1500B;
-            queue.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
-            queue.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
+            queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
+            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
             @display("p=132,391");
         }
         relayUnit: <default("ForwardingRelayUnit")> like RelayUnit {

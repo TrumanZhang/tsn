@@ -27,7 +27,6 @@
 #include "../../ieee8021q/Ieee8021q.h"
 
 using namespace omnetpp;
-using namespace inet;
 
 namespace nesting {
 
@@ -50,14 +49,14 @@ private:
      * when the packet is of type Ether1QTag (is a VLAN Tag)
      * @param packet The packet that was received from lower level.
      */
-    virtual void processPacketFromLowerLevel(Packet *packet);
+    virtual void processPacketFromLowerLevel(inet::Packet *packet);
 
     /**
      * Processes packets from higher level and possibly performs
      * encapsulation when the control information says so.
      * @param packet The packet received from  higher level.
      */
-    virtual void processPacketFromHigherLevel(Packet *packet);
+    virtual void processPacketFromHigherLevel(inet::Packet *packet);
 protected:
     /** Signal for encapsulation events. */
     simsignal_t encapPkSignal;
@@ -87,7 +86,7 @@ protected:
     virtual void refreshDisplay() const override;
 
     virtual int numInitStages() const override {
-        return INITSTAGE_LINK_LAYER + 1;
+        return inet::INITSTAGE_LINK_LAYER + 1;
     }
 public:
     virtual ~VLANEncap() {

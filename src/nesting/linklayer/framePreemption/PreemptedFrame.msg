@@ -20,11 +20,10 @@
 //
 
 cplusplus {{
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include <omnetpp.h>
 #include <memory>
-typedef inet::Packet* cFramePointer;
+typedef inet::EthernetSignal* cFramePointer;
 }}
 
 class noncobject cFramePointer;

@@ -20,12 +20,10 @@ package nesting.linklayer;
 import nesting.ieee8021q.queue.Queuing;
 import nesting.linklayer.ethernet.VLANEncap;
 import nesting.linklayer.framePreemption.FrameForward;
-import nesting.node.ethernet.SinkInOut;
 import nesting.linklayer.framePreemption.EtherMACFullDuplexPreemptable;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.IEtherEncap;
-//import inet.common.queue.Sink;
 
 
 module VLANEthernetInterfaceSwitch like IEthernetInterface
@@ -43,50 +41,44 @@ module VLANEthernetInterfaceSwitch like IEthernetInterface
         inout phys @labels(EtherFrame);
     submodules:
         mac: EtherMACFullDuplexPreemptable {
-            @display("p=90,390");
+            @display("p=140,511");
         }
-        queue: Queuing {
+        queuing: Queuing {
             parameters:
                 @display("p=202,61;q=l2queue");
         }
         vlanEncapE: VLANEncap {
-            @display("p=90,221");
+            @display("p=90,199");
         }
         etherEncapE: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=90,301");
+                @display("p=90,333");
         }
         vlanEncapP: VLANEncap {
-            @display("p=202,221");
+            @display("p=202,199");
         }
         etherEncapP: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=202,301");
+                @display("p=202,333");
         }
         frameForward: FrameForward {
             @display("p=90,61");
         }
-        sink: SinkInOut {
-            @display("p=202,390");
-        }
     connections:
-        upperLayerIn --> queue.in;
+        upperLayerIn --> queuing.in;
         frameForward.upperLayerOut --> upperLayerOut;
 
         vlanEncapE.upperLayerOut --> frameForward.lowerLayerInE;
         vlanEncapP.upperLayerOut --> frameForward.lowerLayerInP;
 
-        queue.eOut --> vlanEncapE.upperLayerIn;
-        queue.pOut --> vlanEncapP.upperLayerIn;
+        queuing.eOut --> vlanEncapE.upperLayerIn;
+        queuing.pOut --> vlanEncapP.upperLayerIn;
 
         etherEncapE.lowerLayerOut --> mac.upperLayerIn;
         mac.upperLayerOut --> etherEncapE.lowerLayerIn;
 
-        etherEncapP.lowerLayerOut --> sink.in++;
-        sink.out++ --> etherEncapP.lowerLayerIn;
-
-        sink.out++ --> mac.upperLayerPreemptableIn;
-        mac.upperLayerPreemptableOut --> sink.in++;
+        etherEncapP.lowerLayerOut --> mac.upperLayerPreemptableIn;
+        mac.upperLayerPreemptableOut --> etherEncapP.lowerLayerIn;
 
         vlanEncapE.lowerLayerOut --> etherEncapE.upperLayerIn;
         etherEncapE.upperLayerOut --> vlanEncapE.lowerLayerIn;

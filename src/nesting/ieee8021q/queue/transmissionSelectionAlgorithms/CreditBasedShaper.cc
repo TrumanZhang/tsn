@@ -74,7 +74,7 @@ double CreditBasedShaper::getSendSlope() {
 }
 
 double CreditBasedShaper::getPortTransmitRate() {
-    return mac->getTxRate();
+    return mac->getTxRate(); // TODO remove dependency
 }
 
 double CreditBasedShaper::creditsForTime(double creditPerSecond,
@@ -156,7 +156,7 @@ bool CreditBasedShaper::isCreditPositive() {
 }
 
 bool CreditBasedShaper::isPacketReadyForTransmission() {
-    uint64_t mtuSize = Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+    uint64_t mtuSize = kEthernet2MaximumTransmissionUnitBitLength.get();
     return !queue->isEmpty(mtuSize);
 }
 

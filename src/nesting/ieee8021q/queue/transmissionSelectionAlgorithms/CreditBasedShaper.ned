@@ -26,11 +26,12 @@ package nesting.ieee8021q.queue.transmissionSelectionAlgorithms;
 //
 // @see ~LengthAwareQueue, ~TransmissionGate, ~EtherMACFullDuplex, ~TSAlgorithm
 //
-simple CreditBasedShaper like TSAlgorithm {
+simple CreditBasedShaper like TSAlgorithm
+{
     parameters:
         @display("i=block/server");
         @class(CreditBasedShaper);
-        string macModule; // Path to the ~EtherMACFullDuplex module
+        string macModule; // Path to the fp module
         string gateModule; // Path to the transmission gate module
         string queueModule; // Path to the length-aware-queue module
         double idleSlopeFactor; // A number in the range (0,1). This value is multiplied to the port transmit rate.
