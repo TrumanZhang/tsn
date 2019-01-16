@@ -693,7 +693,13 @@ bool EtherMACFullDuplexPreemptable::isOnHold() {
 }
 
 void EtherMACFullDuplexPreemptable::refreshDisplay() const {
-
+    // icon colouring
+    const char *colour;
+    if (transmitState == TRANSMITTING_STATE) {
+        colour = "yellow";
+    }else{
+        colour = "";
+    }
     char buf[200];
     const char* currentPreemptableFrameName =
             (nullptr == currentPreemptableFrame) ?
@@ -708,7 +714,7 @@ void EtherMACFullDuplexPreemptable::refreshDisplay() const {
             transmittingPreemptableFrame ? "true" : "false",
             currentPreemptableFrameName, currentExpressFrameName);
     getDisplayString().setTagArg("t", 0, buf);
-
+    getDisplayString().setTagArg("i", 1, colour);
 }
 
 bool EtherMACFullDuplexPreemptable::isFramePreemptionEnabled() {
