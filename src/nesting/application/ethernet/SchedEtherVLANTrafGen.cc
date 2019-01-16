@@ -41,7 +41,7 @@ void SchedEtherVLANTrafGen::initialize(int stage) {
     } else if (stage == INITSTAGE_LINK_LAYER) {
         //clock module reference from ned parameter
 
-        currentSchedule = unique_ptr < HostSchedule
+        currentSchedule = std::unique_ptr < HostSchedule
                 < Ieee8021QCtrl >> (new HostSchedule<Ieee8021QCtrl>());
         cXMLElement* xml = par("initialSchedule").xmlValue();
         loadScheduleOrDefault(xml);
@@ -154,7 +154,7 @@ int SchedEtherVLANTrafGen::scheduleNextTickEvent() {
 }
 
 void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
-    string hostName = this->getModuleByPath(par("hostModule"))->getFullName();
+    std::string hostName = this->getModuleByPath(par("hostModule"))->getFullName();
     HostSchedule<Ieee8021QCtrl>* schedule;
     bool realScheduleFound = false;
     //try to extract the part of the schedule belonging to this host
@@ -177,7 +177,7 @@ void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
         schedule = HostScheduleBuilder::createHostScheduleFromXML(defaultXml,
                 xml);
     }
-    unique_ptr<HostSchedule<Ieee8021QCtrl>> schedulePtr(schedule);
+    std::unique_ptr<HostSchedule<Ieee8021QCtrl>> schedulePtr(schedule);
 
     nextSchedule.reset();
     nextSchedule = move(schedulePtr);

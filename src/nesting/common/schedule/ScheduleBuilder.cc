@@ -21,7 +21,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         cXMLElement *xml) {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 
-    vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
     for (cXMLElement* entry : entries) {
         // Get length
         const char* lengthCString =
@@ -31,7 +31,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         // Get bitvector
         const char* bitvectorCString =
                 entry->getFirstChildWithTag("bitvector")->getNodeValue();
-        string originalVector = string(bitvectorCString);
+        std::string originalVector = std::string(bitvectorCString);
         reverse(originalVector.begin(), originalVector.end());
         GateBitvector bitvector = GateBitvector(originalVector);
 
@@ -47,7 +47,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
     const char* lengthCString =
             xml->getFirstChildWithTag("cycle")->getNodeValue();
     unsigned int length = atoi(lengthCString);
-    string gateString(kMaxSupportedQueues, '1');
+    std::string gateString(kMaxSupportedQueues, '1');
     GateBitvector bitvector = GateBitvector(gateString);
     schedule->addEntry(length, bitvector);
     return schedule;

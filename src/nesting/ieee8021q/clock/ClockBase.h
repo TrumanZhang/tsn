@@ -25,7 +25,6 @@
 #include "IClock.h"
 
 using namespace omnetpp;
-using namespace std;
 
 namespace nesting {
 
@@ -71,7 +70,7 @@ public:
         cMessage *tickMessage;
 
         /** Listeners that have subscribed themselves for the tick event. */
-        list<IClockListener*> listeners;
+        std::list<IClockListener*> listeners;
     };
 protected:
     /** Global time-stamp when the last tick event happened. */
@@ -112,7 +111,7 @@ protected:
      * ticks are conditional values that influence probabilities of future
      * ticks.
      */
-    list<ScheduledTickEntry*> scheduledTicks;
+    std::list<ScheduledTickEntry*> scheduledTicks;
 
 protected:
     /** @copydoc cSimpleModule::initialize() */

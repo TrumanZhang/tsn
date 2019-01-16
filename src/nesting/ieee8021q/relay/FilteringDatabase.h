@@ -25,7 +25,6 @@
 
 using namespace omnetpp;
 using namespace inet;
-using namespace std;
 
 //added hash function for MacAddress (required for map)
 namespace std {
@@ -44,8 +43,8 @@ namespace nesting {
  */
 class FilteringDatabase: public cSimpleModule, public IClockListener {
 private:
-    unordered_map<MacAddress, pair<simtime_t, int>> adminFdb;
-    unordered_map<MacAddress, pair<simtime_t, int>> operFdb;
+    std::unordered_map<MacAddress, std::pair<simtime_t, int>> adminFdb;
+    std::unordered_map<MacAddress, std::pair<simtime_t, int>> operFdb;
 
     bool changeDatabase = false;
 

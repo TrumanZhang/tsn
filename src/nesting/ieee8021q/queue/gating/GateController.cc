@@ -59,11 +59,11 @@ void GateController::initialize(int stage) {
 
         switchString =
                 this->getModuleByPath(par("switchModule"))->getFullName();
-        portString = to_string(
+        portString = std::to_string(
                 this->getModuleByPath(par("queuingModule"))->getIndex());
 
         lastChange = simTime();
-        currentSchedule = unique_ptr < Schedule
+        currentSchedule = std::unique_ptr < Schedule
                 < GateBitvector >> (new Schedule<GateBitvector>());
         cXMLElement* xml = par("initialSchedule").xmlValue();
         loadScheduleOrDefault(xml);
@@ -279,7 +279,7 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
                     << schedule->size() << ". Time is "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
 
-    unique_ptr<Schedule<GateBitvector>> schedulePtr(schedule);
+    std::unique_ptr<Schedule<GateBitvector>> schedulePtr(schedule);
     nextSchedule = move(schedulePtr);
 }
 

@@ -26,7 +26,7 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
     int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
     schedule->setCycle(cycle);
 
-    vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
     for (cXMLElement* entry : entries) {
         // Get time
         const char* timeCString =

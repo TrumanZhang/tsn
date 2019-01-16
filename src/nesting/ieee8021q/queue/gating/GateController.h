@@ -34,7 +34,6 @@
 #include "../../../linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
 
 using namespace omnetpp;
-using namespace std;
 
 class TransmissionGate;
 class EtherMACFullDuplexPreemptable;
@@ -47,13 +46,13 @@ namespace nesting {
 class GateController: public cSimpleModule, public IClockListener {
 private:
     /** Current schedule. Is never null. */
-    unique_ptr<Schedule<GateBitvector>> currentSchedule;
+    std::unique_ptr<Schedule<GateBitvector>> currentSchedule;
 
     /**
      * Next schedule to load after the current schedule finishes it's cycle.
      * Can be null.
      */
-    unique_ptr<Schedule<GateBitvector>> nextSchedule;
+    std::unique_ptr<Schedule<GateBitvector>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
     unsigned int scheduleIndex;
@@ -65,11 +64,11 @@ private:
     IClock* clock;
 
     /** Reference to transmission gate vector module */
-    vector<TransmissionGate*> transmissionGates;
+    std::vector<TransmissionGate*> transmissionGates;
 
     EtherMACFullDuplexPreemptable* macModule;
-    string switchString;
-    string portString;
+    std::string switchString;
+    std::string portString;
     simtime_t lastChange;
 protected:
     /** @see cSimpleModule::initialize(int) */

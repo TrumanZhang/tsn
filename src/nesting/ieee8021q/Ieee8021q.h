@@ -22,8 +22,6 @@
 #include "inet/common/packet/Packet.h"
 #include "../linklayer/common/VLANTag_m.h"
 
-using namespace std;
-
 namespace nesting {
 
 const inet::B kEthernet2MinPayloadByteLength = inet::B(42);
@@ -100,7 +98,7 @@ public:
     }
 };
 
-typedef bitset<static_cast<unsigned long>(kMaxSupportedQueues)> GateBitvector;
+typedef std::bitset<static_cast<unsigned long>(kMaxSupportedQueues)> GateBitvector;
 
 } // namespace nesting
 

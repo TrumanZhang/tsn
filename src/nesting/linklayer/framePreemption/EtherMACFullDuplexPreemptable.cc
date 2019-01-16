@@ -594,7 +594,7 @@ void EtherMACFullDuplexPreemptable::packetEnqueued(IPassiveQueue *queue) {
     Enter_Method("packetEnqueued()");
     if (transmittingPreemptableFrame && !transmittingExpressFrame && transmissionSelectionModule->hasExpressPacketEnqueued()) {
         emit(expressFrameEnqueuedWhileSendingPreemptableSignal, 0);
-        string loggingPrefix = " Received express frame enqueued notification, ";
+        std::string loggingPrefix = " Received express frame enqueued notification, ";
         if(isPreemptionNowPossible()) {
             //If direct sending is possible, request the frame
             EV_DETAIL << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS) << "ns:" << loggingPrefix << "Preemption is possible immediately, requesting frame." << endl;

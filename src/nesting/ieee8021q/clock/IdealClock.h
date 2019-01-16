@@ -22,7 +22,6 @@
 #include "ClockBase.h"
 
 using namespace omnetpp;
-using namespace std;
 
 namespace nesting {
 

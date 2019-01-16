@@ -44,13 +44,13 @@ class SchedEtherVLANTrafGen: public cSimpleModule, public IClockListener {
 private:
 
     /** Current schedule. Is never null. */
-    unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
+    std::unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
 
     /**
      * Next schedule to load after the current schedule finishes it's cycle.
      * Can be null.
      */
-    unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
+    std::unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
     long int index = 0;
