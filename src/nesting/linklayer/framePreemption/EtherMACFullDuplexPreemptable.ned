@@ -24,13 +24,13 @@ simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
     parameters:
         @class(EtherMACFullDuplexPreemptable);
         bool enablePreemptingFrames = default(false); // frame preemption off or on
-        @signal[preemptCurrentFrameSignal](type=EtherFrame);
-        @signal[transmittedExpressFrameSignal](type=EtherFrame);
-        @signal[transmittedPreemptableFrameSignal](type=EtherFrame);
-        @signal[transmittedPreemptableFramePartSignal](type=EtherFrame);
-        @signal[transmittedPreemptableNonFinalSignal](type=EtherFrame);
-        @signal[transmittedPreemptableFinalSignal](type=EtherFrame);
-        @signal[transmittedPreemptableFullSignal](type=EtherFrame);
+        @signal[preemptCurrentFrameSignal](type=inet::Packet);
+        @signal[transmittedExpressFrameSignal](type=inet::Packet);
+        @signal[transmittedPreemptableFrameSignal](type=inet::Packet);
+        @signal[transmittedPreemptableFramePartSignal](type=inet::Packet);
+        @signal[transmittedPreemptableNonFinalSignal](type=inet::Packet);
+        @signal[transmittedPreemptableFinalSignal](type=inet::Packet);
+        @signal[transmittedPreemptableFullSignal](type=inet::Packet);
         @signal[expressFrameEnqueuedWhileSendingPreemptableSignal];
 
         @statistic[preemptions](title="preemptions"; source=preemptCurrentFrameSignal; record=count; interpolationmode=none);
