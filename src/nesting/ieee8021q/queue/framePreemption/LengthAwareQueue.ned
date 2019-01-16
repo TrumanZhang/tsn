@@ -17,8 +17,7 @@ package nesting.ieee8021q.queue.framePreemption;
 
 //
 // Queue with fixed capacity and ability to consider packet sizes for length-
-// aware-scheduling. This queue implementation is also able to split packets
-// and send only packet fragments if frame-preemption is enabled.
+// aware-scheduling.
 //
 // This module must be connected (not necessarely direct) to a ~TSAlgorithm
 // module the ouput port.

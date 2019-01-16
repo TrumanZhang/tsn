@@ -74,6 +74,7 @@ void LengthAwareQueue::enqueue(cPacket* packet) {
     } else {
         emit(dropPkByQueueSignal, packet);
         numPacketsDropped++;
+        handlePacketEnqueuedEvent(packet);
         delete packet;
     }
 }
