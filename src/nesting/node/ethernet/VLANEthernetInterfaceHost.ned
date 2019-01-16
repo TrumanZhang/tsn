@@ -22,7 +22,7 @@ import inet.linklayer.ethernet.EtherEncap;
 import inet.linklayer.contract.IEthernetInterface;
 
 //
-// Ethernet network interface.
+// Ethernet network interface, used in Host modules in nesting project.
 //
 module VLANEthernetInterfaceHost like IEthernetInterface
 {

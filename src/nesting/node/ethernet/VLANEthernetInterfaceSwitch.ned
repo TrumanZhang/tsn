@@ -13,78 +13,65 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.linklayer;
+package nesting.node.ethernet;
 
 @namespace();
 
 import nesting.ieee8021q.queue.Queuing;
 import nesting.linklayer.ethernet.VLANEncap;
 import nesting.linklayer.framePreemption.FrameForward;
-import nesting.linklayer.framePreemption.EtherMACFullDuplexPreemptable;
-import inet.linklayer.contract.IEtherMac;
+import inet.common.queue.Sink;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 
-
+//
+// This module implements an ethernet interface with queueing capabilities of Ieee802.1Q. Frame Preemption is not supported.
+//
 module VLANEthernetInterfaceSwitch like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);
         string interfaceTableModule;
         string fcsMode @enum("declared","computed") = default("declared");
-        @display("i=block/ifcard;bgl=2");
+        @display("i=block/ifcard;bgl=2;bgb=296,407");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
+        bool framePreemptionDisabled = default(true);
     gates:
         input upperLayerIn;
         output upperLayerOut;
         inout phys @labels(EtherFrame);
     submodules:
-        mac: EtherMACFullDuplexPreemptable {
-            @display("p=140,511");
+        mac: EtherMacFullDuplex {
+            @display("p=113,354");
         }
         queuing: Queuing {
             parameters:
-                @display("p=202,61;q=l2queue");
+                @display("p=202,51;q=l2queue");
         }
         vlanEncapE: VLANEncap {
-            @display("p=90,199");
+            @display("p=113,108");
         }
         etherEncapE: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=90,333");
+                @display("p=113,240");
         }
-        vlanEncapP: VLANEncap {
-            @display("p=202,199");
-        }
-        etherEncapP: <default("EtherEncap")> like IEtherEncap {
-            parameters:
-                @display("p=202,333");
-        }
-        frameForward: FrameForward {
-            @display("p=90,61");
+        sink: Sink {
+            @display("p=202,181");
         }
     connections:
         upperLayerIn --> queuing.in;
-        frameForward.upperLayerOut --> upperLayerOut;
-
-        vlanEncapE.upperLayerOut --> frameForward.lowerLayerInE;
-        vlanEncapP.upperLayerOut --> frameForward.lowerLayerInP;
+        vlanEncapE.upperLayerOut --> upperLayerOut;
 
         queuing.eOut --> vlanEncapE.upperLayerIn;
-        queuing.pOut --> vlanEncapP.upperLayerIn;
-
-        etherEncapE.lowerLayerOut --> mac.upperLayerIn;
-        mac.upperLayerOut --> etherEncapE.lowerLayerIn;
-
-        etherEncapP.lowerLayerOut --> mac.upperLayerPreemptableIn;
-        mac.upperLayerPreemptableOut --> etherEncapP.lowerLayerIn;
+        queuing.pOut --> sink.in++;
 
         vlanEncapE.lowerLayerOut --> etherEncapE.upperLayerIn;
         etherEncapE.upperLayerOut --> vlanEncapE.lowerLayerIn;
 
-        vlanEncapP.lowerLayerOut --> etherEncapP.upperLayerIn;
-        etherEncapP.upperLayerOut --> vlanEncapP.lowerLayerIn;
+        mac.upperLayerOut --> etherEncapE.lowerLayerIn;
+        etherEncapE.lowerLayerOut --> mac.upperLayerIn;
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 }
