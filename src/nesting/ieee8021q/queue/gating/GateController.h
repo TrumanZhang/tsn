@@ -23,6 +23,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
 #include "../TransmissionSelection.h"
 #include "../../clock/IClock.h"
@@ -66,7 +67,8 @@ private:
     /** Reference to transmission gate vector module */
     std::vector<TransmissionGate*> transmissionGates;
 
-    EtherMACFullDuplexPreemptable* macModule;
+    EtherMACFullDuplexPreemptable* preemptMacModule;
+    inet::EtherMacFullDuplex* macModule;
     std::string switchString;
     std::string portString;
     simtime_t lastChange;

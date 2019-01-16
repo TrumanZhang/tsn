@@ -74,7 +74,7 @@ double CreditBasedShaper::getSendSlope() {
 }
 
 double CreditBasedShaper::getPortTransmitRate() {
-    return mac->getTxRate(); // TODO remove dependency
+    return mac->getTxRate();
 }
 
 double CreditBasedShaper::creditsForTime(double creditPerSecond,

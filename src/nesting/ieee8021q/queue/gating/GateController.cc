@@ -50,7 +50,17 @@ void GateController::initialize(int stage) {
         }
 
         cModule* macMod = getModuleFromPar<cModule>(par("macModule"), this);
-        macModule = check_and_cast<EtherMACFullDuplexPreemptable*>(macMod);
+
+        EtherMACFullDuplexPreemptable* macTmp =
+                dynamic_cast<EtherMACFullDuplexPreemptable*>(macMod);
+        if (macTmp != nullptr) {
+            preemptMacModule = check_and_cast<EtherMACFullDuplexPreemptable*>(
+                    macMod);
+            macModule = nullptr;
+        } else {
+            macModule = check_and_cast<inet::EtherMacFullDuplex*>(macMod);
+            preemptMacModule = nullptr;
+        }
 
         WATCH(scheduleIndex);
     }
@@ -76,7 +86,7 @@ void GateController::initialize(int stage) {
                         && currentSchedule->getScheduledObject(0).test(
                                 transmissionGate->getIndex()))
                         && transmissionGate->isExpressQueue()) {
-                    macModule->hold(SIMTIME_ZERO);
+                    preemptMacModule->hold(SIMTIME_ZERO);
                     break;
                 }
             }
@@ -101,10 +111,11 @@ void GateController::tick(IClock *clock) {
 // case a new schedule is loaded if available.
     if (scheduleIndex == 0 && nextSchedule) {
         // Print warning if the feature is used in combination with frame preemption
-        if( macModule->isFramePreemptionEnabled() && par("enableHoldAndRelease")) {
-            EV_WARN << "Using schedule swap in combination with Hold&Release (Frame Preemption) can lead to wrong hold periods."<<endl;
+        if(preemptMacModule != nullptr) {
+            if( preemptMacModule->isFramePreemptionEnabled() && par("enableHoldAndRelease")) {
+                EV_WARN << "Using schedule swap in combination with Hold&Release (Frame Preemption) can lead to wrong hold periods."<<endl;
+            }
         }
-
         // Load new schedule and delete the old one.
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
@@ -132,7 +143,9 @@ void GateController::tick(IClock *clock) {
         //If the Mac component was on hold and no express gate is opened, release it
         releaseNeeded = !someExpressGateOpen && currentlyOnHold();
         if(releaseNeeded) {
-            macModule->release();
+            if(preemptMacModule != nullptr) {
+                preemptMacModule->release();
+            }
         }
     }
     //Set gate states for every gate
@@ -167,8 +180,10 @@ void GateController::tick(IClock *clock) {
         for (TransmissionGate* transmissionGate : transmissionGates) {
             //Schedule hold if any express gate is open in the next schdule state
             if(nextVector.test(transmissionGate->getIndex()) && transmissionGate->isExpressQueue()) {
-                macModule->hold((currentSchedule->getLength(scheduleIndex))*clock->getClockRate()-macModule->getHoldAdvance());
-                break;
+                if(preemptMacModule!=nullptr) {
+                    preemptMacModule->hold((currentSchedule->getLength(scheduleIndex))*clock->getClockRate()-preemptMacModule->getHoldAdvance());
+                    break;
+                }
             }
         }
     }
@@ -178,7 +193,12 @@ void GateController::tick(IClock *clock) {
 }
 
 unsigned int GateController::calculateMaxBit(int gateIndex) {
-    double transmitRate = macModule->getTxRate();
+    double transmitRate;
+    if (preemptMacModule != nullptr) {
+        transmitRate = preemptMacModule->getTxRate();
+    } else {
+        transmitRate = macModule->getTxRate();
+    }
     if (transmitRate <= 0) {
         return 0;
     }
@@ -296,7 +316,11 @@ void GateController::openAllGates() {
     setGateStates(bitvectorAllGatesOpen, true);
 }
 bool GateController::currentlyOnHold() {
-    return macModule->isOnHold();
+    if (preemptMacModule != nullptr) {
+        return preemptMacModule->isOnHold();
+    } else {
+        return false;
+    }
 }
 }
 // namespace nesting
