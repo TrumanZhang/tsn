@@ -12,19 +12,18 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-
-
 import inet.linklayer.ethernet.EtherMacFullDuplex;
-
-//@namespace(inet);
 
 package nesting.linklayer.framePreemption;
 
+//
+// This module extends the INET EtherMacFullDuplex module and adds frame preemption capabilities.
+//
 simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
 {
     parameters:
         @class(EtherMACFullDuplexPreemptable);
-        bool enablePreemptingFrames = default(false);
+        bool enablePreemptingFrames = default(false); // frame preemption off or on
         @signal[preemptCurrentFrameSignal](type=EtherFrame);
         @signal[transmittedExpressFrameSignal](type=EtherFrame);
         @signal[transmittedPreemptableFrameSignal](type=EtherFrame);
