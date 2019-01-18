@@ -1,6 +1,6 @@
 # NeSTiNg - Network Simulator for Time-sensitive Networking
 
-**Updated to Inet 4.0.0, will be merge into master soon!**
+**Updated to Inet 4.0.0, will be merged into master branch soon!**
 
 NeSTiNg is a simulation model for Time-sensitive Networking (TSN) using the OMNeT++ discrete event simulation framework.
 Our model uses the [INET framework](https://inet.omnetpp.org/) and enhances it by TSN-capable components.
