@@ -3,25 +3,7 @@
 	<cycle>400</cycle>
 	<host name="robotController">
 		<entry>
-			<start>2</start>
-			<queue>7</queue>
-			<dest>00:00:00:00:00:04</dest>
-			<size>1400</size>
-		</entry>
-		<entry>
-			<start>102</start>
-			<queue>7</queue>
-			<dest>00:00:00:00:00:04</dest>
-			<size>1400</size>
-		</entry>
-		<entry>
-			<start>202</start>
-			<queue>7</queue>
-			<dest>00:00:00:00:00:04</dest>
-			<size>1400</size>
-		</entry>
-		<entry>
-			<start>302</start>
+			<start>20</start>
 			<queue>7</queue>
 			<dest>00:00:00:00:00:04</dest>
 			<size>1400</size>
@@ -30,32 +12,16 @@
 	<switch name="switchA">
 		<port id="3">
 			<entry>
-				<length>100</length>
-				<bitvector>11111110</bitvector>
-			</entry>
-			<entry>
-				<length>200</length>
+				<length>400</length>
 				<bitvector>11111111</bitvector>
-			</entry>
-			<entry>
-				<length>100</length>
-				<bitvector>11111110</bitvector>
 			</entry>
 		</port>
 	</switch>
 	<switch name="switchB">
 		<port id="0">
 			<entry>
-				<length>140</length>
-				<bitvector>11111110</bitvector>
-			</entry>
-			<entry>
-				<length>120</length>
+				<length>400</length>
 				<bitvector>11111111</bitvector>
-			</entry>
-			<entry>
-				<length>140</length>
-				<bitvector>11111110</bitvector>
 			</entry>
 		</port>
 	</switch>
