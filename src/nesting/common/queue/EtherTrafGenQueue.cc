@@ -76,6 +76,10 @@ Packet* EtherTrafGenQueue::generatePacket() {
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
     long len = packetLength->intValue();
     const auto& payload = makeShared<ByteCountChunk>(B(len));
+    // set creation time
+    auto timeTag = payload->addTag<CreationTimeTag>();
+    timeTag->setCreationTime(simTime());
+
     datapacket->insertAtBack(payload);
     datapacket->removeTagIfPresent<PacketProtocolTag>();
     datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(

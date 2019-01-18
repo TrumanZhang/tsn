@@ -26,6 +26,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/common/TimeTag_m.h"
 #include <omnetpp/cxmlelement.h>
 #include <vector>
 #include "../../common/schedule/HostSchedule.h"

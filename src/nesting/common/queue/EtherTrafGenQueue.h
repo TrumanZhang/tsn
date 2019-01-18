@@ -28,6 +28,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/TimeTag_m.h"
 #include "../../linklayer/common/VLANTag_m.h"
 
 using namespace omnetpp;
