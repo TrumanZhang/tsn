@@ -352,17 +352,27 @@ void EtherMACFullDuplexPreemptable::getNextFrameFromQueue() {
 void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
     //TODO add other content from original method
     if (par("enablePreemptingFrames") && transmittingPreemptableFrame) {
-        //A (part of a) preemptable frame was sent
+        // A (part of a) preemptable frame was sent
         emit(transmittedPreemptableFramePartSignal, currentPreemptableFrame);
         bool beginningOfPreemptableFrame = (preemptedBytesSent == 0);
-        //Update bytes sent so far for this preemptable frame
+        // Update bytes sent so far for this preemptable frame
         unsigned int bytesSentInThisPart =
                 (unsigned int) calculatePreemptedPayloadBytesSent(simTime());
         preemptedBytesSent += bytesSentInThisPart;
+        /*
+         * Encapsulation adds PREAMBLE 7B, SFD 1B, FCS 4B. This adds up to 12B. calculatePreemptedBytesSent subtracts 4B for FCS according to standard,
+         * but includes PREAMBLE and SFD.
+         * currentPreemptableFrame holds frame that is not encapsulated, therefore without PREAMBLE and SFD but with FCS.
+         * Therefore, in order to be able to compare preemptedBytesSent to the stored packet length, the length of PREAMBLE and SFD need to be added
+         * to stored packet length.
+         *
+         * If this framelet was the final framelet, or pFrame was transmitted without preemption, 4B that were subtracted by calculatePreemptedPayloadBytesSent
+         * need to be added, because in this case, FCS is included in transmission.
+         */
         if (preemptedBytesSent + 4
-                == currentPreemptableFrame->getByteLength()) {
-            // preemptable frame was sent completely
-            bytesSentInThisPart += 4;
+                == currentPreemptableFrame->getByteLength() + 8) {
+            // 8B (PREAMBLE, SFD) need to be subtracted, 4B were already subtracted, therefore subtract 4B
+            bytesSentInThisPart -= 4;
             //Add last checksum that is included in the encapped frame instead of the "mpacket"/frame preemption calculation
             preemptedBytesSent = currentPreemptableFrame->getByteLength();
             // final part was sent, therefore transmission is complete
@@ -410,36 +420,7 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
         preemptedBytesSentMessage->setBytesInThisPart(bytesSentInThisPart);
         // set length to zero to not have transmission delay
         preemptedBytesSentMessage->setByteLength(0);
-
-        /*
-         //Temporarily set propagation delay to zero and send PreemptedFrame
-         if (dynamic_cast<cDelayChannel *>(transmissionChannel) != nullptr) {
-         cDelayChannel* delayChannel = check_and_cast<cDelayChannel *>(
-         transmissionChannel);
-         simtime_t originalDelay = delayChannel->getDelay();
-         delayChannel->setDelay(0.0);
-         send(preemptedBytesSentMessage, physOutGate);
-         delayChannel->setDelay(originalDelay.dbl());
-         } else if (dynamic_cast<cDatarateChannel *>(transmissionChannel)
-         != nullptr) {
-         cDatarateChannel* dataRateChannel = check_and_cast<
-         cDatarateChannel *>(transmissionChannel);
-         simtime_t originalDelay = dataRateChannel->getDelay();
-         dataRateChannel->setDelay(0.0);
-         send(preemptedBytesSentMessage, physOutGate);
-         dataRateChannel->setDelay(originalDelay.dbl());
-         } else {
-         if (dynamic_cast<cIdealChannel *>(transmissionChannel) == nullptr) {
-         EV_WARN << getFullPath() << " at t="
-         << simTime().inUnit(SIMTIME_NS) << "ns:"
-         << " Unsupported channel configured. Zero-time PreemptedFrame messages may be delayed."
-         << endl;
-         }
-         */
         send(preemptedBytesSentMessage, physOutGate);
-        /*
-         }
-         */
 
         //If this was the final part of a preemptable frame, delete it
         if (preemptedBytesSent == currentPreemptableFrame->getByteLength()) {
@@ -496,8 +477,6 @@ void EtherMACFullDuplexPreemptable::preemptCurrentFrame() {
     ASSERT(!transmittingExpressFrame);
     ASSERT(isPreemptionNowPossible());
 
-    //Don't mark the transmission channel as "transmitting" anymore
-    // transmissionChannel->forceTransmissionFinishTime(simTime());
     cancelEvent(endTxMsg);
 
     emit(preemptCurrentFrameSignal, currentPreemptableFrame);
@@ -521,16 +500,39 @@ int EtherMACFullDuplexPreemptable::calculatePreemptedPayloadBytesSent(
     simtime_t timeElapsed = timeToCheck - preemptableTransmissionStart;
     int bytesTransmittedInTotal = (timeElapsed
             / (SimTime(1, SIMTIME_S) / transmitRate)) / 8;
-    bytesTransmittedInTotal -= 12; //subtract preamble (7B), SFD (1B) and checksum (4B)
-    // TODO why are preamble, etc. subtracted?
+    // subtract checksum (4B), spec. at 802.3 99.4.4
+    bytesTransmittedInTotal -= 4;
     if (bytesTransmittedInTotal < 0) {
         return 0;
     } else if (bytesTransmittedInTotal
-            >= currentPreemptableFrame->getByteLength()) {
+            > currentPreemptableFrame->getByteLength() + 4) {
         throw cRuntimeError(
                 "Supposedly transmitted more bytes than the frame's length.");
     }
     return bytesTransmittedInTotal;
+}
+
+simtime_t EtherMACFullDuplexPreemptable::isPreemptionLaterPossible() {
+
+    if (isPreemptionNowPossible()) {
+        return simTime();
+    }
+    int payloadBytesSentByNow = calculatePreemptedPayloadBytesSent(simTime());
+    int payloadBytesRemaining = currentPreemptableFrame->getByteLength()
+            - payloadBytesSentByNow - preemptedBytesSent;
+    if (payloadBytesSentByNow < kFramePreemptionMinNonFinalPayloadSize.get()
+            && payloadBytesRemaining
+                    >= kFramePreemptionMinNonFinalPayloadSize.get() + 4
+                            - payloadBytesSentByNow
+                            + kFramePreemptionMinFinalPayloadSize.get()) {
+        //Preemption not yet possible, but after a short time -> Need to wait to preempt
+        int bytesToWait = (kFramePreemptionMinNonFinalPayloadSize.get()
+                - payloadBytesSentByNow);
+        return simTime() + calculateTransmissionDuration(bytesToWait);
+    }
+    //Too late to preempt this frame at all
+    return SIMTIME_ZERO;
+
 }
 
 bool EtherMACFullDuplexPreemptable::isPreemptionNowPossible() {
@@ -563,29 +565,6 @@ simtime_t EtherMACFullDuplexPreemptable::calculateTransmissionDuration(
     ASSERT(transmitRate > 0);
     simtime_t timeForOneBit = SimTime(1, SIMTIME_S) / transmitRate;
     return timeForOneBit * bytes * 8;
-
-}
-
-simtime_t EtherMACFullDuplexPreemptable::isPreemptionLaterPossible() {
-
-    if (isPreemptionNowPossible()) {
-        return simTime();
-    }
-    int payloadBytesSentByNow = calculatePreemptedPayloadBytesSent(simTime());
-    int payloadBytesRemaining = currentPreemptableFrame->getByteLength()
-            - payloadBytesSentByNow - preemptedBytesSent;
-    if (payloadBytesSentByNow < kFramePreemptionMinNonFinalPayloadSize.get()
-            && payloadBytesRemaining
-                    >= kFramePreemptionMinNonFinalPayloadSize.get() + 4
-                            - payloadBytesSentByNow
-                            + kFramePreemptionMinFinalPayloadSize.get()) {
-        //Preemption not yet possible, but after a short time -> Need to wait to preempt
-        int bytesToWait = (kFramePreemptionMinNonFinalPayloadSize.get()
-                - payloadBytesSentByNow);
-        return simTime() + calculateTransmissionDuration(bytesToWait);
-    }
-    //Too late to preempt this frame at all
-    return SIMTIME_ZERO;
 
 }
 
@@ -697,7 +676,7 @@ void EtherMACFullDuplexPreemptable::refreshDisplay() const {
     const char *colour;
     if (transmitState == TRANSMITTING_STATE) {
         colour = "yellow";
-    }else{
+    } else {
         colour = "";
     }
     char buf[200];
