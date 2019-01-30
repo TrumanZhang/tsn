@@ -40,6 +40,14 @@ simsignal_t EtherMACFullDuplexPreemptable::transmittedPreemptableFullSignal =
         registerSignal("transmittedPreemptableFullSignal");
 simsignal_t EtherMACFullDuplexPreemptable::expressFrameEnqueuedWhileSendingPreemptableSignal =
         registerSignal("expressFrameEnqueuedWhileSendingPreemptableSignal");
+simsignal_t EtherMACFullDuplexPreemptable::eMacDelay = registerSignal(
+        "eMacDelay");
+simsignal_t EtherMACFullDuplexPreemptable::pMacDelay = registerSignal(
+        "pMacDelay");
+simsignal_t EtherMACFullDuplexPreemptable::receivedExpressFrame =
+        registerSignal("receivedExpressFrame");
+simsignal_t EtherMACFullDuplexPreemptable::receivedPreemptableFrameFull =
+        registerSignal("receivedPreemptableFrameFull");
 
 EtherMACFullDuplexPreemptable::~EtherMACFullDuplexPreemptable() {
     cancelAndDelete(recheckForQueuedExpressFrameMsg);
@@ -84,7 +92,9 @@ void EtherMACFullDuplexPreemptable::handleMessage(cMessage *msg) {
         PreemptedFrame* pFrame = dynamic_cast<PreemptedFrame*>(msg);
         if (pFrame == nullptr) {
             // is express frame, send up
-            processMsgFromNetwork(check_and_cast<EthernetSignal*>(msg));
+            EthernetSignal* tmp = check_and_cast<EthernetSignal*>(msg);
+            emit(receivedExpressFrame, tmp);
+            processMsgFromNetwork(tmp);
         }
         // is preemptible frame
         else if (dynamic_cast<EthernetSignal*>(pFrame->getCompleteFrame())) {
@@ -101,9 +111,10 @@ void EtherMACFullDuplexPreemptable::handleMessage(cMessage *msg) {
             if (receivedPreemptedFrame->getByteLength()
                     == preemptedBytesReceived + 8) {
                 //enough bytes from the preempted frame received -> send it up
-                processMsgFromNetwork(
-                        check_and_cast<EthernetSignal*>(
-                                receivedPreemptedFrame));
+                EthernetSignal* tmp = check_and_cast<EthernetSignal*>(
+                        receivedPreemptedFrame);
+                emit(receivedPreemptableFrameFull, tmp);
+                processMsgFromNetwork(tmp);
                 receivedPreemptedFrame = nullptr;
             }
             delete pFrame;
@@ -140,6 +151,12 @@ void EtherMACFullDuplexPreemptable::handleSelfMessage(cMessage *msg) {
 void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/BEGIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
+
+    if (packet->arrivedOn("upperLayerPreemptableIn")) {
+        pFrameArrivalTime = simTime();
+    } else {
+        eFrameArrivalTime = simTime();
+    }
 
     bool isExpressFrame = !(packet->arrivedOn("upperLayerPreemptableIn"));
 
@@ -286,7 +303,7 @@ void EtherMACFullDuplexPreemptable::startFrameTransmission() {
             signal->encapsulate(frame);
         }
         send(signal, physOutGate);
-
+        emit(eMacDelay, simTime() - eFrameArrivalTime);
         scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     } else {
@@ -312,6 +329,7 @@ void EtherMACFullDuplexPreemptable::startFrameTransmission() {
         frameCopyToCalculateLength->setByteLength(preemptedPacketLength);
         //Block link for the theoretically needed amount of time
         scheduleAt(simTime() + transmissionChannel->calculateDuration(frameCopyToCalculateLength), endTxMsg);
+        emit(pMacDelay, simTime() - pFrameArrivalTime);
         delete frame;
         delete frameCopyToCalculateLength;
     }

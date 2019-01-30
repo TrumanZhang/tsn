@@ -55,6 +55,10 @@ private:
     bool transmittingPreemptableFrame = false;
     Packet* currentPreemptableFrame = nullptr;
     simtime_t preemptableTransmissionStart;
+
+    simtime_t pFrameArrivalTime;
+    simtime_t eFrameArrivalTime;
+
     unsigned int preemptedBytesReceived;
     unsigned int preemptedBytesSent;
     EthernetSignal* receivedPreemptedFrame = nullptr;
@@ -73,6 +77,10 @@ protected:
     static simsignal_t transmittedPreemptableFinalSignal;
     static simsignal_t transmittedPreemptableFullSignal;
     static simsignal_t expressFrameEnqueuedWhileSendingPreemptableSignal;
+    static simsignal_t eMacDelay;
+    static simsignal_t pMacDelay;
+    static simsignal_t receivedExpressFrame;
+    static simsignal_t receivedPreemptableFrameFull;
 
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;

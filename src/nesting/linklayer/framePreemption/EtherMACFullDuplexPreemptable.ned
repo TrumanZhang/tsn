@@ -32,7 +32,15 @@ simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
         @signal[transmittedPreemptableFinalSignal](type=inet::Packet);
         @signal[transmittedPreemptableFullSignal](type=inet::Packet);
         @signal[expressFrameEnqueuedWhileSendingPreemptableSignal];
+        @signal[eMacDelay](type=simtime_t; unit=s);
+        @signal[pMacDelay](type=simtime_t; unit=s);
+        @signal[receivedExpressFrame](type=inet::EthernetSignal);
+        @signal[receivedPreemptableFrameFull](type=inet::EthernetSignal);
 
+        @statistic[receivedPreemptableFrameFull](title="receivedPreemptableFrameFull"; record="vector(packetBytes)"; interpolationmode=none);
+        @statistic[receivedExpressFrame](title="receivedExpressFrame"; record="vector(packetBytes)"; interpolationmode=none);
+        @statistic[eMacDelay](title="eMacDelay"; record=histogram,vector; interpolationmode=none);
+        @statistic[pMacDelay](title="pMacDelay"; record=histogram,vector; interpolationmode=none);
         @statistic[preemptions](title="preemptions"; source=preemptCurrentFrameSignal; record=count; interpolationmode=none);
         @statistic[expressFrames](title="expressFrames"; source=transmittedExpressFrameSignal; record=count; interpolationmode=none);
         @statistic[preemptableFrames](title="preemptableFrames"; source=transmittedPreemptableFrameSignal; record=count; interpolationmode=none);
