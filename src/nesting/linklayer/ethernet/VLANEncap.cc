@@ -112,7 +112,7 @@ void VLANEncap::processPacketFromLowerLevel(inet::Packet *packet) {
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(vlanHeader->getPcp());
         vlanTag->setDe(vlanHeader->getDe());
-        EV_TRACE << ", PCP Value is " << vlanTag->getPcp();
+        EV_TRACE << ", PCP Value is " << (int) vlanTag->getPcp() << " ";
         short vid = vlanHeader->getVID();
         if (vid < kMinValidVID || vid > kMaxValidVID) {
             vid = pvid;
