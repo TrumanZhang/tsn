@@ -22,11 +22,5 @@ import nesting.linklayer.ethernet.VLANEncap;
 //
 module VLANHostBase extends EtherHostBase
 {
-    submodules:
-        vlanEncap: VLANEncap {
-            @display("p=142,171");
-        }
-    connections:
-        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
-        eth.upperLayerIn <-- vlanEncap.lowerLayerOut;
+
 }

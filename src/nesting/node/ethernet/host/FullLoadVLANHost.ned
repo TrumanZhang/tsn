@@ -17,6 +17,7 @@ package nesting.node.ethernet.host;
 
 import inet.common.queue.Sink;
 import nesting.common.queue.EtherTrafGenQueue;
+import nesting.linklayer.ethernet.VLANEncap;
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
 // physical medium allows. This module's main use case is to simulate a
@@ -35,7 +36,13 @@ module FullLoadVLANHost extends VLANHostBase
         sink: Sink {
             @display("p=84,69");
         }
+        vlanEncap: VLANEncap {
+            @display("p=142,188");
+        }
     connections:
         trafGenQueue.out --> vlanEncap.upperLayerIn;
         vlanEncap.upperLayerOut --> sink.in++;
+        
+        vlanEncap.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
 }

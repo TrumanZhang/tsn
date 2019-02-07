@@ -19,6 +19,7 @@ import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 import nesting.application.ethernet.EtherVLANTaggedTrafGen;
 import nesting.linklayer.ethernet.VLANEncap;
+import nesting.ieee8021q.clock.IClock;
 
 
 //
@@ -32,11 +33,19 @@ module VLANHost extends VLANHostBase
     parameters:
         @display("bgb=483,473");
         @networkNode();
+        eth.typename = "VLANEthernetInterfaceSwitchPreemptable";
+        eth.mac.queueModule = "^.^.eth[0].queuing.transmissionSelection";
+        eth.mac.mtu = 1500B;
+        eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
+        eth.queuing.gateController.macModule = "^.^.^.eth[0].mac";
     submodules:
         app: EtherVLANTaggedTrafGen {
             @display("p=142,70");
         }
+        clock: <default("IdealClock")> like IClock {
+            @display("p=26,28;is=s");
+        }
     connections:
-        app.out --> vlanEncap.upperLayerIn;
-        vlanEncap.upperLayerOut --> app.in;
+        app.out --> eth.upperLayerIn;
+        eth.upperLayerOut --> app.in;
 }
