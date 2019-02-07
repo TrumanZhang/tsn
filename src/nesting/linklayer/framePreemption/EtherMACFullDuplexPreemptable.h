@@ -63,7 +63,7 @@ private:
     unsigned int preemptedBytesSent;
     EthernetSignal* receivedPreemptedFrame = nullptr;
 
-    virtual int calculatePreemptedPayloadBytesSent(simtime_t timeToCheck);
+    virtual int calculatePreemptedPayloadBytesSent(simtime_t timeToCheck, bool sentCRC);
     virtual bool isPreemptionNowPossible();
     virtual simtime_t isPreemptionLaterPossible();
     virtual simtime_t calculateTransmissionDuration(int bytes);
