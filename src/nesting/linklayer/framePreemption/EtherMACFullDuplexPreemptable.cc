@@ -527,7 +527,8 @@ int EtherMACFullDuplexPreemptable::calculatePreemptedPayloadBytesSent(
     if (bytesTransmittedInTotal < 0) {
         return 0;
     } else if (bytesTransmittedInTotal
-            > currentPreemptableFrame->getByteLength() + 4) {
+            > currentPreemptableFrame->getByteLength() + 8) {
+        // add 8 Bytes for Preamble and sfd
         throw cRuntimeError(
                 "Supposedly transmitted more bytes than the frame's length.");
     }
@@ -550,7 +551,7 @@ simtime_t EtherMACFullDuplexPreemptable::isPreemptionLaterPossible() {
                             + kFramePreemptionMinFinalPayloadSize.get()) {
         //Preemption not yet possible, but after a short time -> Need to wait to preempt
         int bytesToWait = (kFramePreemptionMinNonFinalPayloadSize.get()
-                - payloadBytesSentByNow) + 4; // add 4 bytes to be able to send checksum
+                - payloadBytesSentByNow);
         return simTime() + calculateTransmissionDuration(bytesToWait);
     }
     //Too late to preempt this frame at all
