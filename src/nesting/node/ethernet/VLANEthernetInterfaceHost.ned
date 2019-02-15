@@ -20,15 +20,16 @@ package nesting.node.ethernet;
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.EtherEncap;
 import inet.linklayer.contract.IEthernetInterface;
-
+import inet.networklayer.common.InterfaceEntry;
 //
 // Ethernet network interface, used in Host modules in nesting project.
 //
-module VLANEthernetInterfaceHost like IEthernetInterface
+module VLANEthernetInterfaceHost extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);
         string interfaceTableModule;
+        string address = default("auto"); // MAC address
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));

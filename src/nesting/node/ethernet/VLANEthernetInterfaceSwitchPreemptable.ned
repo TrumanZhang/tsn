@@ -23,15 +23,17 @@ import nesting.linklayer.framePreemption.FrameForward;
 import nesting.linklayer.framePreemption.EtherMACFullDuplexPreemptable;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.IEtherEncap;
+import inet.networklayer.common.InterfaceEntry;
 
 //
 // This module implements an ethernet interface that supports frame preemption.
 //
-module VLANEthernetInterfaceSwitchPreemptable like IEthernetInterface
+module VLANEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);
         string interfaceTableModule;
+        string address = default("auto"); // MAC address
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
         *.interfaceTableModule = default(absPath(interfaceTableModule));

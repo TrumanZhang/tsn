@@ -69,12 +69,7 @@ void EtherMACFullDuplexPreemptable::initialize(int stage) {
     }
 }
 
-void EtherMACFullDuplexPreemptable::handleMessage(cMessage *msg) {
-    if (!isOperational) {
-        handleMessageWhenDown(msg);
-        return;
-    }
-
+void EtherMACFullDuplexPreemptable::handleMessageWhenUp(cMessage *msg) {
     if (channelsDiffer) {
         readChannelParameters(true);
     }

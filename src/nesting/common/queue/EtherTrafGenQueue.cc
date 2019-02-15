@@ -111,10 +111,12 @@ Packet* EtherTrafGenQueue::generatePacket() {
 void EtherTrafGenQueue::requestPacket() {
     Enter_Method("requestPacket(...)");
 
+    /*
     if(doNotSendFirstInitPacket) {
         doNotSendFirstInitPacket = false;
         return;
     }
+    */
 
     Packet* packet = generatePacket();
 

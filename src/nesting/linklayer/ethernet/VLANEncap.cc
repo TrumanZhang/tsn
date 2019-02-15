@@ -75,10 +75,10 @@ void VLANEncap::processPacketFromHigherLevel(inet::Packet *packet) {
     // Encapsulate VLAN Header
     if (packet->findTag<VLANTagReq>()) {
         auto vlanTag = packet->getTag<VLANTagReq>();
-        const auto& vlanHeader = inet::makeShared<inet::Ieee802_1QHeader>();
+        const auto& vlanHeader = inet::makeShared<inet::Ieee8021qHeader>();
         vlanHeader->setPcp(vlanTag->getPcp());
         vlanHeader->setDe(vlanTag->getDe());
-        vlanHeader->setVID(vlanTag->getVID());
+        vlanHeader->setVid(vlanTag->getVID());
         packet->insertAtFront(vlanHeader);
         delete packet->removeTagIfPresent<VLANTagReq>();
         // Statistics and logging
@@ -107,13 +107,13 @@ void VLANEncap::processPacketFromLowerLevel(inet::Packet *packet) {
     EV_TRACE << getFullPath() << ": Packet-length is "
                     << packet->getByteLength() << ", destination is "
                     << packet->getTag<inet::MacAddressInd>()->getDestAddress();
-    if (packet->hasAtFront<inet::Ieee802_1QHeader>()) {
-        auto vlanHeader = packet->popAtFront<inet::Ieee802_1QHeader>();
+    if (packet->hasAtFront<inet::Ieee8021qHeader>()) {
+        auto vlanHeader = packet->popAtFront<inet::Ieee8021qHeader>();
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(vlanHeader->getPcp());
         vlanTag->setDe(vlanHeader->getDe());
         EV_TRACE << ", PCP Value is " << (int) vlanTag->getPcp() << " ";
-        short vid = vlanHeader->getVID();
+        short vid = vlanHeader->getVid();
         if (vid < kMinValidVID || vid > kMaxValidVID) {
             vid = pvid;
         }

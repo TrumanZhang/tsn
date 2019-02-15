@@ -24,15 +24,17 @@ import inet.common.queue.Sink;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.IEtherEncap;
 import inet.linklayer.ethernet.EtherMacFullDuplex;
+import inet.networklayer.common.InterfaceEntry;
 
 //
 // This module implements an ethernet interface with queueing capabilities of Ieee802.1Q. Frame Preemption is not supported.
 //
-module VLANEthernetInterfaceSwitch like IEthernetInterface
+module VLANEthernetInterfaceSwitch extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);
         string interfaceTableModule;
+        string address = default("auto"); // MAC address
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2;bgb=296,407");
         *.interfaceTableModule = default(absPath(interfaceTableModule));

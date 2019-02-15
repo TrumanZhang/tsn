@@ -83,7 +83,7 @@ protected:
     static simsignal_t receivedPreemptableFrameFull;
 
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *msg) override;
     virtual void handleEndTxPeriod() override;
     virtual void handleEndIFGPeriod() override;
