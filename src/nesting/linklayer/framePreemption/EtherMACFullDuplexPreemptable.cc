@@ -370,7 +370,8 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
         bool beginningOfPreemptableFrame = (preemptedBytesSent == 0);
         // Update bytes sent so far for this preemptable frame
         unsigned int bytesSentInThisPart =
-                (unsigned int) calculatePreemptedPayloadBytesSent(simTime(), true);
+                (unsigned int) calculatePreemptedPayloadBytesSent(simTime(),
+                        true);
         preemptedBytesSent += bytesSentInThisPart;
         /*
          * Encapsulation adds PREAMBLE 7B, SFD 1B, FCS 4B. This adds up to 12B. calculatePreemptedBytesSent subtracts 4B for FCS according to standard,
@@ -515,7 +516,7 @@ int EtherMACFullDuplexPreemptable::calculatePreemptedPayloadBytesSent(
             / (SimTime(1, SIMTIME_S) / transmitRate)) / 8;
     // this function gets called at two different times: when CRC has been sent at end of tx, or when checking if preemption is possible (CRC not sent yet)
     // , therefore CRC only needs to be subtracted when CRC has been sent
-    if(sentCRC){
+    if (sentCRC) {
         // subtract checksum (4B), spec. at 802.3 99.4.4
         bytesTransmittedInTotal -= 4;
     }
@@ -535,7 +536,8 @@ simtime_t EtherMACFullDuplexPreemptable::isPreemptionLaterPossible() {
     if (isPreemptionNowPossible()) {
         return simTime();
     }
-    int payloadBytesSentByNow = calculatePreemptedPayloadBytesSent(simTime(), false);
+    int payloadBytesSentByNow = calculatePreemptedPayloadBytesSent(simTime(),
+            false);
     int payloadBytesRemaining = currentPreemptableFrame->getByteLength()
             - payloadBytesSentByNow - preemptedBytesSent;
     // TODO Why payloadBytesRemaining >= NonFinal + - sentbynow + FinalPayloadSize??
@@ -661,11 +663,12 @@ void EtherMACFullDuplexPreemptable::release() {
         //Clear pending requests from this module, otherwise
         transmissionSelectionModule->removePendingRequests();
         if(!transmittingExpressFrame) {
+            // if release signaled during interframe gap, wait until IFG is over
             if(!endIFGMsg->isScheduled()) {
+                //getNextFrameFromQueue() checks if preemptedFrame was in transmission
                 getNextFrameFromQueue();
                 beginSendFrames();
             }
-            //check for preemptable frame, assert that no preempted frame is ready for transmission
         }
     }
 
