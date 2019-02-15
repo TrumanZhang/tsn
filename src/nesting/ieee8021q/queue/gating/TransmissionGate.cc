@@ -44,6 +44,9 @@ void TransmissionGate::initialize() {
             par("transmissionSelectionAlgorithmModule"), this);
 
     clock = getModuleFromPar<IClock>(par("clockModule"), this);
+
+    gateStateChangedSignal =
+            registerSignal("gateStateChanged");
 }
 
 void TransmissionGate::handleMessage(cMessage* msg) {
@@ -101,7 +104,7 @@ void TransmissionGate::handleGateStateChangedEvent() {
     } else {
         EV_INFO << "Gate closed." << endl;
     }
-
+    emit(gateStateChangedSignal, this->gateOpen);
     // Notify transmission-selection if packet has become ready for transmission
     if (gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits())
             && (isExpressQueue() || !gateController->currentlyOnHold())) {

@@ -31,7 +31,7 @@ simple GateController
         @class(GateController);
         string clockModule = default("^.^.^.clock");
         string switchModule = default("^.^.^");
-        string queuingModule = default("^");
+        string networkInterfaceModule = default("^.^");
         string macModule;
         string transmissionGateVectorModule = default("^.tGates[0]");
         bool verbose = default(false);

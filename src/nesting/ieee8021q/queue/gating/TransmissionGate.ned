@@ -39,6 +39,8 @@ simple TransmissionGate
         string clockModule = default("^.^.^.clock");
         bool lengthAwareSchedulingEnabled = default(true);
         bool verbose = default(false);
+        @signal[gateStateChanged](type=bool);
+        @statistic[gateStateChanged](title="gateStateChanged"; record=vector; interpolationmode=none);
     gates:
         input in;
         output out;

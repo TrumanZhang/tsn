@@ -98,6 +98,9 @@ private:
     cMessage gateStateChangedMsg = cMessage("gateStateChanged");
 
 protected:
+
+    simsignal_t gateStateChangedSignal;
+
     /*
      * @see cSimpleModule::initialize()
      */

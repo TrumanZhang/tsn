@@ -70,7 +70,7 @@ void GateController::initialize(int stage) {
         switchString =
                 this->getModuleByPath(par("switchModule"))->getFullName();
         portString = std::to_string(
-                this->getModuleByPath(par("queuingModule"))->getIndex());
+                this->getModuleByPath(par("networkInterfaceModule"))->getIndex());
 
         lastChange = simTime();
         currentSchedule = std::unique_ptr < Schedule
