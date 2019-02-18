@@ -1,18 +1,16 @@
 # NeSTiNg - Network Simulator for Time-sensitive Networking
 
-**Updated to Inet 4.0.0, will be merged into master branch soon!**
-
 NeSTiNg is a simulation model for Time-sensitive Networking (TSN) using the OMNeT++ discrete event simulation framework.
 Our model uses the [INET framework](https://inet.omnetpp.org/) and enhances it by TSN-capable components.
 The model was initially developed by a group of students during a curricular project and is continously extended at the [Distributed Systems group of IPVS, University of Stuttgart](https://www.ipvs.uni-stuttgart.de/abteilungen/vs/)
 
 ## Compatibility
 
-The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.4 and INET version 4.0.0 under Linux.
+The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.4.1 and INET version 4.1.0 under Linux.
 
 ## Getting Started
 
-+ Follow the instructions at [https://omnetpp.org/](https://omnetpp.org/) to download and install OMNeT++ version 5.4.
++ Follow the instructions at [https://omnetpp.org/](https://omnetpp.org/) to download and install OMNeT++ version 5.4.1
 + Make sure OMNeT++ is in your `PATH` by changing into the OMNeT++ directory and sourcing the `setenv` script.
 + `cd` into an arbitrarily named, preferably empty `<workspace>` directory.
 + Clone this repository, i.e.
@@ -21,15 +19,15 @@ The current version of the NeSTiNg simulation framework has been tested with OMN
   $ git clone https://gitlab.com/ipvs/nesting.git
 ```
 
-+ Download and unpack INET version 4.0.0 or clone the INET repository and checkout tag v4.0.0, i.e.
++ Download and unpack INET version 4.1.0 or clone the INET repository and checkout tag v4.1.0, i.e.
 
 ```
   $ git clone https://github.com/inet-framework/inet.git
-  $ git checkout -b v4.0.0 v4.0.0
+  $ git checkout -b v4.1.0 v4.1.0
 ```
   Alternatively, as space-saving one-liner
 ```
-  $ git clone --branch v4.0.0 --depth 1 https://github.com/inet-framework/inet.git
+  $ git clone --branch v4.1.0 --depth 1 https://github.com/inet-framework/inet.git
 ```
 
 + Your directory should now look like this:
