@@ -28,7 +28,7 @@ void QueuingFrames::initialize() {
     //Precondition: numberOfQueues must have a valid number, i.e <= number of
     // all possible pcp values.
 
-    if (numberOfQueues > Ieee8021q::kNumberOfPCPValues || numberOfQueues < 1) {
+    if (numberOfQueues > kNumberOfPCPValues || numberOfQueues < 1) {
         throw new cRuntimeError(
                 "Invalid assignment of numberOfQueues. Number of queues should not "
                         "be bigger than the number of all possible pcp values!");
@@ -36,15 +36,30 @@ void QueuingFrames::initialize() {
 }
 
 void QueuingFrames::handleMessage(cMessage *msg) {
-    cPacket *packet = check_and_cast<cPacket *>(msg);
+    inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
 
-    Ieee8021QCtrl* controler = check_and_cast<Ieee8021QCtrl*>(
-            packet->getControlInfo());
+    // switch ingoing VLAN Tag to outgoing Tag
+    auto vlanTagIn = packet->removeTag<VLANTagInd>();
+    int pcpValue = vlanTagIn->getPcp();
+    auto vlanTagOut = packet->addTag<VLANTagReq>();
+    vlanTagOut->setPcp(pcpValue);
+    vlanTagOut->setDe(vlanTagIn->getDe());
+    vlanTagOut->setVID(vlanTagIn->getVID());
 
-    int pcpValue = controler->getPCP();
+    // switch ingoing MAC Tag to outgoing MAC Tag
+    auto macTagIn = packet->removeTag<inet::MacAddressInd>();
+    auto macTagOut = packet->addTag<inet::MacAddressReq>();
+    macTagOut->setDestAddress(macTagIn->getDestAddress());
+    macTagOut->setSrcAddress(macTagIn->getSrcAddress());
+
+    delete macTagIn;
+    delete vlanTagIn;
+
+    // remove encapsulation
+    packet->trim();
 
     // Check whether the PCP value is correct.
-    if (pcpValue > Ieee8021q::kNumberOfPCPValues) {
+    if (pcpValue > kNumberOfPCPValues) {
         throw new cRuntimeError(
                 "Invalid assignment of PCP value. The value of PCP should not be "
                         "bigger than the number of supported queues.");
@@ -57,8 +72,8 @@ void QueuingFrames::handleMessage(cMessage *msg) {
 
     // Get the corresponding gate and transmit the frame to it.
     EV_TRACE << getFullPath() << ": Sending packet '" << packet
-                    << "' with pcp value '" << controler->getPCP()
-                    << "' to queue " << queueIndex << endl;
+                    << "' with pcp value '" << pcpValue << "' to queue "
+                    << queueIndex << endl;
 
     cGate* outputGate = gate("out", queueIndex);
     send(msg, outputGate);

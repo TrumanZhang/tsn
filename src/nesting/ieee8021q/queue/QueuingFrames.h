@@ -19,8 +19,10 @@
 #include <omnetpp.h>
 #include <array>
 
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "../Ieee8021q.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
+#include "../../linklayer/common/VLANTag_m.h"
 
 using namespace omnetpp;
 
@@ -35,7 +37,7 @@ private:
     /**
      * A static implementation of the traffic class mapping from the standard
      */
-    int standardTrafficClassMapping[Ieee8021q::kNumberOfPCPValues][Ieee8021q::kNumberOfPCPValues] =
+    int standardTrafficClassMapping[kNumberOfPCPValues][kNumberOfPCPValues] =
         {
               { 0, 0, 0, 0, 0, 0, 0, 0 },
               { 0, 0, 0, 0, 1, 1, 1, 1 },

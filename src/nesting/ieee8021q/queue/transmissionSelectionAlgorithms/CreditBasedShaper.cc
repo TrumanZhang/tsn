@@ -53,7 +53,7 @@ void CreditBasedShaper::handleMessage(cMessage* msg) {
             TSAlgorithm::handleMessage(msg);
         }
     } else {
-        cPacket* packet = check_and_cast<cPacket*>(msg);
+        Packet* packet = check_and_cast<Packet*>(msg);
         handleSendPacketEvent(packet);
         send(packet, "out");
     }
@@ -100,7 +100,7 @@ simtime_t CreditBasedShaper::idleTimeToZeroCredit() {
     return simTime() + timeForCredits(getIdleSlope(), 0 - credit);
 }
 
-simtime_t CreditBasedShaper::transmissionTime(cPacket* packet) {
+simtime_t CreditBasedShaper::transmissionTime(Packet* packet) {
     simtime_t transmissionTime = timeForCredits(getPortTransmitRate(),
             Ieee8021q::getFinalEthernet2FrameBitLength(packet));
     return transmissionTime;
@@ -125,7 +125,7 @@ void CreditBasedShaper::updateState(State newState) {
     EV_DEBUG << ",credit=" << credit << "]" << endl;
 }
 
-void CreditBasedShaper::spendCredit(cPacket* packet) {
+void CreditBasedShaper::spendCredit(Packet* packet) {
     double spendCredit = creditsForTime(getSendSlope(),
             transmissionTime(packet));
     credit -= spendCredit;
@@ -156,7 +156,7 @@ bool CreditBasedShaper::isCreditPositive() {
 }
 
 bool CreditBasedShaper::isPacketReadyForTransmission() {
-    uint64_t mtuSize = Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+    uint64_t mtuSize = kEthernet2MaximumTransmissionUnitBitLength.get();
     return !queue->isEmpty(mtuSize);
 }
 
@@ -205,7 +205,7 @@ void CreditBasedShaper::handlePacketEnqueuedEvent() {
     }
 }
 
-void CreditBasedShaper::handleSendPacketEvent(cPacket* packet) {
+void CreditBasedShaper::handleSendPacketEvent(Packet* packet) {
     assert(state != kSpendCredit);
     assert(isCreditPositive());
     assert(!reachedZeroCreditMessage.isScheduled());

@@ -38,31 +38,53 @@ void EtherVLANTaggedTrafGen::sendBurstPackets() {
         char msgname[40];
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-        cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
-
+        // create new packet
+        Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = packetLength->intValue();
-        packet->setByteLength(len);
+        const auto& payload = makeShared<ByteCountChunk>(B(len));
+        // set creation time
+        auto timeTag = payload->addTag<CreationTimeTag>();
+        timeTag->setCreationTime(simTime());
 
-        // Create control info for encap modules
-        Ieee8021QCtrl *ctrlInfo = new Ieee8021QCtrl();
-        ctrlInfo->setEtherType(etherType);
-        ctrlInfo->setDest(destMACAddress);
-        ctrlInfo->setTagged(vlanTagEnabled->boolValue());
-        ctrlInfo->setPCP(pcp->intValue());
-        ctrlInfo->setDEI(dei->boolValue());
-        ctrlInfo->setVID(vid->intValue());
-        packet->setControlInfo(ctrlInfo);
+        datapacket->insertAtBack(payload);
+        datapacket->removeTagIfPresent<PacketProtocolTag>();
+        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
+                &Protocol::ipv4);
+        // TODO check which protocol to insert
+        auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
+        sapTag->setSsap(ssap);
+        sapTag->setDsap(dsap);
 
-        EV_TRACE << getFullPath() << ": Send packet `" << packet->getName()
-                        << "' dest=" << ctrlInfo->getDestinationAddress()
-                        << " length=" << packet->getBitLength() << "B type="
-                        << ctrlInfo->getEtherType() << " vlan-tagged="
-                        << ctrlInfo->isTagged() << " pcp=" << ctrlInfo->getPCP()
-                        << " dei=" << ctrlInfo->getDEI() << " vid="
-                        << ctrlInfo->getVID() << endl;
+        // create control info for encap modules
+        auto macTag = datapacket->addTag<MacAddressReq>();
+        macTag->setDestAddress(destMacAddress);
 
-        emit(sentPkSignal, packet);
-        send(packet, "out");
+        uint8_t PCP;
+        bool de;
+        short VID;
+        // create VLAN control info
+        if (vlanTagEnabled->boolValue()) {
+            auto ieee8021q = datapacket->addTag<VLANTagReq>();
+            PCP = pcp->intValue();
+            de = dei->boolValue();
+            VID = vid->intValue();
+            ieee8021q->setPcp(PCP);
+            ieee8021q->setDe(de);
+            ieee8021q->setVID(VID);
+        }
+
+        EV_TRACE << getFullPath() << ": Send packet `" << datapacket->getName()
+                        << "' dest=" << macTag->getDestAddress() << " length="
+                        << datapacket->getBitLength() << "B type="
+                        << IEEE802CTRL_DATA << " vlan-tagged="
+                        << vlanTagEnabled->boolValue();
+        if (vlanTagEnabled->boolValue()) {
+            EV_TRACE << " pcp=" << PCP << " dei=" << de << " vid=" << VID;
+        }
+        EV_TRACE << endl;
+
+        emit(packetSentSignal, datapacket);
+        send(datapacket, "out");
         packetsSent++;
     }
 }

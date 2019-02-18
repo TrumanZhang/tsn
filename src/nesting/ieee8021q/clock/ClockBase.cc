@@ -67,7 +67,7 @@ void ClockBase::addScheduledTickListener(unsigned int idleTicks,
     Enter_Method_Silent();
 
     // Binary search to find scheduled entry with equal or more idle ticks.
-    list<ScheduledTickEntry*>::iterator it = lower_bound(
+    std::list<ScheduledTickEntry*>::iterator it = lower_bound(
     scheduledTicks.begin(),
     scheduledTicks.end(),
     idleTicks,

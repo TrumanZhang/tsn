@@ -44,6 +44,9 @@ void TransmissionGate::initialize() {
             par("transmissionSelectionAlgorithmModule"), this);
 
     clock = getModuleFromPar<IClock>(par("clockModule"), this);
+
+    gateStateChangedSignal =
+            registerSignal("gateStateChanged");
 }
 
 void TransmissionGate::handleMessage(cMessage* msg) {
@@ -56,7 +59,7 @@ void TransmissionGate::handleMessage(cMessage* msg) {
             handleRequestPacketEvent();
         }
     } else {
-        cPacket* packet = check_and_cast<cPacket *>(msg);
+        Packet* packet = check_and_cast<Packet *>(msg);
         EV_TRACE << getFullPath() << ": Sending packet '" << packet->getName()
                         << "' of size " << packet->getByteLength() << "B ("
                         << packet->getBitLength() << " bit) at time "
@@ -101,7 +104,7 @@ void TransmissionGate::handleGateStateChangedEvent() {
     } else {
         EV_INFO << "Gate closed." << endl;
     }
-
+    emit(gateStateChangedSignal, this->gateOpen);
     // Notify transmission-selection if packet has become ready for transmission
     if (gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits())
             && (isExpressQueue() || !gateController->currentlyOnHold())) {
@@ -121,7 +124,7 @@ uint64_t TransmissionGate::maxTransferableBits() {
 
         return maxbit;
     }
-    return Ieee8021q::kEthernet2MaximumTransmissionUnitBitLength;
+    return kEthernet2MaximumTransmissionUnitBitLength.get();
 }
 
 bool TransmissionGate::isGateOpen() {

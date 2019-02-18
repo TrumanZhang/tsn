@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <schedule>
-	<cycle>1000</cycle>
+	<cycle>400</cycle>
 	<host name="robotController">
 		<entry>
 			<!-- us -->
-			<start>2</start>
+			<start>10</start>
 			<queue>7</queue>
 			<dest>00:00:00:00:00:04</dest>
 			<!-- byte -->
@@ -15,12 +15,12 @@
 		<port id="3">
 			<entry>
 				<!-- us -->
-				<length>50</length>
+				<length>200</length>
 				<bitvector>00000001</bitvector>
 			</entry>
 			<entry>
 				<!-- us -->
-				<length>950</length>
+				<length>200</length>
 				<bitvector>11111110</bitvector>
 			</entry>
 		</port>
@@ -29,12 +29,12 @@
 		<port id="0">
 			<entry>
 				<!-- us -->
-				<length>50</length>
+				<length>200</length>
 				<bitvector>00000001</bitvector>
 			</entry>
 			<entry>
 				<!-- us -->
-				<length>950</length>
+				<length>200</length>
 				<bitvector>11111110</bitvector>
 			</entry>
 		</port>

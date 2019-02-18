@@ -1,10 +1,8 @@
 //
-// Copyright (C) 2006 Levente Meszaros
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,7 +10,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
 #ifndef __INET_ETHERMACFULLDUPLEXPREEMPTABLE_H
@@ -20,7 +18,9 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "../../ieee8021q/queue/TransmissionSelection.h"
 #include "../../ieee8021q/Ieee8021q.h"
 
@@ -35,7 +35,7 @@ class TransmissionSelection;
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class EtherMACFullDuplexPreemptable: public EtherMACFullDuplex,
+class EtherMACFullDuplexPreemptable: public EtherMacFullDuplex,
         public IPassiveQueueListener {
 private:
     TransmissionSelection* transmissionSelectionModule;
@@ -49,17 +49,21 @@ private:
 //    cMessage *preemptCurrentFrameMsg = nullptr;
 
     bool transmittingExpressFrame = false;
-    EtherFrame* currentExpressFrame = nullptr;
+    Packet* currentExpressFrame = nullptr;
 
     bool onHold = false;
     bool transmittingPreemptableFrame = false;
-    EtherFrame* currentPreemptableFrame = nullptr;
+    Packet* currentPreemptableFrame = nullptr;
     simtime_t preemptableTransmissionStart;
+
+    simtime_t pFrameArrivalTime;
+    simtime_t eFrameArrivalTime;
+
     unsigned int preemptedBytesReceived;
     unsigned int preemptedBytesSent;
-    EtherPhyFrame* receivedPreemptedFrame = nullptr;
+    EthernetSignal* receivedPreemptedFrame = nullptr;
 
-    virtual int calculatePreemptedPayloadBytesSent(simtime_t timeToCheck);
+    virtual int calculatePreemptedPayloadBytesSent(simtime_t timeToCheck, bool sentCRC);
     virtual bool isPreemptionNowPossible();
     virtual simtime_t isPreemptionLaterPossible();
     virtual simtime_t calculateTransmissionDuration(int bytes);
@@ -73,15 +77,19 @@ protected:
     static simsignal_t transmittedPreemptableFinalSignal;
     static simsignal_t transmittedPreemptableFullSignal;
     static simsignal_t expressFrameEnqueuedWhileSendingPreemptableSignal;
+    static simsignal_t eMacDelay;
+    static simsignal_t pMacDelay;
+    static simsignal_t receivedExpressFrame;
+    static simsignal_t receivedPreemptableFrameFull;
 
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *msg) override;
     virtual void handleEndTxPeriod() override;
     virtual void handleEndIFGPeriod() override;
     virtual void getNextFrameFromQueue() override;
     virtual bool checkForAndRequestExpressFrame();
-    virtual void processFrameFromUpperLayer(EtherFrame *frame) override;
+    virtual void handleUpperPacket(Packet *frame) override;
     virtual void startFrameTransmission() override;
     virtual void refreshDisplay() const override;
 public:

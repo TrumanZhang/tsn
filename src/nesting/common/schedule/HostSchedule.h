@@ -1,9 +1,17 @@
-/*
- * HostSchedule.h
- *
- *  Created on: 15.07.2017
- *      Author: Patrick
- */
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+//
 
 #ifndef NESTING_COMMON_SCHEDULE_HOSTSCHEDULE_H_
 #define NESTING_COMMON_SCHEDULE_HOSTSCHEDULE_H_
@@ -12,7 +20,6 @@
 #include <vector>
 
 using namespace omnetpp;
-using namespace std;
 
 namespace nesting {
 
@@ -27,7 +34,7 @@ protected:
      * Schedule entries, that consist of a length in abstract time units and
      * a scheduled object.
      */
-    vector<tuple<int, int, T>> entries;
+    std::vector<std::tuple<int, int, T>> entries;
 
     /**
      * Total cycletime of this schedule.
@@ -59,21 +66,21 @@ public:
 
     /** Returns the scheduled object at a given index. */
     virtual T getScheduledObject(unsigned int index) const {
-        return get < 2 > (entries[index]);
+        return std::get < 2 > (entries[index]);
     }
 
     /**
      * Returns the time when the scheduled object is supposed to be sent.
      */
     virtual unsigned int getTime(unsigned int index) const {
-        return get < 0 > (entries[index]);
+        return std::get < 0 > (entries[index]);
     }
 
     /**
      *  Return the size of the scheduled object at a given index.
      */
     virtual unsigned int getSize(unsigned int index) const {
-        return get < 1 > (entries[index]);
+        return std::get < 1 > (entries[index]);
     }
 
     /** Returns true if the schedule contains no entries. Otherwise false. */
@@ -92,7 +99,7 @@ public:
      *                        scheduled entry.
      */
     virtual void addEntry(int time, int size, T scheduledObject) {
-        entries.push_back(make_tuple(time, size, scheduledObject));
+        entries.push_back(std::make_tuple(time, size, scheduledObject));
     }
 };
 

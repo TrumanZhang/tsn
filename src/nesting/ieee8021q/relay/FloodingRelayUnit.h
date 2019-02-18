@@ -18,8 +18,6 @@
 
 #include <omnetpp.h>
 
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
-
 using namespace omnetpp;
 
 namespace nesting {

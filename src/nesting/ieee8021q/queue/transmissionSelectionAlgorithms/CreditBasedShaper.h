@@ -19,12 +19,12 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 
 #include "TSAlgorithm.h"
 #include "../../Ieee8021q.h"
 
 using namespace omnetpp;
-using namespace inet;
 
 namespace nesting {
 
@@ -44,7 +44,7 @@ protected:
 protected:
     /**
      * The rate of change of credit as factor of the transmission rate of the
-     * MAC module.
+     * Mac module.
      */
     double idleSlopeFactor;
 
@@ -92,7 +92,7 @@ protected:
     virtual double getSendSlope();
 
     /**
-     * This method returns the associated MAC port transmit rate in bits per
+     * This method returns the associated Mac port transmit rate in bits per
      * second.
      */
     virtual double getPortTransmitRate();
@@ -132,13 +132,13 @@ protected:
     virtual simtime_t idleTimeToZeroCredit();
 
     /** Calculates the time needed to transmit a packet. */
-    virtual simtime_t transmissionTime(cPacket* packet);
+    virtual simtime_t transmissionTime(Packet* packet);
 
     /** Transitions the module into a new state. */
     virtual void updateState(State newState);
 
     /** Spend the necessary amount of credit for a given packet to transmit. */
-    virtual void spendCredit(cPacket* packet);
+    virtual void spendCredit(Packet* packet);
 
     /** Earn the amount of credits respective to a given time interval. */
     virtual void earnCredits(simtime_t time);
@@ -168,7 +168,7 @@ protected:
     /**
      * Handle state changes and triggering events due to transmitting packets.
      */
-    virtual void handleSendPacketEvent(cPacket* packet);
+    virtual void handleSendPacketEvent(Packet* packet);
 
     /**
      * Handle state changes and triggering events after finishing spending

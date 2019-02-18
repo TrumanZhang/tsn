@@ -22,15 +22,14 @@
 
 #include "../transmissionSelectionAlgorithms/TSAlgorithm.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
+#include "inet/common/packet/Packet.h"
 #include "../../clock/IClock.h"
 #include "GateController.h"
 #include "../TransmissionSelection.h"
 #include "../framePreemption/IPreemptableQueue.h"
 
 using namespace omnetpp;
-using namespace inet;
-using namespace std;
 
 namespace nesting {
 
@@ -99,6 +98,9 @@ private:
     cMessage gateStateChangedMsg = cMessage("gateStateChanged");
 
 protected:
+
+    simsignal_t gateStateChangedSignal;
+
     /*
      * @see cSimpleModule::initialize()
      */

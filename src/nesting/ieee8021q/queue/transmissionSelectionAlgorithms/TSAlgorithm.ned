@@ -33,10 +33,11 @@ package nesting.ieee8021q.queue.transmissionSelectionAlgorithms;
 // @see ~CreditBasedShaper, ~StrictPriority, ~EtherMACFullDuplex
 // @see ~TransmissionGate
 //
-moduleinterface TSAlgorithm {
+moduleinterface TSAlgorithm
+{
     parameters:
         @display("i=block/server");
-        string macModule; // Path to the MAC module
+        string macModule; // Path to the frame preemption module
         string gateModule; // Path to the transmission gate module
         string queueModule; // Path to the length-aware-queue module
     gates:

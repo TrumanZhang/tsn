@@ -27,73 +27,61 @@ void ForwardingRelayUnit::initialize() {
 }
 
 void ForwardingRelayUnit::handleMessage(cMessage *msg) {
-    cPacket* packet = check_and_cast<cPacket*>(msg);
-    Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
-            packet->getControlInfo());
+    Packet* packet = check_and_cast<Packet*>(msg);
+    auto macTag = packet->getTag<MacAddressInd>();
 
     // Distinguish between broadcast-, multicast- and unicast-ethernet frames
-    if (ctrlInfo->getDestinationAddress().isBroadcast()) {
+    if (macTag->getDestAddress().isBroadcast()) {
         processBroadcast(packet);
-    } else if (ctrlInfo->getDestinationAddress().isMulticast()) {
+    } else if (macTag->getDestAddress().isMulticast()) {
         processMulticast(packet);
     } else {
         processUnicast(packet);
     }
 }
 
-void ForwardingRelayUnit::processBroadcast(cPacket* packet) {
+void ForwardingRelayUnit::processBroadcast(Packet* packet) {
     // Flood packets everywhere except of ingress port
     // TODO this is just a temporary solution not sure how correct that is
     for (int portId = 0; portId < gateSize("out"); portId++) {
         cGate *outputGate = gate("out", portId);
         if (!packet->arrivedOn("in", portId)) {
-            send(duplicatePacketWithCtrlInfo(packet), outputGate);
+            // send(duplicatePacketWithCtrlInfo(packet), outputGate);
+            Packet* dupPacket = packet->dup();
+            send(dupPacket, outputGate);
         }
     }
     delete packet;
 }
 
-void ForwardingRelayUnit::processMulticast(cPacket* packet) {
+void ForwardingRelayUnit::processMulticast(Packet* packet) {
     processBroadcast(packet);
 }
 
-void ForwardingRelayUnit::processUnicast(cPacket* packet) {
+void ForwardingRelayUnit::processUnicast(Packet* packet) {
     // Control info is needed to retrieve destination MAC address
-    Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
-            packet->getControlInfo());
+    auto macTag = packet->getTag<MacAddressInd>();
 
     //Learning MAC port mappings
-    fdb->insert(ctrlInfo->getSourceAddress(), simTime(),
+    fdb->insert(macTag->getSrcAddress(), simTime(),
             packet->getArrivalGate()->getIndex());
-    int forwardingPort = fdb->getPort(ctrlInfo->getDestinationAddress(),
-            simTime());
+    int forwardingPort = fdb->getPort(macTag->getDestAddress(), simTime());
 
+    Packet* dupPacket;
     //Routing entry available?
     if (forwardingPort == -1) {
-        processBroadcast(duplicatePacketWithCtrlInfo(packet));
+        dupPacket = packet->dup();
+        processBroadcast(dupPacket);
         EV_INFO << getFullPath() << ": Broadcasting packets `" << packet
                        << "` to all ports" << endl;
     } else {
+        dupPacket = packet->dup();
         EV_INFO << getFullPath() << ": Forwarding packet `" << packet
                        << "` to port " << forwardingPort << endl;
-        send(duplicatePacketWithCtrlInfo(packet), gate("out", forwardingPort));
+        send(dupPacket, gate("out", forwardingPort));
     }
 
     delete packet;
-}
-
-cPacket* ForwardingRelayUnit::duplicatePacketWithCtrlInfo(cPacket* packet) {
-    // Duplicate packet
-    cPacket* dupPacket = packet->dup();
-
-    // Duplicate control because it is not duplicated implicitly and attach it to
-    // the duplicated packet
-    Ieee8021QCtrl* ctrlInfo = check_and_cast<Ieee8021QCtrl*>(
-            packet->getControlInfo());
-    Ieee8021QCtrl* dupCtrlInfo = new Ieee8021QCtrl(*ctrlInfo);
-    dupPacket->setControlInfo(dupCtrlInfo);
-
-    return dupPacket;
 }
 
 } // namespace nesting

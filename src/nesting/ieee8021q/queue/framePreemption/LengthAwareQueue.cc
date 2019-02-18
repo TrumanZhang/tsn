@@ -74,6 +74,7 @@ void LengthAwareQueue::enqueue(cPacket* packet) {
     } else {
         emit(dropPkByQueueSignal, packet);
         numPacketsDropped++;
+        handlePacketEnqueuedEvent(packet);
         delete packet;
     }
     emit(queueLengthSignal, queue.getLength());
@@ -120,7 +121,7 @@ bool LengthAwareQueue::isEmpty(uint64_t maxBits) {
     }
 
     cPacket* nextPacket = static_cast<cPacket*>(queue.front());
-    return static_cast<uint64_t>(nextPacket->getBitLength()) > maxBits;
+    return static_cast<uint64_t>(nextPacket->getBitLength() + 240) > maxBits; // add 240 bits to account for headers (30 bytes * 8)
 }
 
 void LengthAwareQueue::requestPacket(uint64_t maxBits) {

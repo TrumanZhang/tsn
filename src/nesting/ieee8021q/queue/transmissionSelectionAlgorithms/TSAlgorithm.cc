@@ -26,8 +26,8 @@ TSAlgorithm::~TSAlgorithm() {
 }
 
 void TSAlgorithm::initialize() {
-    cModule* rawMACModule = getModuleFromPar<cModule>(par("macModule"), this);
-    mac = check_and_cast<EtherMACBase*>(rawMACModule);
+    cModule* macModule = getModuleFromPar<cModule>(par("macModule"), this);
+    mac = check_and_cast<EtherMacBase*>(macModule);
     queue = getModuleFromPar<LengthAwareQueue>(par("queueModule"), this);
     transmissionGate = getModuleFromPar<TransmissionGate>(par("gateModule"),
             this);

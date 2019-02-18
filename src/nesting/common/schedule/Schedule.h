@@ -21,7 +21,6 @@
 #include <vector>
 
 using namespace omnetpp;
-using namespace std;
 
 namespace nesting {
 
@@ -36,7 +35,7 @@ protected:
      * Schedule entries, that consist of a length in abstract time units and
      * a scheduled object.
      */
-    vector<tuple<int, T>> entries;
+    std::vector<std::tuple<int, T>> entries;
 
     /**
      * Total length of all schedule entries combined in abstract time units.
@@ -57,7 +56,7 @@ public:
 
     /** Returns the scheduled object at a given index. */
     virtual T getScheduledObject(unsigned int index) const {
-        return get < 1 > (entries[index]);
+        return std::get < 1 > (entries[index]);
     }
 
     /**
@@ -65,7 +64,7 @@ public:
      * scheduled.
      */
     virtual unsigned int getLength(unsigned int index) const {
-        return get < 0 > (entries[index]);
+        return std::get < 0 > (entries[index]);
     }
 
     /** Returns the total length of the schedule in abstract time units. */

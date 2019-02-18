@@ -19,13 +19,14 @@ namespace nesting {
 
 HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         cXMLElement *xml, cXMLElement *rootXml) {
-    HostSchedule<Ieee8021QCtrl>* schedule = new HostSchedule<Ieee8021QCtrl>();
+    HostSchedule<Ieee8021QCtrl>* schedule =
+            new HostSchedule<Ieee8021QCtrl>();
 
     //extract cycle from second xml argument (xml root)
     int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
     schedule->setCycle(cycle);
 
-    vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
     for (cXMLElement* entry : entries) {
         // Get time
         const char* timeCString =
@@ -38,24 +39,23 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         unsigned int size = atoi(sizeCString);
 
         // Get Ieee8021QCtrl
-
-        Ieee8021QCtrl etherctrl = Ieee8021QCtrl();
+        Ieee8021QCtrl header;
+        header.q1Tag = VLANTagReq();
+        header.macTag = inet::MacAddressReq();
         const char* queueCString =
                 entry->getFirstChildWithTag("queue")->getNodeValue();
-        etherctrl.setPCP(atoi(queueCString));
+        header.q1Tag.setPcp(atoi(queueCString));
 
         const char* addressCString =
                 entry->getFirstChildWithTag("dest")->getNodeValue();
 
-        inet::MACAddress destination = inet::MACAddress(addressCString);
-        etherctrl.setDestinationAddress(destination);
+        inet::MacAddress destination = inet::MacAddress(addressCString);
+        header.macTag.setDestAddress(destination);
+        // etherctrl.setTagged(true); no tagged in Ieee802_1QHeader
+        header.q1Tag.setVID(0);
+        header.q1Tag.setDe(false);
 
-        etherctrl.setEtherType(0x8100);
-        etherctrl.setTagged(true);
-        etherctrl.setVID(0);
-        etherctrl.setDEI(false);
-
-        schedule->addEntry(time, size, etherctrl);
+        schedule->addEntry(time, size, header);
     }
 
     return schedule;

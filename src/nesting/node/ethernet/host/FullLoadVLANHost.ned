@@ -17,7 +17,7 @@ package nesting.node.ethernet.host;
 
 import inet.common.queue.Sink;
 import nesting.common.queue.EtherTrafGenQueue;
-
+import nesting.linklayer.ethernet.VLANEncap;
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
 // physical medium allows. This module's main use case is to simulate a
@@ -28,15 +28,21 @@ module FullLoadVLANHost extends VLANHostBase
     parameters:
         @display("bgb=363,398");
         @networkNode();
-        mac.queueModule = "^.trafGenQueue";
+        eth.mac.queueModule = "^.^.trafGenQueue";
     submodules:
         trafGenQueue: EtherTrafGenQueue {
-            @display("p=252,324");
+            @display("p=192,69");
         }
         sink: Sink {
-            @display("p=100,324");
+            @display("p=84,69");
+        }
+        vlanEncap: VLANEncap {
+            @display("p=142,188");
         }
     connections:
         trafGenQueue.out --> vlanEncap.upperLayerIn;
         vlanEncap.upperLayerOut --> sink.in++;
+        
+        vlanEncap.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
 }

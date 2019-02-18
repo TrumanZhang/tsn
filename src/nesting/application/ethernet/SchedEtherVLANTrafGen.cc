@@ -41,7 +41,7 @@ void SchedEtherVLANTrafGen::initialize(int stage) {
     } else if (stage == INITSTAGE_LINK_LAYER) {
         //clock module reference from ned parameter
 
-        currentSchedule = unique_ptr < HostSchedule
+        currentSchedule = std::unique_ptr < HostSchedule
                 < Ieee8021QCtrl >> (new HostSchedule<Ieee8021QCtrl>());
         cXMLElement* xml = par("initialSchedule").xmlValue();
         loadScheduleOrDefault(xml);
@@ -61,7 +61,7 @@ void SchedEtherVLANTrafGen::handleMessage(cMessage *msg) {
     if (msg->isSelfMessage()) {
         //disregard for now
     } else {
-        receivePacket(check_and_cast<cPacket *>(msg));
+        receivePacket(check_and_cast<Packet *>(msg));
     }
 }
 
@@ -70,14 +70,35 @@ void SchedEtherVLANTrafGen::sendPacket() {
     char msgname[40];
     sprintf(msgname, "pk-%d-%d", getId(), seqNum);
 
-    cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
+    // create new packet
+    Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
+    long len = currentSchedule->getSize(index);
+    const auto& payload = makeShared<ByteCountChunk>(B(len));
+    // set creation time
+    auto timeTag = payload->addTag<CreationTimeTag>();
+    timeTag->setCreationTime(simTime());
+
+    datapacket->insertAtBack(payload);
+    datapacket->removeTagIfPresent<PacketProtocolTag>();
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
+            &Protocol::ipv4);
+    // TODO check if protocol is correct
+    auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
+    sapTag->setSsap(ssap);
+    sapTag->setDsap(dsap);
 
     seqNum++;
 
-    datapacket->setByteLength(currentSchedule->getSize(index));
-    Ieee8021QCtrl* etherctrl = new Ieee8021QCtrl(
-            currentSchedule->getScheduledObject(index));
-    datapacket->setControlInfo(etherctrl);
+    // get scheduled control data
+    Ieee8021QCtrl header = currentSchedule->getScheduledObject(index);
+    // create mac control info
+    auto macTag = datapacket->addTag<MacAddressReq>();
+    macTag->setDestAddress(header.macTag.getDestAddress());
+    // create VLAN control info
+    auto ieee8021q = datapacket->addTag<VLANTagReq>();
+    ieee8021q->setPcp(header.q1Tag.getPcp());
+    ieee8021q->setDe(header.q1Tag.getDe());
+    ieee8021q->setVID(header.q1Tag.getVID());
 
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
@@ -88,7 +109,7 @@ void SchedEtherVLANTrafGen::sendPacket() {
     TSNpacketsSent++;
 }
 
-void SchedEtherVLANTrafGen::receivePacket(cPacket *msg) {
+void SchedEtherVLANTrafGen::receivePacket(Packet *msg) {
     EV_TRACE << getFullPath() << ": Received packet '" << msg->getName()
                     << "' with length " << msg->getByteLength() << "B at time "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
@@ -137,7 +158,8 @@ int SchedEtherVLANTrafGen::scheduleNextTickEvent() {
 }
 
 void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
-    string hostName = this->getModuleByPath(par("hostModule"))->getFullName();
+    std::string hostName =
+            this->getModuleByPath(par("hostModule"))->getFullName();
     HostSchedule<Ieee8021QCtrl>* schedule;
     bool realScheduleFound = false;
     //try to extract the part of the schedule belonging to this host
@@ -160,7 +182,7 @@ void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
         schedule = HostScheduleBuilder::createHostScheduleFromXML(defaultXml,
                 xml);
     }
-    unique_ptr < HostSchedule < Ieee8021QCtrl >> schedulePtr(schedule);
+    std::unique_ptr < HostSchedule < Ieee8021QCtrl >> schedulePtr(schedule);
 
     nextSchedule.reset();
     nextSchedule = move(schedulePtr);

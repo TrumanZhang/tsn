@@ -20,7 +20,8 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "FilteringDatabase.h"
 
 using namespace omnetpp;
@@ -40,10 +41,9 @@ private:
 protected:
     virtual void initialize();
     virtual void handleMessage(cMessage* msg);
-    virtual void processBroadcast(cPacket* packet);
-    virtual void processMulticast(cPacket* packet);
-    virtual void processUnicast(cPacket* packet);
-    virtual cPacket* duplicatePacketWithCtrlInfo(cPacket* packet);
+    virtual void processBroadcast(Packet* packet);
+    virtual void processMulticast(Packet* packet);
+    virtual void processUnicast(Packet* packet);
 
 public:
     //TODO: Fix filtering database aging parameter!

@@ -52,7 +52,7 @@ void EtherTrafGenQueue::initialize() {
     vid = &par("vid");
     packetLength = &par("packetLength");
     const char *destAddress = par("destAddress");
-    if (!destMACAddress.tryParse(destAddress)) {
+    if (!destMacAddress.tryParse(destAddress)) {
         throw new cRuntimeError("Invalid MAC Address");
     }
 
@@ -66,45 +66,70 @@ void EtherTrafGenQueue::handleMessage(cMessage *msg) {
     throw cRuntimeError("cannot handle messages.");
 }
 
-cPacket* EtherTrafGenQueue::generatePacket() {
+Packet* EtherTrafGenQueue::generatePacket() {
     seqNum++;
 
     char msgname[40];
     sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-    cPacket *packet = new cPacket(msgname, IEEE802CTRL_DATA);
-
+    // create new packet
+    Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
     long len = packetLength->intValue();
-    packet->setByteLength(len);
+    const auto& payload = makeShared<ByteCountChunk>(B(len));
+    // set creation time
+    auto timeTag = payload->addTag<CreationTimeTag>();
+    timeTag->setCreationTime(simTime());
 
-    Ieee8021QCtrl *etherctrl = new Ieee8021QCtrl();
+    datapacket->insertAtBack(payload);
+    datapacket->removeTagIfPresent<PacketProtocolTag>();
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
+            &Protocol::ipv4);
+    // TODO check if protocol is correct
+    auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
+    sapTag->setSsap(ssap);
+    sapTag->setDsap(dsap);
 
-    etherctrl->setEtherType(etherType->intValue());
-    etherctrl->setDest(destMACAddress);
-    etherctrl->setTagged(vlanTagEnabled->boolValue());
-    etherctrl->setPCP(pcp->intValue());
-    etherctrl->setDEI(dei->boolValue());
-    etherctrl->setVID(vid->intValue());
+    auto macTag = datapacket->addTag<MacAddressReq>();
+    macTag->setDestAddress(destMacAddress);
 
-    packet->setControlInfo(etherctrl);
-
-    return packet;
+    uint8_t PCP;
+    bool de;
+    short VID;
+    // create VLAN control info
+    if (vlanTagEnabled->boolValue()) {
+        auto ieee8021q = datapacket->addTag<VLANTagReq>();
+        PCP = pcp->intValue();
+        de = dei->boolValue();
+        VID = vid->intValue();
+        ieee8021q->setPcp(PCP);
+        ieee8021q->setDe(de);
+        ieee8021q->setVID(VID);
+    }
+    return datapacket;
 }
 
 void EtherTrafGenQueue::requestPacket() {
     Enter_Method("requestPacket(...)");
 
-    cPacket* packet = generatePacket();
+    /*
+    if(doNotSendFirstInitPacket) {
+        doNotSendFirstInitPacket = false;
+        return;
+    }
+    */
 
-    Ieee8021QCtrl* ctrlInfo = static_cast<Ieee8021QCtrl*>(
-    packet->getControlInfo()
-    );
+    Packet* packet = generatePacket();
 
     if(par("verbose")) {
-        EV_TRACE << getFullPath() << ": Send packet `" << packet->getName() << "' dest=" << ctrlInfo->getDestinationAddress()
-        << " length=" << packet->getBitLength() << "B type=" << ctrlInfo->getEtherType()
-        << " vlan-tagged=" << ctrlInfo->isTagged() << " pcp=" << ctrlInfo->getPCP()
-        << " dei=" << ctrlInfo->getDEI() << " vid=" << ctrlInfo->getVID() << "\n";
+        auto macTag = packet->findTag<MacAddressReq>();
+        auto ieee8021qTag = packet->findTag<VLANTagReq>();
+        EV_TRACE << getFullPath() << ": Send packet `" << packet->getName() << "' dest=" << macTag->getDestAddress()
+        << " length=" << packet->getBitLength() << "B type= empty" << " vlan-tagged=false";
+        if(ieee8021qTag) {
+            EV_TRACE << " vlan-tagged=true" << " pcp=" << ieee8021qTag->getPcp()
+            << " dei=" << ieee8021qTag->getDe() << " vid=" << ieee8021qTag->getVID();
+        }
+        EV_TRACE << endl;
     }
     emit(sentPkSignal, packet);
     send(packet, "out");

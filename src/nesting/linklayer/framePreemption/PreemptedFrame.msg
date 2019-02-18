@@ -18,11 +18,12 @@
 // holding an internal reference to the complete packet and a sequence number
 // to represent the packet ordering.
 //
+
 cplusplus {{
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include <omnetpp.h>
 #include <memory>
-typedef inet::EtherPhyFrame* cFramePointer;
+typedef inet::EthernetSignal* cFramePointer;
 }}
 
 class noncobject cFramePointer;

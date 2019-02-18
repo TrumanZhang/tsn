@@ -20,7 +20,10 @@
 
 #include "HostSchedule.h"
 #include "../../ieee8021q/Ieee8021q.h"
-#include "../../linklayer/common/Ieee8021QCtrl_m.h"
+#include "../../linklayer/common/Ieee8021QCtrl.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 using namespace omnetpp;
 

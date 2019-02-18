@@ -59,7 +59,7 @@ int FilteringDatabase::numInitStages() const {
 void FilteringDatabase::loadDatabase(cXMLElement* xml, int cycle) {
     newCycle = cycle;
 
-    string switchName =
+    std::string switchName =
             this->getModuleByPath(par("switchModule"))->getFullName();
     cXMLElement* fdb;
     //TODO this bool can probably be refactored to a nullptr check
@@ -106,7 +106,7 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
 
     for (auto individualAddress : individualAddresses) {
 
-        string macAddressStr = string(
+        std::string macAddressStr = std::string(
                 individualAddress->getAttribute("macAddress"));
         if (macAddressStr.empty()) {
             throw cRuntimeError(
@@ -129,11 +129,11 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
 
         // Create and insert entry for different individual address types
         if (vid == 0) {
-            MACAddress macAddress;
+            MacAddress macAddress;
             if (!macAddress.tryParse(macAddressStr.c_str())) {
-                throw new cRuntimeError("Cannot parse invalid MAC address.");
+                throw new cRuntimeError("Cannot parse invalid Mac address.");
             }
-            adminFdb.insert( { macAddress, pair<simtime_t, int>(0, port) });
+            adminFdb.insert( { macAddress, std::pair<simtime_t, int>(0, port) });
         } else {
             // TODO
             throw cRuntimeError(
@@ -160,12 +160,12 @@ void FilteringDatabase::handleMessage(cMessage *msg) {
     throw cRuntimeError("Must not receive messages.");
 }
 
-void FilteringDatabase::insert(MACAddress macAddress, simtime_t curTS,
+void FilteringDatabase::insert(MacAddress macAddress, simtime_t curTS,
         int port) {
     operFdb[macAddress] = std::pair<simtime_t, int>(curTS, port);
 }
 
-int FilteringDatabase::getPort(MACAddress macAddress, simtime_t curTS) {
+int FilteringDatabase::getPort(MacAddress macAddress, simtime_t curTS) {
     simtime_t ts;
     int port;
 

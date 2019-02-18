@@ -15,8 +15,10 @@
 
 package nesting.node.ethernet;
 
-import inet.linklayer.ethernet.EtherMACFullDuplex;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.contract.IEthernetInterface;
 import nesting.application.ethernet.SchedEtherVLANTrafGen;
 import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
@@ -31,40 +33,45 @@ import nesting.linklayer.ethernet.VLANEncap;
 module VLANEtherHost
 {
     parameters:
-        *.interfaceTableModule = default("");
+        string fcsMode @enum("declared","computed") = default("declared");
         @networkNode();
         @labels(node,ethernet-node);
-        @display("i=device/pc2;bgb=385.52002,483.12003");
+        @display("i=device/pc2;bgb=385,371");
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.fcsMode = fcsMode;
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
         tsn_app: SchedEtherVLANTrafGen {
             @display("p=212.768,69.296005");
         }
-        etherEncap: <default("EtherEncap")> like IEtherEncap {
-            @display("p=138,287");
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=330,215;is=s");
         }
+
         vlanEncap: VLANEncap {
-            @display("p=138,174");
+            @display("p=138,149");
         }
-        mac: EtherMACFullDuplex {
-            @display("p=138,402;q=txQueue");
-        }
+
         clock: <default("IdealClock")> like IClock {
             @display("p=330,69");
         }
         scheduleSwap: ScheduleSwap {
             usedInHost = true;
-            
-            @display("p=330,149;b=40,40");
+
+            @display("p=330,149;b=29,25");
+        }
+        eth: <default("EthernetInterface")> like IEthernetInterface {
+            parameters:
+                @display("p=138,271,row,150;q=txQueue");
         }
     connections:
         tsn_app.out --> vlanEncap.upperLayerIn;
-        vlanEncap.lowerLayerOut --> etherEncap.upperLayerIn;
-        etherEncap.lowerLayerOut --> mac.upperLayerIn;
-
-        mac.upperLayerOut --> etherEncap.lowerLayerIn;
-        etherEncap.upperLayerOut --> vlanEncap.lowerLayerIn;
         vlanEncap.upperLayerOut --> tsn_app.in;
-        mac.phys <--> ethg;
+
+        vlanEncap.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
+
+        eth.phys <--> ethg;
 }

@@ -19,12 +19,14 @@
 #include <omnetpp.h>
 
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "../common/Ieee8021QCtrl_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qHeader_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "../common/VLANTag_m.h"
 #include "../../ieee8021q/Ieee8021q.h"
 
 using namespace omnetpp;
-using namespace inet;
 
 namespace nesting {
 
@@ -47,14 +49,14 @@ private:
      * when the packet is of type Ether1QTag (is a VLAN Tag)
      * @param packet The packet that was received from lower level.
      */
-    virtual void processPacketFromLowerLevel(cPacket* packet);
+    virtual void processPacketFromLowerLevel(inet::Packet *packet);
 
     /**
      * Processes packets from higher level and possibly performs
      * encapsulation when the control information says so.
      * @param packet The packet received from  higher level.
      */
-    virtual void processPacketFromHigherLevel(cPacket* packet);
+    virtual void processPacketFromHigherLevel(inet::Packet *packet);
 protected:
     /** Signal for encapsulation events. */
     simsignal_t encapPkSignal;
@@ -75,13 +77,17 @@ protected:
     long totalDecap;
 protected:
     /** @see cSimpleModule::initialize() */
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
 
     /** @see cSimpleModule::handleMessage(cMessage*) */
     virtual void handleMessage(cMessage *msg) override;
 
     /** @see cSimpleModule::refreshDisplay() */
     virtual void refreshDisplay() const override;
+
+    virtual int numInitStages() const override {
+        return inet::INITSTAGE_LINK_LAYER + 1;
+    }
 public:
     virtual ~VLANEncap() {
     }

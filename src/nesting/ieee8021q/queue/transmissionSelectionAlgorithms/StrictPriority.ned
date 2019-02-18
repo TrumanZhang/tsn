@@ -31,7 +31,7 @@ simple StrictPriority like TSAlgorithm
     parameters:
         @display("i=block/server");
         @class(StrictPriority);
-        string macModule; // Path to the MAC module
+        string macModule; // Path to the fp module
         string gateModule; // Path to the transmission gate module
         string queueModule; // Path to the length-aware-queue module
         bool verbose = default(false);

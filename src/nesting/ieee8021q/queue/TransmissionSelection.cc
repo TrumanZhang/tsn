@@ -110,8 +110,8 @@ bool TransmissionSelection::schedulePacket() {
 void TransmissionSelection::handleRequestPacketEvent() {
     EV_TRACE << getFullPath() << ": Handle request-packet-event." << endl;
 
-    // Precondition: The MAC module must not request more than one packet at a
-    // time. This implies the MAC module can not operate in burst mode or the
+    // Precondition: The Mac module must not request more than one packet at a
+    // time. This implies the Mac module can not operate in burst mode or the
     // like.
     if (packetRequestedFromUs) {
         throw cRuntimeError(
