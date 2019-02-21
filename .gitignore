@@ -7,7 +7,6 @@
 /simulations/nesting
 /simulations/nesting_dbg
 /simulations/*/results
-/simulations/results*
 
 /.settings/
 
