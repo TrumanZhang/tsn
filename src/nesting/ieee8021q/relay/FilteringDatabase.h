@@ -43,8 +43,8 @@ namespace nesting {
  */
 class FilteringDatabase: public cSimpleModule, public IClockListener {
 private:
-    std::unordered_map<MacAddress, std::pair<simtime_t, int>> adminFdb;
-    std::unordered_map<MacAddress, std::pair<simtime_t, int>> operFdb;
+    std::unordered_map<MacAddress, std::pair<simtime_t, std::vector<int>>> adminFdb;
+    std::unordered_map<MacAddress, std::pair<simtime_t, std::vector<int>>> operFdb;
 
     bool changeDatabase = false;
 
@@ -80,6 +80,8 @@ public:
     virtual void loadDatabase(cXMLElement* fdb, int cycle);
 
     virtual int getPort(MacAddress macAddress, simtime_t curTS);
+
+    virtual std::vector<int> getPorts(MacAddress macAddress, simtime_t curTS);
 
     void insert(MacAddress macAddress, simtime_t curTS, int port);
 };

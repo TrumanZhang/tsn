@@ -46,7 +46,6 @@ void ForwardingRelayUnit::processBroadcast(Packet* packet) {
     for (int portId = 0; portId < gateSize("out"); portId++) {
         cGate *outputGate = gate("out", portId);
         if (!packet->arrivedOn("in", portId)) {
-            // send(duplicatePacketWithCtrlInfo(packet), outputGate);
             Packet* dupPacket = packet->dup();
             send(dupPacket, outputGate);
         }
@@ -55,7 +54,31 @@ void ForwardingRelayUnit::processBroadcast(Packet* packet) {
 }
 
 void ForwardingRelayUnit::processMulticast(Packet* packet) {
-    processBroadcast(packet);
+    auto macTag = packet->getTag<MacAddressInd>();
+    int arrivalGate = packet->getArrivalGate()->getIndex();
+
+    std::vector<int> forwardingPorts = fdb->getPorts(macTag->getDestAddress(),
+            simTime());
+
+    if (forwardingPorts.at(0) == -1) {
+        throw cRuntimeError(
+                "Static multicast forwarding for packet didn't work. Entry in forwarding table was empty!");
+    } else {
+        std::string forwardingPortsString = "";
+        for (auto forwardingPort : forwardingPorts) {
+            // skip arrival gate
+            if (forwardingPort == arrivalGate) {
+                continue;
+            }
+            Packet* dupPacket = packet->dup();
+            send(dupPacket, gate("out", forwardingPort));
+            forwardingPortsString = forwardingPortsString.append(
+                    std::to_string(forwardingPort));
+        }
+        EV_INFO << getFullPath() << ": Forwarding multicast packet `" << packet
+                       << "` to ports " << forwardingPortsString << endl;
+    }
+    delete packet;
 }
 
 void ForwardingRelayUnit::processUnicast(Packet* packet) {
