@@ -120,7 +120,9 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                             "port attribute");
         }
 
-        int port = atoi(individualAddress->getAttribute("port"));
+        std::vector<int> port;
+        port.insert(port.begin(), 1,
+                atoi(individualAddress->getAttribute("port")));
 
         uint8_t vid = 0;
         if (individualAddress->getAttribute("vid"))
@@ -133,11 +135,61 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
             if (!macAddress.tryParse(macAddressStr.c_str())) {
                 throw new cRuntimeError("Cannot parse invalid Mac address.");
             }
-            adminFdb.insert( { macAddress, std::pair<simtime_t, int>(0, port) });
+            adminFdb.insert( { macAddress,
+                    std::pair<simtime_t, std::vector<int>>(0, port) });
         } else {
             // TODO
             throw cRuntimeError(
                     "Individual address rules with VIDs aren't supported yet");
+        }
+    }
+
+    // Rules for multicastAddresses
+    cXMLElementList multicastAddresses = xml->getChildrenByTagName(
+            "multicastAddress");
+    for (auto multicastAddress : multicastAddresses) {
+        std::string macAddressStr = std::string(
+                multicastAddress->getAttribute("macAddress"));
+        if (macAddressStr.empty()) {
+            throw cRuntimeError(
+                    "multicastAddress tag in forwarding database XML must have an "
+                            "macAddress attribute");
+        }
+
+        if (!multicastAddress->getAttribute("ports")) {
+            throw cRuntimeError(
+                    "multicastAddress tag in forwarding database XML must have an "
+                            "ports attribute");
+        }
+        std::string portsString = multicastAddress->getAttribute("ports");
+        std::vector<int> port;
+        unsigned int i = 0;
+        while (i <= portsString.length()) {
+            port.push_back(portsString[i] - '0');
+            i += 2;
+        }
+
+        uint8_t vid = 0;
+        if (multicastAddress->getAttribute("vid"))
+            vid = static_cast<uint8_t>(atoi(
+                    multicastAddress->getAttribute("vid")));
+
+        // Create and insert entry for different individual address types
+        if (vid == 0) {
+            MacAddress macAddress;
+            if (!macAddress.tryParse(macAddressStr.c_str())) {
+                throw new cRuntimeError("Cannot parse invalid Mac address.");
+            }
+            if (!macAddress.isMulticast()) {
+                throw new cRuntimeError(
+                        "Mac address is not a Multicast address.");
+            }
+            adminFdb.insert( { macAddress,
+                    std::pair<simtime_t, std::vector<int>>(0, port) });
+        } else {
+            // TODO
+            throw cRuntimeError(
+                    "Multicast address rules with VIDs aren't supported yet");
         }
     }
 }
@@ -162,12 +214,14 @@ void FilteringDatabase::handleMessage(cMessage *msg) {
 
 void FilteringDatabase::insert(MacAddress macAddress, simtime_t curTS,
         int port) {
-    operFdb[macAddress] = std::pair<simtime_t, int>(curTS, port);
+    std::vector<int> tmp;
+    tmp.insert(tmp.begin(), 1, port);
+    operFdb[macAddress] = std::pair<simtime_t, std::vector<int>>(curTS, tmp);
 }
 
 int FilteringDatabase::getPort(MacAddress macAddress, simtime_t curTS) {
     simtime_t ts;
-    int port;
+    std::vector<int> port;
 
     auto it = operFdb.find(macAddress);
 
@@ -175,16 +229,52 @@ int FilteringDatabase::getPort(MacAddress macAddress, simtime_t curTS) {
     if (it != operFdb.end()) {
         ts = it->second.first;
         port = it->second.second;
+        // return if mac address belongs to multicast
+        if (port.size() != 1) {
+            return -1;
+        }
         // static entries (ts == 0) do not age
         if (!agingActive || (ts == 0 || curTS - ts < agingThreshold)) {
-            operFdb[macAddress] = std::pair<simtime_t, int>(curTS, port);
-            return port;
+            operFdb[macAddress] = std::pair<simtime_t, std::vector<int>>(curTS,
+                    port);
+            return port.at(0);
         } else {
             operFdb.erase(macAddress);
         }
     }
 
     return -1;
+}
+
+std::vector<int> FilteringDatabase::getPorts(MacAddress macAddress,
+        simtime_t curTS) {
+    simtime_t ts;
+    std::vector<int> ports;
+
+    if (!macAddress.isMulticast()) {
+        ports.push_back(-1);
+        return ports;
+    }
+
+    auto it = operFdb.find(macAddress);
+
+    //is element available?
+    if (it != operFdb.end()) {
+        ts = it->second.first;
+        ports = it->second.second;
+        // static entries (ts == 0) do not age
+        if (!agingActive || (ts == 0 || curTS - ts < agingThreshold)) {
+            operFdb[macAddress] = std::pair<simtime_t, std::vector<int>>(curTS,
+                    ports);
+            return ports;
+        } else {
+            operFdb.erase(macAddress);
+        }
+
+    }
+
+    ports.push_back(-1);
+    return ports;
 }
 
 } // namespace nesting
