@@ -30,7 +30,7 @@ module EthernetSwitchPreemptable
 {
     parameters:
         @networkNode();
-        @display("i=device/switch;bgb=308,466");
+        @display("i=device/switch;bgb=,466");
         **.interfaceTableModule = default("");
     gates:
         inout ethg[];
@@ -40,7 +40,7 @@ module EthernetSwitchPreemptable
             mac.mtu = 1500B;
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
             queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
-            @display("p=132,391");
+            @display("p=132,391,r,200");
         }
         relayUnit: <default("ForwardingRelayUnit")> like RelayUnit {
             numberOfPorts = sizeof(ethg);
