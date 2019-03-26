@@ -41,7 +41,7 @@ module VEtherHostSched
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        tsn_app: VEtherTrafGenSched {
+        trafGenSchedApp: VEtherTrafGenSched {
             @display("p=212.768,69.296005");
         }
         interfaceTable: InterfaceTable {
@@ -64,8 +64,8 @@ module VEtherHostSched
                 @display("p=138,271,row,150;q=txQueue");
         }
     connections:
-        tsn_app.out --> vlanEncap.upperLayerIn;
-        vlanEncap.upperLayerOut --> tsn_app.in;
+        trafGenSchedApp.out --> vlanEncap.upperLayerIn;
+        vlanEncap.upperLayerOut --> trafGenSchedApp.in;
 
         vlanEncap.lowerLayerOut --> eth.upperLayerIn;
         eth.upperLayerOut --> vlanEncap.lowerLayerIn;

@@ -37,13 +37,13 @@ module VEtherHost extends VEtherHostBase
         eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
         eth.queuing.gateController.macModule = "^.^.^.eth[0].mac";
     submodules:
-        app: VEtherTrafGen {
+        trafGenApp: VEtherTrafGen {
             @display("p=142,70");
         }
         clock: <default("IdealClock")> like IClock {
             @display("p=26,28;is=s");
         }
     connections:
-        app.out --> eth.upperLayerIn;
-        eth.upperLayerOut --> app.in;
+        trafGenApp.out --> eth.upperLayerIn;
+        eth.upperLayerOut --> trafGenApp.in;
 }

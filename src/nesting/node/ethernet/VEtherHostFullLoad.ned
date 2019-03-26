@@ -29,9 +29,9 @@ module VEtherHostFullLoad extends VEtherHostBase
     parameters:
         @display("bgb=363,398");
         @networkNode();
-        eth.mac.queueModule = "^.^.trafGenQueue";
+        eth.mac.queueModule = "^.^.trafGenQueueApp";
     submodules:
-        trafGenQueue: EtherTrafGenQueue {
+        trafGenQueueApp: EtherTrafGenQueue {
             @display("p=192,69");
         }
         sink: Sink {
@@ -41,7 +41,7 @@ module VEtherHostFullLoad extends VEtherHostBase
             @display("p=142,188");
         }
     connections:
-        trafGenQueue.out --> vlanEncap.upperLayerIn;
+        trafGenQueueApp.out --> vlanEncap.upperLayerIn;
         vlanEncap.upperLayerOut --> sink.in++;
         
         vlanEncap.lowerLayerOut --> eth.upperLayerIn;

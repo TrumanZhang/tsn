@@ -29,7 +29,7 @@ simple ScheduleSwap
         string switchModule = default("^"); // Path to the ~VEtherSwitch module
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
         string gateControllerModules = default("^.eth[%d].queuing.gateController"); // Wildcard path that is used to determine the paths to ~GateController modules
-        string tsnGenModule = default("^.tsn_app"); // Path to the ~VEtherTrafGenSched module that generates TSN traffic
+        string tsnGenModule = default("^.trafGenSchedApp"); // Path to the ~VEtherTrafGenSched module that generates TSN traffic
         xml schedule = default(xml("<schedules></schedules>")); // Internal micro schedule that manages the micro schedules
         bool usedInHost = default(false);
         bool verbose = default(false);
