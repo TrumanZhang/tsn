@@ -13,17 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet.host;
+package nesting.node.ethernet;
 
 import inet.common.queue.Sink;
 import nesting.common.queue.EtherTrafGenQueue;
 import nesting.linklayer.ethernet.VLANEncap;
+
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
 // physical medium allows. This module's main use case is to simulate a
 // congestion scenarios on a switch.
 //
-module FullLoadVLANHost extends VLANHostBase
+module VEtherHostFullLoad extends VEtherHostBase
 {
     parameters:
         @display("bgb=363,398");

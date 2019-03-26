@@ -13,14 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet.host;
+package nesting.node.ethernet;
 
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 import nesting.application.ethernet.VEtherTrafGen;
-import nesting.linklayer.ethernet.VLANEncap;
 import nesting.ieee8021q.clock.IClock;
-
 
 //
 // Simple Host with the capability to create and receive VLAN tagged ethernet
@@ -28,7 +26,7 @@ import nesting.ieee8021q.clock.IClock;
 //
 // @see ~VEtherTrafGen
 //
-module VLANHost extends VLANHostBase
+module VEtherHost extends VEtherHostBase
 {
     parameters:
         @display("bgb=483,473");

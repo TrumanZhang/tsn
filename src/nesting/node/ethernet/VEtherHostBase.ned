@@ -13,18 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet.host;
+package nesting.node.ethernet;
 
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
-
-
 import inet.linklayer.contract.IEthernetInterface;
 
 //
 // Base module for the further implementation of ethernet capable hosts.
 //
-module EtherHostBase
+module VEtherHostBase
 {
     parameters:
         *.interfaceTableModule = default("");

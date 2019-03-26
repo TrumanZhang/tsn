@@ -24,13 +24,12 @@ import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.linklayer.ethernet.VLANEncap;
 
-
 //
 // Simple Host with the capability to send out frames according to a given schedule
 //
 // @see ~VEtherTrafGen
 //
-module VLANEtherHost
+module VEtherHostSched
 {
     parameters:
         string fcsMode @enum("declared","computed") = default("declared");
@@ -49,11 +48,9 @@ module VLANEtherHost
             parameters:
                 @display("p=330,215;is=s");
         }
-
         vlanEncap: VLANEncap {
             @display("p=138,149");
         }
-
         clock: <default("IdealClock")> like IClock {
             @display("p=330,69");
         }

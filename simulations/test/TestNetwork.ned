@@ -17,9 +17,9 @@ package nesting.simulations.test;
 
 import ned.DatarateChannel;
 import nesting.node.ethernet.VEtherSwitchPreemptable;
-import nesting.node.ethernet.VLANEtherHost;
-import nesting.node.ethernet.host.FullLoadVLANHost;
-import nesting.node.ethernet.host.VLANHost;
+import nesting.node.ethernet.VEtherHostSched;
+import nesting.node.ethernet.VEtherHostFullLoad;
+import nesting.node.ethernet.VEtherHost;
 
 
 network TestNetwork
@@ -37,13 +37,13 @@ network TestNetwork
             gates:
                 ethg[3];
         }
-        workstation1: FullLoadVLANHost {
+        workstation1: VEtherHostFullLoad {
             @display("p=79,62");
         }
-        robotController: VLANEtherHost {
+        robotController: VEtherHostSched {
             @display("p=79,202");
         }
-        sink: VLANHost {
+        sink: VEtherHost {
             @display("p=307,128");
         }
     connections:
