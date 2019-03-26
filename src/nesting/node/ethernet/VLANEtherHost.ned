@@ -19,7 +19,7 @@ import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.contract.IEthernetInterface;
-import nesting.application.ethernet.SchedEtherVLANTrafGen;
+import nesting.application.ethernet.VEtherTrafGenSched;
 import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.linklayer.ethernet.VLANEncap;
@@ -28,7 +28,7 @@ import nesting.linklayer.ethernet.VLANEncap;
 //
 // Simple Host with the capability to send out frames according to a given schedule
 //
-// @see ~EtherVLANTaggedTrafGen
+// @see ~VEtherTrafGen
 //
 module VLANEtherHost
 {
@@ -42,7 +42,7 @@ module VLANEtherHost
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        tsn_app: SchedEtherVLANTrafGen {
+        tsn_app: VEtherTrafGenSched {
             @display("p=212.768,69.296005");
         }
         interfaceTable: InterfaceTable {

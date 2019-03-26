@@ -17,10 +17,10 @@ package nesting.ieee8021q.queue.gating;
 
 //
 // This module is used to initiate schedule changes in ~GateController,
-// ~FilteringDatabase and ~SchedEtherVLANTrafGen modules according to an own
+// ~FilteringDatabase and ~VEtherTrafGenSched modules according to an own
 // configurable schedule.
 //
-// @see ~GateController, ~FilteringDatabase, ~SchedEtherVLANTrafGen, ~IClock
+// @see ~GateController, ~FilteringDatabase, ~VEtherTrafGenSched, ~IClock
 //
 simple ScheduleSwap
 {
@@ -29,7 +29,7 @@ simple ScheduleSwap
         string switchModule = default("^"); // Path to the ~EthernetSwitch module
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
         string gateControllerModules = default("^.eth[%d].queuing.gateController"); // Wildcard path that is used to determine the paths to ~GateController modules
-        string tsnGenModule = default("^.tsn_app"); // Path to the ~SchedEtherVLANTrafGen module that generates TSN traffic
+        string tsnGenModule = default("^.tsn_app"); // Path to the ~VEtherTrafGenSched module that generates TSN traffic
         xml schedule = default(xml("<schedules></schedules>")); // Internal micro schedule that manages the micro schedules
         bool usedInHost = default(false);
         bool verbose = default(false);

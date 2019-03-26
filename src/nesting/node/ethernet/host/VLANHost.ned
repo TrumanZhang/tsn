@@ -17,7 +17,7 @@ package nesting.node.ethernet.host;
 
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
-import nesting.application.ethernet.EtherVLANTaggedTrafGen;
+import nesting.application.ethernet.VEtherTrafGen;
 import nesting.linklayer.ethernet.VLANEncap;
 import nesting.ieee8021q.clock.IClock;
 
@@ -26,7 +26,7 @@ import nesting.ieee8021q.clock.IClock;
 // Simple Host with the capability to create and receive VLAN tagged ethernet
 // traffic. Mainly used for test purposes.
 //
-// @see ~EtherVLANTaggedTrafGen
+// @see ~VEtherTrafGen
 //
 module VLANHost extends VLANHostBase
 {
@@ -39,7 +39,7 @@ module VLANHost extends VLANHostBase
         eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
         eth.queuing.gateController.macModule = "^.^.^.eth[0].mac";
     submodules:
-        app: EtherVLANTaggedTrafGen {
+        app: VEtherTrafGen {
             @display("p=142,70");
         }
         clock: <default("IdealClock")> like IClock {

@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "EtherVLANTaggedTrafGen.h"
+#include "VEtherTrafGen.h"
 
 namespace nesting {
 
-Define_Module(EtherVLANTaggedTrafGen);
+Define_Module(VEtherTrafGen);
 
-void EtherVLANTaggedTrafGen::initialize(int stage) {
+void VEtherTrafGen::initialize(int stage) {
     EtherTrafGen::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
@@ -30,7 +30,7 @@ void EtherVLANTaggedTrafGen::initialize(int stage) {
     }
 }
 
-void EtherVLANTaggedTrafGen::sendBurstPackets() {
+void VEtherTrafGen::sendBurstPackets() {
     int n = numPacketsPerBurst->intValue();
     for (int i = 0; i < n; i++) {
         seqNum++;

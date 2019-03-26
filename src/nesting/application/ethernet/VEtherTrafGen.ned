@@ -15,6 +15,9 @@
 
 package nesting.application.ethernet;
 
+import inet.applications.ethernet.EtherTrafGen;
+
+
 //
 // Traffic generator application for VLAN tagged ethernet frames. This
 // module should be connected to a VLANEncap module and the VLANEncap
@@ -28,24 +31,13 @@ package nesting.application.ethernet;
 //
 // @see ~VLANEncap, ~EtherEncap, ~Ieee8021QCtrl
 //
-simple SchedEtherVLANTrafGen
+simple VEtherTrafGen extends EtherTrafGen
 {
     parameters:
-        @class(SchedEtherVLANTrafGen);
-
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
-
-        //Actual schedule has to be set in .ini file
-        xml initialSchedule = default(xml("<schedule><cycle>100</cycle></schedule>"));
-        xml emptySchedule = default(xml("<schedule><cycle>100</cycle></schedule>"));
-        string clockModule = default("^.clock");
-        string hostModule = default("^");
-		bool verbose = default(false);
-    gates:
-        input in;
-        output out;
+        @class(VEtherTrafGen);
+        bool vlanTagEnabled = default(true);	// When true, the application's packets will be VLAN encapsulated by the VLANEncap module
+        int pcp = default(0);					// PCP (Priority Code Point) value that is added to the packets control information
+        bool dei = default(false);				// DEI (Drop Eligible Indicator) that is added to the packets control information
+        int vid = default(1);					// VID (VLAN Identifier) value that is added to the packets control information
+        bool verbose = default(false);
 }
-
-
-
