@@ -16,6 +16,7 @@
 package nesting.node.ethernet;
 
 import inet.common.queue.Sink;
+import inet.linklayer.contract.IEthernetInterface;
 import nesting.common.queue.EtherTrafGenQueue;
 import nesting.linklayer.ethernet.VLANEncap;
 
@@ -24,12 +25,16 @@ import nesting.linklayer.ethernet.VLANEncap;
 // physical medium allows. This module's main use case is to simulate a
 // congestion scenarios on a switch.
 //
-module VEtherHostFullLoad extends VEtherHostBase
+module VEtherHostFullLoad
 {
     parameters:
-        @display("bgb=363,398");
+        @display("i=device/pc2;bgb=363,398");
         @networkNode();
+        @labels(node,ethernet-node);
+        *.interfaceTableModule = default("");
         eth.mac.queueModule = "^.^.trafGenQueueApp";
+    gates:
+        inout ethg @labels(EtherFrame-conn);
     submodules:
         trafGenQueueApp: EtherTrafGenQueue {
             @display("p=192,69");
@@ -40,10 +45,14 @@ module VEtherHostFullLoad extends VEtherHostBase
         vlanEncap: VLANEncap {
             @display("p=142,188");
         }
+        eth: <default("VEthernetInterface")> like IEthernetInterface {
+            parameters:
+                @display("p=142,283,row,150;q=txQueue");
+        }
     connections:
-        trafGenQueueApp.out --> vlanEncap.upperLayerIn;
+        vlanEncap.upperLayerIn <-- trafGenQueueApp.out;
         vlanEncap.upperLayerOut --> sink.in++;
-        
-        vlanEncap.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerIn <-- vlanEncap.lowerLayerOut;
         eth.upperLayerOut --> vlanEncap.lowerLayerIn;
+        eth.phys <--> ethg;
 }

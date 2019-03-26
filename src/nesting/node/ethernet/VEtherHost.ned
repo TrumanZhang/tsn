@@ -16,7 +16,7 @@
 package nesting.node.ethernet;
 
 import inet.linklayer.ethernet.EtherMacFullDuplex;
-import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.contract.IEthernetInterface;
 import nesting.application.ethernet.VEtherTrafGen;
 import nesting.ieee8021q.clock.IClock;
 
@@ -26,16 +26,20 @@ import nesting.ieee8021q.clock.IClock;
 //
 // @see ~VEtherTrafGen
 //
-module VEtherHost extends VEtherHostBase
+module VEtherHost
 {
     parameters:
-        @display("bgb=483,473");
+        @display("i=device/pc2;bgb=483,473");
         @networkNode();
+        @labels(node,ethernet-node);
+        *.interfaceTableModule = default("");
         eth.typename = "VEthernetInterfaceSwitchPreemptable";
         eth.mac.queueModule = "^.^.eth[0].queuing.transmissionSelection";
         eth.mac.mtu = 1500B;
         eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
         eth.queuing.gateController.macModule = "^.^.^.eth[0].mac";
+    gates:
+        inout ethg @labels(EtherFrame-conn);
     submodules:
         trafGenApp: VEtherTrafGen {
             @display("p=142,70");
@@ -43,7 +47,12 @@ module VEtherHost extends VEtherHostBase
         clock: <default("IdealClock")> like IClock {
             @display("p=26,28;is=s");
         }
+        eth: <default("VEthernetInterface")> like IEthernetInterface {
+            parameters:
+                @display("p=142,283,row,150;q=txQueue");
+        }
     connections:
-        trafGenApp.out --> eth.upperLayerIn;
+        eth.upperLayerIn <-- trafGenApp.out;
         eth.upperLayerOut --> trafGenApp.in;
+        eth.phys <--> ethg;
 }
