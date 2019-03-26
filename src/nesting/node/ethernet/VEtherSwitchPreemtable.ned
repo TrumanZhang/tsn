@@ -27,7 +27,7 @@ import nesting.linklayer.ethernet.VEthernetInterfaceSwitchPreemptable;
 //
 // This module implements a switch that supports frame preemption.
 //
-module EthernetSwitchPreemptable
+module VEtherSwitchPreemptable
 {
     parameters:
         @networkNode();

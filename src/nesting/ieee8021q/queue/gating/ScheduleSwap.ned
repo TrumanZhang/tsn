@@ -26,7 +26,7 @@ simple ScheduleSwap
 {
     parameters:
         string clockModule = default("^.clock"); // Path to the ~IClock module
-        string switchModule = default("^"); // Path to the ~EthernetSwitch module
+        string switchModule = default("^"); // Path to the ~VEtherSwitch module
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
         string gateControllerModules = default("^.eth[%d].queuing.gateController"); // Wildcard path that is used to determine the paths to ~GateController modules
         string tsnGenModule = default("^.tsn_app"); // Path to the ~VEtherTrafGenSched module that generates TSN traffic

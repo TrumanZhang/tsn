@@ -27,7 +27,7 @@ import nesting.linklayer.ethernet.VEthernetInterfaceSwitch;
 //
 // This module implements a switch that supports Ieee8021q queueing capabilities. Frame Preemption is not supported.
 //
-module EthernetSwitch
+module VEtherSwitch
 {
     parameters:
         @networkNode();

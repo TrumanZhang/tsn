@@ -16,7 +16,7 @@
 package nesting.simulations.test;
 
 import ned.DatarateChannel;
-import nesting.node.ethernet.EthernetSwitchPreemptable;
+import nesting.node.ethernet.VEtherSwitchPreemptable;
 import nesting.node.ethernet.VLANEtherHost;
 import nesting.node.ethernet.host.FullLoadVLANHost;
 import nesting.node.ethernet.host.VLANHost;
@@ -31,7 +31,7 @@ network TestNetwork
             datarate = 0.1Gbps;
         }
     submodules:
-        switchA: EthernetSwitchPreemptable {
+        switchA: VEtherSwitchPreemptable {
             parameters:
                 @display("p=188,127");
             gates:
