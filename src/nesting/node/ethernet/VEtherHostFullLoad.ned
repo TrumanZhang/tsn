@@ -18,7 +18,6 @@ package nesting.node.ethernet;
 import inet.common.queue.Sink;
 import inet.linklayer.contract.IEthernetInterface;
 import nesting.common.queue.EtherTrafGenQueue;
-import nesting.linklayer.ethernet.VLANEncap;
 
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
@@ -42,17 +41,12 @@ module VEtherHostFullLoad
         sink: Sink {
             @display("p=84,69");
         }
-        vlanEncap: VLANEncap {
-            @display("p=142,188");
-        }
         eth: <default("VEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
         }
     connections:
-        vlanEncap.upperLayerIn <-- trafGenQueueApp.out;
-        vlanEncap.upperLayerOut --> sink.in++;
-        eth.upperLayerIn <-- vlanEncap.lowerLayerOut;
-        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
+        eth.upperLayerIn <-- trafGenQueueApp.out;
+        eth.upperLayerOut --> sink.in++;
         eth.phys <--> ethg;
 }
