@@ -22,6 +22,7 @@ import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.relay.FilteringDatabase;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.RelayUnit;
+import nesting.linklayer.ethernet.VEthernetInterfaceSwitch;
 
 //
 // This module implements a switch that supports Ieee8021q queueing capabilities. Frame Preemption is not supported.
@@ -35,7 +36,7 @@ module EthernetSwitch
     gates:
         inout ethg[];
     submodules:
-        eth[sizeof(ethg)]: VLANEthernetInterfaceSwitch {
+        eth[sizeof(ethg)]: VEthernetInterfaceSwitch {
             mac.queueModule = "^.^.eth[" + string(index) + "].queuing.transmissionSelection";
             mac.mtu = 1500B;
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";

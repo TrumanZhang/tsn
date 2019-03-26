@@ -33,7 +33,7 @@ module VLANHost extends VLANHostBase
     parameters:
         @display("bgb=483,473");
         @networkNode();
-        eth.typename = "VLANEthernetInterfaceSwitchPreemptable";
+        eth.typename = "VEthernetInterfaceSwitchPreemptable";
         eth.mac.queueModule = "^.^.eth[0].queuing.transmissionSelection";
         eth.mac.mtu = 1500B;
         eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";

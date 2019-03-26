@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet;
+package nesting.linklayer.ethernet;
 
 @namespace();
 
@@ -24,7 +24,7 @@ import inet.networklayer.common.InterfaceEntry;
 //
 // Ethernet network interface, used in Host modules in nesting project.
 //
-module VLANEthernetInterfaceHost extends InterfaceEntry like IEthernetInterface
+module VEthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);

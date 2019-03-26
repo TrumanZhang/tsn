@@ -34,7 +34,7 @@ module EtherHostBase
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        eth: <default("VLANEthernetInterfaceHost")> like IEthernetInterface {
+        eth: <default("VEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
         }
