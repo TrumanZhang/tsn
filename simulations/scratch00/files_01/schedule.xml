@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<schedule>
+
+	<!-- for FilteringDatabase -->
+	<!-- [us] and not zero!-->
+	<cycle>300000</cycle>
+
+	<!-- for GateController -->
+	<switch name="switch">
+		<port id="0">
+			<entry>
+				<!-- [us] -->
+				<length>300000</length>
+				<bitvector>11111111</bitvector>
+			</entry>
+		</port>
+	</switch>
+
+</schedule>
