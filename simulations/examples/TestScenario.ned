@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.simulations;
+package nesting.simulations.examples;
 
 import ned.DatarateChannel;
 import nesting.node.ethernet.VEtherSwitchPreemptable;
