@@ -19,7 +19,7 @@ import ned.DatarateChannel;
 import nesting.node.ethernet.VEtherSwitchPreemptable;
 import nesting.node.ethernet.VEtherHostSched;
 import nesting.node.ethernet.VEtherHostFullLoad;
-import nesting.node.ethernet.VEtherHost;
+import nesting.node.ethernet.VEtherHostQ;
 
 
 network TestScenario
@@ -49,13 +49,13 @@ network TestScenario
         workstation2: VEtherHostFullLoad {
             @display("p=172,29");
         }
-        backupServer: VEtherHost {
+        backupServer: VEtherHostQ {
             @display("p=446,54");
         }
         robotController: VEtherHostSched {
             @display("p=79,202");
         }
-        roboticArm: VEtherHost {
+        roboticArm: VEtherHostQ {
             @display("p=440,202");
         }
     connections:

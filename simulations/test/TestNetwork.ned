@@ -19,7 +19,7 @@ import ned.DatarateChannel;
 import nesting.node.ethernet.VEtherSwitchPreemptable;
 import nesting.node.ethernet.VEtherHostSched;
 import nesting.node.ethernet.VEtherHostFullLoad;
-import nesting.node.ethernet.VEtherHost;
+import nesting.node.ethernet.VEtherHostQ;
 
 
 network TestNetwork
@@ -43,7 +43,7 @@ network TestNetwork
         robotController: VEtherHostSched {
             @display("p=79,202");
         }
-        sink: VEtherHost {
+        sink: VEtherHostQ {
             @display("p=307,128");
         }
     connections:

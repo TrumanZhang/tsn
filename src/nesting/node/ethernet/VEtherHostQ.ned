@@ -26,7 +26,7 @@ import nesting.ieee8021q.clock.IClock;
 //
 // @see ~VEtherTrafGen
 //
-module VEtherHost
+module VEtherHostQ
 {
     parameters:
         @display("i=device/pc2;bgb=483,473");
