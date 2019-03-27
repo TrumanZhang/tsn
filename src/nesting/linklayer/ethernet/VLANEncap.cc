@@ -57,6 +57,7 @@ void VLANEncap::initialize(int stage) {
 }
 
 void VLANEncap::handleMessage(cMessage* msg) {
+    if (dynamic_cast<inet::Packet *>(msg) == nullptr){delete msg; return;}
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
 
     if (packet->arrivedOn("lowerLayerIn")) {
