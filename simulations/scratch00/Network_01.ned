@@ -17,10 +17,10 @@ package nesting.simulations.scratch00;
 
 import inet.node.ethernet.EtherLink; // GEORG REFACTOR: this line does not work
 import ned.DatarateChannel;
-import nesting.node.ethernet.VEtherHost;
-import nesting.node.ethernet.VEtherHostFullLoad;
-import nesting.node.ethernet.VEtherSwitch;
-import nesting.node.ethernet.VEtherSwitchPreemptable;
+import nesting.node.ethernet.VlanEtherHost;
+import nesting.node.ethernet.VlanEtherHostFullLoad;
+import nesting.node.ethernet.VlanEtherSwitch;
+import nesting.node.ethernet.VlanEtherSwitchPreemptable;
 
 network Network_01
 {
@@ -33,19 +33,19 @@ network Network_01
             datarate = 1Gbps;
         }
     submodules:
-        switch: VEtherSwitch {
+        switch: VlanEtherSwitch {
             parameters:
                 @display("p=200,150");
             gates:
                 ethg[3];
         }
-        workstation1: VEtherHost {
+        workstation1: VlanEtherHost {
             @display("p=100,200");
         }
-        workstation2: VEtherHostFullLoad {
+        workstation2: VlanEtherHostFullLoad {
             @display("p=100,100");
         }
-        backupServer: VEtherHost {
+        backupServer: VlanEtherHost {
             @display("p=300,150");
         }
     connections:
