@@ -35,7 +35,7 @@ using namespace inet;
 namespace nesting {
 
 /** See the NED file for a detailed description */
-class VEtherTrafGen: public EtherTrafGen {
+class VlanEtherTrafGen: public EtherTrafGen {
 private:
     // Parameters from NED file
     cPar* vlanTagEnabled;

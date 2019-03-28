@@ -41,7 +41,7 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class VEtherTrafGenSched: public cSimpleModule, public IClockListener {
+class VlanEtherTrafGenSched: public cSimpleModule, public IClockListener {
 private:
 
     /** Current schedule. Is never null. */

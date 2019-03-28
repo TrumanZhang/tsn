@@ -26,7 +26,7 @@ import nesting.linklayer.ethernet.VLANEncap;
 //
 // Ethernet network interface, used in Host modules in nesting project.
 //
-module VEthernetInterface extends InterfaceEntry like IEthernetInterface
+module VlanEthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);

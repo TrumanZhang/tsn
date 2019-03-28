@@ -24,7 +24,7 @@ import nesting.common.queue.EtherTrafGenQueue;
 // physical medium allows. This module's main use case is to simulate a
 // congestion scenarios on a switch.
 //
-module VEtherHostFullLoad
+module VlanEtherHostFullLoad
 {
     parameters:
         @display("i=device/pc2;bgb=363,398");
@@ -41,7 +41,7 @@ module VEtherHostFullLoad
         sink: Sink {
             @display("p=84,69");
         }
-        eth: <default("VEthernetInterface")> like IEthernetInterface {
+        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
         }

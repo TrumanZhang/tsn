@@ -1,14 +1,14 @@
 version 2
-run General-0-20190326-14:34:54-24012
+run General-0-20190328-12:47:44-15100
 attr configname General
-attr datetime 20190326-14:34:54
+attr datetime 20190328-12:47:44
 attr experiment General
 attr inifile 01_example_strict_priority.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network TestScenario
-attr processid 24012
+attr processid 15100
 attr repetition 0
 attr replication #0
 attr resultdir results_strict_priority
@@ -284,19 +284,19 @@ vector 73 TestScenario.workstation2.trafGenQueueApp sentPk:vector(packetBytes) E
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, vector(packetBytes)"
-vector 74 TestScenario.workstation1.vlanEncap encapPk:vector(packetBytes) ETV
+vector 74 TestScenario.workstation1.eth.vlanEncap encapPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, vector(packetBytes)"
-vector 75 TestScenario.workstation2.vlanEncap encapPk:vector(packetBytes) ETV
+vector 75 TestScenario.workstation2.eth.vlanEncap encapPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, vector(packetBytes)"
-vector 76 TestScenario.workstation1.eth.encap encapPk:vector(packetBytes) ETV
+vector 76 TestScenario.workstation1.eth.etherEncap encapPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, vector(packetBytes)"
-vector 77 TestScenario.workstation2.eth.encap encapPk:vector(packetBytes) ETV
+vector 77 TestScenario.workstation2.eth.etherEncap encapPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, vector(packetBytes)"
@@ -320,197 +320,6 @@ vector 82 TestScenario.robotController.eth.mac packetReceivedFromUpper:vector(pa
 attr interpolationmode none
 attr source packetReceivedFromUpper
 attr title "packet bytes from higher layer, vector(packetBytes)"
-vector 83 TestScenario.workstation1.eth.mac txPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToLower
-attr title "packets transmitted, vector(packetBytes)"
-vector 84 TestScenario.workstation2.eth.mac txPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToLower
-attr title "packets transmitted, vector(packetBytes)"
-vector 85 TestScenario.switchA.eth[1].mac receivedExpressFrame:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "receivedExpressFrame, vector(packetBytes)"
-vector 86 TestScenario.switchA.eth[1].mac rxPkOk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source rxPkOk
-attr title "packets received OK, vector(packetBytes)"
-vector 87 TestScenario.switchA.eth[1].mac passedUpPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToUpper
-attr title "packets passed to higher layer, vector(packetBytes)"
-vector 88 TestScenario.switchA.eth[2].mac receivedExpressFrame:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "receivedExpressFrame, vector(packetBytes)"
-vector 89 TestScenario.switchA.eth[2].mac rxPkOk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source rxPkOk
-attr title "packets received OK, vector(packetBytes)"
-vector 90 TestScenario.switchA.eth[2].mac passedUpPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToUpper
-attr title "packets passed to higher layer, vector(packetBytes)"
-vector 91 TestScenario.switchA.eth[1].etherEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 92 TestScenario.switchA.eth[2].etherEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 93 TestScenario.switchA.eth[1].vlanEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 94 TestScenario.switchA.eth[2].vlanEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 95 TestScenario.switchA.processingDelay[1] packetReceived:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetReceived
-attr title "packets received, vector(packetBytes)"
-vector 96 TestScenario.switchA.processingDelay[1] delay:vector ETV
-attr interpolationmode none
-attr source delay
-attr title "packet delay, vector"
-vector 97 TestScenario.switchA.processingDelay[2] packetReceived:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetReceived
-attr title "packets received, vector(packetBytes)"
-vector 98 TestScenario.switchA.processingDelay[2] delay:vector ETV
-attr interpolationmode none
-attr source delay
-attr title "packet delay, vector"
-vector 99 TestScenario.robotController.eth.mac txPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToLower
-attr title "packets transmitted, vector(packetBytes)"
-vector 100 TestScenario.switchA.eth[0].mac receivedExpressFrame:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "receivedExpressFrame, vector(packetBytes)"
-vector 101 TestScenario.switchA.eth[0].mac rxPkOk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source rxPkOk
-attr title "packets received OK, vector(packetBytes)"
-vector 102 TestScenario.switchA.eth[0].mac passedUpPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToUpper
-attr title "packets passed to higher layer, vector(packetBytes)"
-vector 103 TestScenario.switchA.eth[0].etherEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 104 TestScenario.switchA.eth[0].vlanEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 105 TestScenario.switchA.processingDelay[0] packetReceived:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetReceived
-attr title "packets received, vector(packetBytes)"
-vector 106 TestScenario.switchA.processingDelay[0] delay:vector ETV
-attr interpolationmode none
-attr source delay
-attr title "packet delay, vector"
-vector 107 TestScenario.switchA.processingDelay[1] packetSent:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSent
-attr title "packets sent, vector(packetBytes)"
-vector 108 TestScenario.switchA.processingDelay[2] packetSent:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSent
-attr title "packets sent, vector(packetBytes)"
-vector 109 TestScenario.switchA.eth[3].queuing.queues[6] rcvdPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "received packets, vector(packetBytes)"
-vector 110 TestScenario.switchA.eth[3].queuing.queues[5] rcvdPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "received packets, vector(packetBytes)"
-vector 111 TestScenario.switchA.eth[3].queuing.queues[6] queueingTime:vector ETV
-attr interpolationmode none
-attr title "queueing time, vector"
-vector 112 TestScenario.switchA.eth[3].vlanEncapE encapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source encapPk
-attr title "packets encapsulated, vector(packetBytes)"
-vector 113 TestScenario.switchA.eth[3].etherEncapE encapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source encapPk
-attr title "packets encapsulated, vector(packetBytes)"
-vector 114 TestScenario.switchA.eth[3].mac packetReceivedFromUpper:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetReceivedFromUpper
-attr title "packet bytes from higher layer, vector(packetBytes)"
-vector 115 TestScenario.switchA.eth[3].mac eMacDelay:vector ETV
-attr interpolationmode none
-attr title "eMacDelay, vector"
-vector 116 TestScenario.switchA.processingDelay[0] packetSent:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSent
-attr title "packets sent, vector(packetBytes)"
-vector 117 TestScenario.switchA.eth[3].queuing.queues[7] rcvdPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "received packets, vector(packetBytes)"
-vector 118 TestScenario.switchA.eth[3].mac txPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToLower
-attr title "packets transmitted, vector(packetBytes)"
-vector 119 TestScenario.switchA.eth[3].queuing.queues[7] queueingTime:vector ETV
-attr interpolationmode none
-attr title "queueing time, vector"
-vector 120 TestScenario.switchB.eth[2].mac receivedExpressFrame:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "receivedExpressFrame, vector(packetBytes)"
-vector 121 TestScenario.switchB.eth[2].mac rxPkOk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source rxPkOk
-attr title "packets received OK, vector(packetBytes)"
-vector 122 TestScenario.switchB.eth[2].mac passedUpPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSentToUpper
-attr title "packets passed to higher layer, vector(packetBytes)"
-vector 123 TestScenario.switchB.eth[2].etherEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 124 TestScenario.switchB.eth[2].vlanEncapE decapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source decapPk
-attr title "packets decapsulated, vector(packetBytes)"
-vector 125 TestScenario.switchB.processingDelay[2] packetReceived:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetReceived
-attr title "packets received, vector(packetBytes)"
-vector 126 TestScenario.switchB.processingDelay[2] delay:vector ETV
-attr interpolationmode none
-attr source delay
-attr title "packet delay, vector"
-vector 127 TestScenario.switchB.processingDelay[2] packetSent:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetSent
-attr title "packets sent, vector(packetBytes)"
-vector 128 TestScenario.switchB.eth[1].queuing.queues[6] rcvdPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr title "received packets, vector(packetBytes)"
-vector 129 TestScenario.switchB.eth[1].queuing.queues[6] queueingTime:vector ETV
-attr interpolationmode none
-attr title "queueing time, vector"
-vector 130 TestScenario.switchB.eth[1].vlanEncapE encapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source encapPk
-attr title "packets encapsulated, vector(packetBytes)"
-vector 131 TestScenario.switchB.eth[1].etherEncapE encapPk:vector(packetBytes) ETV
-attr interpolationmode none
-attr source encapPk
-attr title "packets encapsulated, vector(packetBytes)"
-vector 132 TestScenario.switchB.eth[1].mac packetReceivedFromUpper:vector(packetBytes) ETV
-attr interpolationmode none
-attr source packetReceivedFromUpper
-attr title "packet bytes from higher layer, vector(packetBytes)"
-vector 133 TestScenario.switchB.eth[1].mac eMacDelay:vector ETV
-attr interpolationmode none
-attr title "eMacDelay, vector"
 0	0	0	0
 1	0	0	0
 2	0	0	0
@@ -541,16 +350,8 @@ attr title "eMacDelay, vector"
 27	0	0	0
 28	0	0	0
 29	0	0	0
-29	59	0.000017308	1
-29	110	0.000029612	2
 30	0	0	0
-30	58	0.000017308	1
-30	67	0.000017308	0
-30	109	0.000029612	1
-30	136	0.00003278	0
 31	0	0	0
-31	77	0.000018172	1
-31	118	0.000029612	0
 32	0	0	0
 33	0	0	0
 34	0	0	0
@@ -566,8 +367,6 @@ attr title "eMacDelay, vector"
 44	0	0	0
 45	0	0	0
 46	0	0	0
-46	151	0.000034616	1
-46	157	0.000034616	0
 47	0	0	0
 48	0	0	0
 49	0	0	0
@@ -594,120 +393,14 @@ attr title "eMacDelay, vector"
 70	0	0	0
 71	0	0	0
 72	0	0	1496
-72	27	0.000012304	1496
-72	83	0.000024608	1496
 73	0	0	1496
-73	28	0.000012304	1496
-73	84	0.000024608	1496
 74	3	0	1500
-74	29	0.000012304	1500
-74	85	0.000024608	1500
 75	4	0	1500
-75	30	0.000012304	1500
-75	86	0.000024608	1500
 76	8	0	1500
-76	31	0.000012304	1500
-76	87	0.000024608	1500
 77	9	0	1500
-77	32	0.000012304	1500
-77	88	0.000024608	1500
 78	10	0	1518
-78	33	0.000012304	1518
-78	89	0.000024608	1518
 79	11	0	1518
-79	34	0.000012304	1518
-79	90	0.000024608	1518
 80	22	0.00001	358
 81	23	0.00001	358
 82	24	0.00001	376
-83	25	0.000012208	1518
-83	81	0.000024512	1518
-83	164	0.000036816	1518
-84	26	0.000012208	1518
-84	82	0.000024512	1518
-84	165	0.000036816	1518
-85	35	0.000012308	1526
-85	91	0.000024612	1526
-86	35	0.000012308	1518
-86	91	0.000024612	1518
-87	35	0.000012308	1518
-87	91	0.000024612	1518
-88	36	0.000012308	1526
-88	92	0.000024612	1526
-89	36	0.000012308	1518
-89	92	0.000024612	1518
-90	36	0.000012308	1518
-90	92	0.000024612	1518
-91	37	0.000012308	1500
-91	93	0.000024612	1500
-92	38	0.000012308	1500
-92	94	0.000024612	1500
-93	39	0.000012308	1496
-93	95	0.000024612	1496
-94	40	0.000012308	1496
-94	96	0.000024612	1496
-95	43	0.000012308	1496
-95	99	0.000024612	1496
-96	43	0.000012308	5e-06
-96	99	0.000024612	5e-06
-97	44	0.000012308	1496
-97	100	0.000024612	1496
-98	44	0.000012308	5e-06
-98	100	0.000024612	5e-06
-99	45	0.000013072	376
-100	47	0.000013172	384
-101	47	0.000013172	376
-102	47	0.000013172	376
-103	48	0.000013172	358
-104	49	0.000013172	354
-105	51	0.000013172	354
-106	51	0.000013172	5e-06
-107	52	0.000017308	1496
-107	102	0.000029612	1496
-108	53	0.000017308	1496
-108	103	0.000029612	1496
-109	58	0.000017308	1496
-109	109	0.000029612	1496
-110	59	0.000017308	1496
-110	110	0.000029612	1496
-111	67	0.000017308	0
-111	136	0.00003278	3.168e-06
-112	71	0.000017308	1500
-112	122	0.000029612	358
-112	140	0.00003278	1500
-113	72	0.000017308	1500
-113	123	0.000029612	358
-113	141	0.00003278	1500
-114	73	0.000017308	1518
-114	124	0.000029612	376
-114	142	0.00003278	1518
-115	73	0.000017308	0
-115	124	0.000029612	0
-115	142	0.00003278	0
-116	74	0.000018172	354
-117	77	0.000018172	354
-118	101	0.000029516	1518
-118	131	0.000032684	376
-119	118	0.000029612	1.144e-05
-120	126	0.000029616	1526
-120	143	0.000032784	384
-121	126	0.000029616	1518
-121	143	0.000032784	376
-122	126	0.000029616	1518
-122	143	0.000032784	376
-123	127	0.000029616	1500
-123	144	0.000032784	358
-124	128	0.000029616	1496
-124	145	0.000032784	354
-125	130	0.000029616	1496
-125	147	0.000032784	354
-126	130	0.000029616	5e-06
-126	147	0.000032784	5e-06
-127	148	0.000034616	1496
-128	151	0.000034616	1496
-129	157	0.000034616	0
-130	161	0.000034616	1500
-131	162	0.000034616	1500
-132	163	0.000034616	1518
-133	163	0.000034616	0
 

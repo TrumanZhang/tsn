@@ -89,7 +89,7 @@ void ScheduleSwap::tick(IClock *clock) {
                 cModule* module = this->getModuleByPath(tsnGenPath);
                 if(module !=nullptr) {
                     EV_INFO << getFullPath() << ": Changing host schedule at " << tsnGenPath << endl;
-                    VEtherTrafGenSched* tsnModule = check_and_cast<VEtherTrafGenSched*>(module);
+                    VlanEtherTrafGenSched* tsnModule = check_and_cast<VlanEtherTrafGenSched*>(module);
                     tsnModule->loadScheduleOrDefault(newScheduleXml);
                 }
                 else {
