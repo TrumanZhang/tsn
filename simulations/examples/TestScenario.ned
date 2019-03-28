@@ -16,10 +16,10 @@
 package nesting.simulations.examples;
 
 import ned.DatarateChannel;
-import nesting.node.ethernet.VEtherSwitchPreemptable;
-import nesting.node.ethernet.VEtherHostSched;
-import nesting.node.ethernet.VEtherHostFullLoad;
-import nesting.node.ethernet.VEtherHostQ;
+import nesting.node.ethernet.VlanEtherSwitchPreemptable;
+import nesting.node.ethernet.VlanEtherHostSched;
+import nesting.node.ethernet.VlanEtherHostFullLoad;
+import nesting.node.ethernet.VlanEtherHostQ;
 
 
 network TestScenario
@@ -31,31 +31,31 @@ network TestScenario
             datarate = 1Gbps;
         }
     submodules:
-        switchA: VEtherSwitchPreemptable {
+        switchA: VlanEtherSwitchPreemptable {
             parameters:
                 @display("p=188,127");
             gates:
                 ethg[4];
         }
-        switchB: VEtherSwitchPreemptable {
+        switchB: VlanEtherSwitchPreemptable {
             parameters:
                 @display("p=327,127");
             gates:
                 ethg[3];
         }
-        workstation1: VEtherHostFullLoad {
+        workstation1: VlanEtherHostFullLoad {
             @display("p=79,62");
         }
-        workstation2: VEtherHostFullLoad {
+        workstation2: VlanEtherHostFullLoad {
             @display("p=172,29");
         }
-        backupServer: VEtherHostQ {
+        backupServer: VlanEtherHostQ {
             @display("p=446,54");
         }
-        robotController: VEtherHostSched {
+        robotController: VlanEtherHostSched {
             @display("p=79,202");
         }
-        roboticArm: VEtherHostQ {
+        roboticArm: VlanEtherHostQ {
             @display("p=440,202");
         }
     connections:

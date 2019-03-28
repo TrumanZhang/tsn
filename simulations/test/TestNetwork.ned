@@ -16,10 +16,10 @@
 package nesting.simulations.test;
 
 import ned.DatarateChannel;
-import nesting.node.ethernet.VEtherSwitchPreemptable;
-import nesting.node.ethernet.VEtherHostSched;
-import nesting.node.ethernet.VEtherHostFullLoad;
-import nesting.node.ethernet.VEtherHostQ;
+import nesting.node.ethernet.VlanEtherSwitchPreemptable;
+import nesting.node.ethernet.VlanEtherHostSched;
+import nesting.node.ethernet.VlanEtherHostFullLoad;
+import nesting.node.ethernet.VlanEtherHostQ;
 
 
 network TestNetwork
@@ -31,19 +31,19 @@ network TestNetwork
             datarate = 0.1Gbps;
         }
     submodules:
-        switchA: VEtherSwitchPreemptable {
+        switchA: VlanEtherSwitchPreemptable {
             parameters:
                 @display("p=188,127");
             gates:
                 ethg[3];
         }
-        workstation1: VEtherHostFullLoad {
+        workstation1: VlanEtherHostFullLoad {
             @display("p=79,62");
         }
-        robotController: VEtherHostSched {
+        robotController: VlanEtherHostSched {
             @display("p=79,202");
         }
-        sink: VEtherHostQ {
+        sink: VlanEtherHostQ {
             @display("p=307,128");
         }
     connections:

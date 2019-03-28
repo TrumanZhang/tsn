@@ -17,23 +17,23 @@ package nesting.node.ethernet;
 
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.contract.IEthernetInterface;
-import nesting.application.ethernet.VEtherTrafGen;
+import nesting.application.ethernet.VlanEtherTrafGen;
 import nesting.ieee8021q.clock.IClock;
 
 //
 // Simple Host with the capability to create and receive VLAN tagged ethernet
 // traffic. Mainly used for test purposes.
 //
-// @see ~VEtherTrafGen
+// @see ~VlanEtherTrafGen
 //
-module VEtherHostQ
+module VlanEtherHostQ
 {
     parameters:
         @display("i=device/pc2;bgb=483,473");
         @networkNode();
         @labels(node,ethernet-node);
         *.interfaceTableModule = default("");
-        eth.typename = "VEthernetInterfaceSwitchPreemptable";
+        eth.typename = "VlanEthernetInterfaceSwitchPreemptable";
         eth.mac.queueModule = "^.^.eth[0].queuing.transmissionSelection";
         eth.mac.mtu = 1500B;
         eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
@@ -41,13 +41,13 @@ module VEtherHostQ
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        trafGenApp: VEtherTrafGen {
+        trafGenApp: VlanEtherTrafGen {
             @display("p=142,70");
         }
         clock: <default("IdealClock")> like IClock {
             @display("p=26,28;is=s");
         }
-        eth: <default("VEthernetInterface")> like IEthernetInterface {
+        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
         }
