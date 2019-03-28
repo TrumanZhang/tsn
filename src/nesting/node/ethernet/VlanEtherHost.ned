@@ -17,15 +17,15 @@ package nesting.node.ethernet;
 
 
 import inet.linklayer.contract.IEthernetInterface;
-import nesting.application.ethernet.VEtherTrafGen;
+import nesting.application.ethernet.VlanEtherTrafGen;
 
 //
 // Simple Host with the capability to create and receive VLAN tagged ethernet
 // traffic. Mainly used for test purposes.
 //
-// @see ~VEtherTrafGen
+// @see ~VlanEtherTrafGen
 //
-module VEtherHost
+module VlanEtherHost
 {
     parameters:
         @networkNode();
@@ -35,10 +35,10 @@ module VEtherHost
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        trafGenApp: VEtherTrafGen {
+        trafGenApp: VlanEtherTrafGen {
             @display("p=142,70");
         }
-        eth: <default("VEthernetInterface")> like IEthernetInterface {
+        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
         }
