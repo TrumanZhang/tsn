@@ -13,15 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "SchedEtherVLANTrafGen.h"
+#include "VlanEtherTrafGenSched.h"
 
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
 
-Define_Module(SchedEtherVLANTrafGen);
+Define_Module(VlanEtherTrafGenSched);
 
-void SchedEtherVLANTrafGen::initialize(int stage) {
+void VlanEtherTrafGenSched::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         // Signals
         sentPkSignal = registerSignal("sentPk");
@@ -53,11 +53,11 @@ void SchedEtherVLANTrafGen::initialize(int stage) {
     }
 }
 
-int SchedEtherVLANTrafGen::numInitStages() const {
+int VlanEtherTrafGenSched::numInitStages() const {
     return INITSTAGE_LINK_LAYER + 1;
 }
 
-void SchedEtherVLANTrafGen::handleMessage(cMessage *msg) {
+void VlanEtherTrafGenSched::handleMessage(cMessage *msg) {
     if (msg->isSelfMessage()) {
         //disregard for now
     } else {
@@ -65,7 +65,7 @@ void SchedEtherVLANTrafGen::handleMessage(cMessage *msg) {
     }
 }
 
-void SchedEtherVLANTrafGen::sendPacket() {
+void VlanEtherTrafGenSched::sendPacket() {
 
     char msgname[40];
     sprintf(msgname, "pk-%d-%d", getId(), seqNum);
@@ -109,7 +109,7 @@ void SchedEtherVLANTrafGen::sendPacket() {
     TSNpacketsSent++;
 }
 
-void SchedEtherVLANTrafGen::receivePacket(Packet *msg) {
+void VlanEtherTrafGenSched::receivePacket(Packet *msg) {
     EV_TRACE << getFullPath() << ": Received packet '" << msg->getName()
                     << "' with length " << msg->getByteLength() << "B at time "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
@@ -120,7 +120,7 @@ void SchedEtherVLANTrafGen::receivePacket(Packet *msg) {
     delete msg;
 }
 
-void SchedEtherVLANTrafGen::tick(IClock *clock) {
+void VlanEtherTrafGenSched::tick(IClock *clock) {
     Enter_Method("tick()");
     // When the current schedule index is 0, this means that the current
     // schedule's cycle was not started or was just finished. Therefore in this
@@ -144,7 +144,7 @@ void SchedEtherVLANTrafGen::tick(IClock *clock) {
 
 /* This method returns the timeinterval between
  * the last sent frame and the frame to be sent next */
-int SchedEtherVLANTrafGen::scheduleNextTickEvent() {
+int VlanEtherTrafGenSched::scheduleNextTickEvent() {
     if (currentSchedule->size() == 0) {
         return currentSchedule->getCycle();
     } else if (index == currentSchedule->size()) {
@@ -157,7 +157,7 @@ int SchedEtherVLANTrafGen::scheduleNextTickEvent() {
     }
 }
 
-void SchedEtherVLANTrafGen::loadScheduleOrDefault(cXMLElement* xml) {
+void VlanEtherTrafGenSched::loadScheduleOrDefault(cXMLElement* xml) {
     std::string hostName =
             this->getModuleByPath(par("hostModule"))->getFullName();
     HostSchedule<Ieee8021QCtrl>* schedule;

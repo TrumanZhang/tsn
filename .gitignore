@@ -2,11 +2,12 @@
 
 /src/Makefile
 
-/simulations/results
+/simulations/results*
 /simulations/Makefile
 /simulations/nesting
 /simulations/nesting_dbg
-/simulations/*/results
+/simulations/*/results*
+/simulations/*/*results*
 
 /.settings/
 

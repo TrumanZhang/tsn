@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet;
+package nesting.linklayer.ethernet;
 
 @namespace();
 
@@ -29,7 +29,7 @@ import inet.networklayer.common.InterfaceEntry;
 //
 // This module implements an ethernet interface with queueing capabilities of Ieee802.1Q. Frame Preemption is not supported.
 //
-module VLANEthernetInterfaceSwitch extends InterfaceEntry like IEthernetInterface
+module VlanEthernetInterfaceSwitch extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);

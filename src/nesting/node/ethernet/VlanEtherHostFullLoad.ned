@@ -13,36 +13,40 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet.host;
+package nesting.node.ethernet;
 
 import inet.common.queue.Sink;
+import inet.linklayer.contract.IEthernetInterface;
 import nesting.common.queue.EtherTrafGenQueue;
-import nesting.linklayer.ethernet.VLANEncap;
+
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
 // physical medium allows. This module's main use case is to simulate a
 // congestion scenarios on a switch.
 //
-module FullLoadVLANHost extends VLANHostBase
+module VlanEtherHostFullLoad
 {
     parameters:
-        @display("bgb=363,398");
+        @display("i=device/pc2;bgb=363,398");
         @networkNode();
-        eth.mac.queueModule = "^.^.trafGenQueue";
+        @labels(node,ethernet-node);
+        *.interfaceTableModule = default("");
+        eth.mac.queueModule = "^.^.trafGenQueueApp";
+    gates:
+        inout ethg @labels(EtherFrame-conn);
     submodules:
-        trafGenQueue: EtherTrafGenQueue {
+        trafGenQueueApp: EtherTrafGenQueue {
             @display("p=192,69");
         }
         sink: Sink {
             @display("p=84,69");
         }
-        vlanEncap: VLANEncap {
-            @display("p=142,188");
+        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
+            parameters:
+                @display("p=142,283,row,150;q=txQueue");
         }
     connections:
-        trafGenQueue.out --> vlanEncap.upperLayerIn;
-        vlanEncap.upperLayerOut --> sink.in++;
-        
-        vlanEncap.lowerLayerOut --> eth.upperLayerIn;
-        eth.upperLayerOut --> vlanEncap.lowerLayerIn;
+        eth.upperLayerIn <-- trafGenQueueApp.out;
+        eth.upperLayerOut --> sink.in++;
+        eth.phys <--> ethg;
 }

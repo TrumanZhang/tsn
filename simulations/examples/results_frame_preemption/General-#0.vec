@@ -47,18 +47,18 @@ param **.queues[6].expressQueue false
 param **.queues[7].expressQueue true
 param **.queues[*].bufferCapacity 363360b
 param **.switchA.eth[3].mac.enablePreemptingFrames true
-param **.robotController.tsn_app.initialSchedule "xmldoc(\"xml/TestScenarioSchedule_AllOpen.xml\")"
-param **.workstation*.trafGenQueue.destAddress "\"00-00-00-00-00-05\""
-param **.workstation*.trafGenQueue.packetLength "1500Byte - 4Byte"
-param **.workstation*.trafGenQueue.vlanTagEnabled true
-param **.workstation1.trafGenQueue.pcp 6
-param **.workstation2.trafGenQueue.pcp 5
-param **.roboticArm.app.numPacketsPerBurst 0
-param **.roboticArm.app.sendInterval 1ms
-param **.roboticArm.app.packetLength 100B
-param **.backupServer.app.numPacketsPerBurst 0
-param **.backupServer.app.sendInterval 1ms
-param **.backupServer.app.packetLength 100B
+param **.robotController.trafGenSchedApp.initialSchedule "xmldoc(\"xml/TestScenarioSchedule_AllOpen.xml\")"
+param **.workstation*.trafGenQueueApp.destAddress "\"00-00-00-00-00-05\""
+param **.workstation*.trafGenQueueApp.packetLength "1500Byte - 4Byte"
+param **.workstation*.trafGenQueueApp.vlanTagEnabled true
+param **.workstation1.trafGenQueueApp.pcp 6
+param **.workstation2.trafGenQueueApp.pcp 5
+param **.roboticArm.trafGenApp.numPacketsPerBurst 0
+param **.roboticArm.trafGenApp.sendInterval 1ms
+param **.roboticArm.trafGenApp.packetLength 100B
+param **.backupServer.trafGenApp.numPacketsPerBurst 0
+param **.backupServer.trafGenApp.sendInterval 1ms
+param **.backupServer.trafGenApp.packetLength 100B
 
 vector 0 TestScenario.switchA.eth[0].queuing.queues[0] queueLength:vector ETV
 attr interpolationmode sample-hold
@@ -228,11 +228,11 @@ attr title "queue length, vector"
 vector 55 TestScenario.switchB.eth[2].queuing.queues[7] queueLength:vector ETV
 attr interpolationmode sample-hold
 attr title "queue length, vector"
-vector 56 TestScenario.workstation1.trafGenQueue sentPk:vector(packetBytes) ETV
+vector 56 TestScenario.workstation1.trafGenQueueApp sentPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, vector(packetBytes)"
-vector 57 TestScenario.workstation2.trafGenQueue sentPk:vector(packetBytes) ETV
+vector 57 TestScenario.workstation2.trafGenQueueApp sentPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, vector(packetBytes)"
@@ -473,11 +473,11 @@ vector 118 TestScenario.roboticArm.vlanEncap decapPk:vector(packetBytes) ETV
 attr interpolationmode none
 attr source decapPk
 attr title "packets decapsulated, vector(packetBytes)"
-vector 119 TestScenario.roboticArm.app packetReceived:vector(packetBytes) ETV
+vector 119 TestScenario.roboticArm.trafGenApp packetReceived:vector(packetBytes) ETV
 attr interpolationmode none
 attr source packetReceived
 attr title "packets received, vector(packetBytes)"
-vector 120 TestScenario.roboticArm.app endToEndDelay:vector ETV
+vector 120 TestScenario.roboticArm.trafGenApp endToEndDelay:vector ETV
 attr interpolationmode none
 attr source dataAge(packetReceived)
 attr title "end-to-end delay, vector"

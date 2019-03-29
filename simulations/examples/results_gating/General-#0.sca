@@ -38,18 +38,18 @@ param **.switch*.queuing[*].tsAlgorithms[6].typename "\"StrictPriority\""
 param **.switch*.queuing[*].tsAlgorithms[7].typename "\"StrictPriority\""
 param **.queues[*].bufferCapacity 363360b
 param **.switchA.eth[3].mac.enablePreemptingFrames false
-param **.robotController.tsn_app.initialSchedule "xmldoc(\"xml/TestScenarioSchedule_GatingOn.xml\")"
-param **.workstation*.trafGenQueue.destAddress "\"00-00-00-00-00-05\""
-param **.workstation*.trafGenQueue.packetLength "1500Byte - 4Byte"
-param **.workstation*.trafGenQueue.vlanTagEnabled true
-param **.workstation1.trafGenQueue.pcp 6
-param **.workstation2.trafGenQueue.pcp 5
-param **.roboticArm.app.numPacketsPerBurst 0
-param **.roboticArm.app.sendInterval 1ms
-param **.roboticArm.app.packetLength 100B
-param **.backupServer.app.numPacketsPerBurst 0
-param **.backupServer.app.sendInterval 1ms
-param **.backupServer.app.packetLength 100B
+param **.robotController.trafGenSchedApp.initialSchedule "xmldoc(\"xml/TestScenarioSchedule_GatingOn.xml\")"
+param **.workstation*.trafGenQueueApp.destAddress "\"00-00-00-00-00-05\""
+param **.workstation*.trafGenQueueApp.packetLength "1500Byte - 4Byte"
+param **.workstation*.trafGenQueueApp.vlanTagEnabled true
+param **.workstation1.trafGenQueueApp.pcp 6
+param **.workstation2.trafGenQueueApp.pcp 5
+param **.roboticArm.trafGenApp.numPacketsPerBurst 0
+param **.roboticArm.trafGenApp.sendInterval 1ms
+param **.roboticArm.trafGenApp.packetLength 100B
+param **.backupServer.trafGenApp.numPacketsPerBurst 0
+param **.backupServer.trafGenApp.sendInterval 1ms
+param **.backupServer.trafGenApp.packetLength 100B
 
 scalar TestScenario.switchA.eth[0].mac "simulated time" 4.9149349e-05
 scalar TestScenario.switchA.eth[0].mac full-duplex 1
@@ -3638,11 +3638,11 @@ scalar TestScenario.workstation1.vlanEncap encapPk:sum(packetBytes) 6000
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, sum(packetBytes)"
-scalar TestScenario.workstation1.trafGenQueue sentPk:count 4
+scalar TestScenario.workstation1.trafGenQueueApp sentPk:count 4
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, count"
-scalar TestScenario.workstation1.trafGenQueue sentPk:sum(packetBytes) 5984
+scalar TestScenario.workstation1.trafGenQueueApp sentPk:sum(packetBytes) 5984
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, sum(packetBytes)"
@@ -3768,11 +3768,11 @@ scalar TestScenario.workstation2.vlanEncap encapPk:sum(packetBytes) 6000
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, sum(packetBytes)"
-scalar TestScenario.workstation2.trafGenQueue sentPk:count 4
+scalar TestScenario.workstation2.trafGenQueueApp sentPk:count 4
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, count"
-scalar TestScenario.workstation2.trafGenQueue sentPk:sum(packetBytes) 5984
+scalar TestScenario.workstation2.trafGenQueueApp sentPk:sum(packetBytes) 5984
 attr interpolationmode none
 attr source sentPk
 attr title "packets sent, sum(packetBytes)"
@@ -3898,15 +3898,15 @@ scalar TestScenario.backupServer.vlanEncap encapPk:sum(packetBytes) 0
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, sum(packetBytes)"
-scalar TestScenario.backupServer.app packetReceived:count 0
+scalar TestScenario.backupServer.trafGenApp packetReceived:count 0
 attr interpolationmode none
 attr source packetReceived
 attr title "packets received, count"
-scalar TestScenario.backupServer.app packetReceived:sum(packetBytes) 0
+scalar TestScenario.backupServer.trafGenApp packetReceived:sum(packetBytes) 0
 attr interpolationmode none
 attr source packetReceived
 attr title "packets received, sum(packetBytes)"
-statistic TestScenario.backupServer.app endToEndDelay:histogram
+statistic TestScenario.backupServer.trafGenApp endToEndDelay:histogram
 field count 0
 field mean -nan
 field stddev -nan
@@ -3921,11 +3921,11 @@ attr unit s
 bin	-inf	0
 bin	0	0
 bin	1	0
-scalar TestScenario.backupServer.app packetSent:count 0
+scalar TestScenario.backupServer.trafGenApp packetSent:count 0
 attr interpolationmode none
 attr source packetSent
 attr title "packets sent, count"
-scalar TestScenario.backupServer.app packetSent:sum(packetBytes) 0
+scalar TestScenario.backupServer.trafGenApp packetSent:sum(packetBytes) 0
 attr interpolationmode none
 attr source packetSent
 attr title "packets sent, sum(packetBytes)"
@@ -4153,15 +4153,15 @@ scalar TestScenario.roboticArm.vlanEncap encapPk:sum(packetBytes) 0
 attr interpolationmode none
 attr source encapPk
 attr title "packets encapsulated, sum(packetBytes)"
-scalar TestScenario.roboticArm.app packetReceived:count 1
+scalar TestScenario.roboticArm.trafGenApp packetReceived:count 1
 attr interpolationmode none
 attr source packetReceived
 attr title "packets received, count"
-scalar TestScenario.roboticArm.app packetReceived:sum(packetBytes) 354
+scalar TestScenario.roboticArm.trafGenApp packetReceived:sum(packetBytes) 354
 attr interpolationmode none
 attr source packetReceived
 attr title "packets received, sum(packetBytes)"
-statistic TestScenario.roboticArm.app endToEndDelay:histogram
+statistic TestScenario.roboticArm.trafGenApp endToEndDelay:histogram
 field count 1
 field mean 3.0956e-05
 field stddev -nan
@@ -4226,11 +4226,11 @@ bin	0.48	0
 bin	0.49	0
 bin	0.5	0
 bin	0.51	0
-scalar TestScenario.roboticArm.app packetSent:count 0
+scalar TestScenario.roboticArm.trafGenApp packetSent:count 0
 attr interpolationmode none
 attr source packetSent
 attr title "packets sent, count"
-scalar TestScenario.roboticArm.app packetSent:sum(packetBytes) 0
+scalar TestScenario.roboticArm.trafGenApp packetSent:sum(packetBytes) 0
 attr interpolationmode none
 attr source packetSent
 attr title "packets sent, sum(packetBytes)"

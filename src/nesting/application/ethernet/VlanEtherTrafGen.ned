@@ -31,10 +31,10 @@ import inet.applications.ethernet.EtherTrafGen;
 //
 // @see ~VLANEncap, ~EtherEncap, ~Ieee8021QCtrl
 //
-simple EtherVLANTaggedTrafGen extends EtherTrafGen
+simple VlanEtherTrafGen extends EtherTrafGen
 {
     parameters:
-        @class(EtherVLANTaggedTrafGen);
+        @class(VlanEtherTrafGen);
         bool vlanTagEnabled = default(true);	// When true, the application's packets will be VLAN encapsulated by the VLANEncap module
         int pcp = default(0);					// PCP (Priority Code Point) value that is added to the packets control information
         bool dei = default(false);				// DEI (Drop Eligible Indicator) that is added to the packets control information

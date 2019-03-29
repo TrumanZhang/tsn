@@ -19,18 +19,17 @@ import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.IEtherEncap;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.contract.IEthernetInterface;
-import nesting.application.ethernet.SchedEtherVLANTrafGen;
+import nesting.application.ethernet.VlanEtherTrafGenSched;
 import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.linklayer.ethernet.VLANEncap;
 
-
 //
 // Simple Host with the capability to send out frames according to a given schedule
 //
-// @see ~EtherVLANTaggedTrafGen
+// @see ~VlanEtherTrafGen
 //
-module VLANEtherHost
+module VlanEtherHostSched
 {
     parameters:
         string fcsMode @enum("declared","computed") = default("declared");
@@ -42,18 +41,16 @@ module VLANEtherHost
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
-        tsn_app: SchedEtherVLANTrafGen {
+        trafGenSchedApp: VlanEtherTrafGenSched {
             @display("p=212.768,69.296005");
         }
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=330,215;is=s");
         }
-
         vlanEncap: VLANEncap {
             @display("p=138,149");
         }
-
         clock: <default("IdealClock")> like IClock {
             @display("p=330,69");
         }
@@ -67,8 +64,8 @@ module VLANEtherHost
                 @display("p=138,271,row,150;q=txQueue");
         }
     connections:
-        tsn_app.out --> vlanEncap.upperLayerIn;
-        vlanEncap.upperLayerOut --> tsn_app.in;
+        trafGenSchedApp.out --> vlanEncap.upperLayerIn;
+        vlanEncap.upperLayerOut --> trafGenSchedApp.in;
 
         vlanEncap.lowerLayerOut --> eth.upperLayerIn;
         eth.upperLayerOut --> vlanEncap.lowerLayerIn;

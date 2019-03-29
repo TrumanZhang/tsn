@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet;
+package nesting.linklayer.ethernet;
 
 @namespace();
 
@@ -21,10 +21,12 @@ import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.EtherEncap;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.InterfaceEntry;
+import nesting.linklayer.ethernet.VLANEncap;
+
 //
 // Ethernet network interface, used in Host modules in nesting project.
 //
-module VLANEthernetInterfaceHost extends InterfaceEntry like IEthernetInterface
+module VlanEthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);
@@ -40,20 +42,24 @@ module VLANEthernetInterfaceHost extends InterfaceEntry like IEthernetInterface
         inout phys @labels(EtherFrame);
     submodules:
         mac: EtherMacFullDuplex {
-            @display("p=141,193");
+            @display("p=141,242");
         }
-        encap: EtherEncap {
+        etherEncap: EtherEncap {
             parameters:
-                @display("p=141,77");
+                @display("p=141,152");
+        }
+        vlanEncap: VLANEncap {
+            @display("p=141,68");
         }
     connections:
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        mac.upperLayerOut --> encap.lowerLayerIn;
-        encap.lowerLayerOut --> mac.upperLayerIn;
+        mac.upperLayerOut --> etherEncap.lowerLayerIn;
+        mac.upperLayerIn <-- etherEncap.lowerLayerOut;
 
-        encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn;
+        etherEncap.upperLayerOut --> { @display("m=n"); } --> vlanEncap.lowerLayerIn;
+        etherEncap.upperLayerIn <-- { @display("m=n"); } <-- vlanEncap.lowerLayerOut;
 
+        vlanEncap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        vlanEncap.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn;
 }
-

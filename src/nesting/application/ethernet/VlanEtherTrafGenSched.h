@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef NESTING_APPLICATION_ETHERNET_SCHEDETHERVLANTRAFGEN_H_
-#define NESTING_APPLICATION_ETHERNET_SCHEDETHERVLANTRAFGEN_H_
+#ifndef __NESTING_VETHERTRAFGENSCHED_H
+#define __NESTING_VETHERTRAFGENSCHED_H
 
 #include <omnetpp.h>
 #include <memory>
@@ -41,7 +41,7 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class SchedEtherVLANTrafGen: public cSimpleModule, public IClockListener {
+class VlanEtherTrafGenSched: public cSimpleModule, public IClockListener {
 private:
 
     /** Current schedule. Is never null. */
@@ -86,4 +86,4 @@ public:
 
 } // namespace nesting
 
-#endif /* NESTING_APPLICATION_ETHERNET_SCHEDETHERVLANTRAFGEN_H_ */
+#endif /* __NESTING_VETHERTRAFGENSCHED_H */

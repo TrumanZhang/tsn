@@ -28,10 +28,10 @@ package nesting.application.ethernet;
 //
 // @see ~VLANEncap, ~EtherEncap, ~Ieee8021QCtrl
 //
-simple SchedEtherVLANTrafGen
+simple VlanEtherTrafGenSched
 {
     parameters:
-        @class(SchedEtherVLANTrafGen);
+        @class(VlanEtherTrafGenSched);
 
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

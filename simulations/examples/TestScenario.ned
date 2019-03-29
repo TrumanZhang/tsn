@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.simulations;
+package nesting.simulations.examples;
 
 import ned.DatarateChannel;
-import nesting.node.ethernet.EthernetSwitchPreemptable;
-import nesting.node.ethernet.VLANEtherHost;
-import nesting.node.ethernet.host.FullLoadVLANHost;
-import nesting.node.ethernet.host.VLANHost;
+import nesting.node.ethernet.VlanEtherSwitchPreemptable;
+import nesting.node.ethernet.VlanEtherHostSched;
+import nesting.node.ethernet.VlanEtherHostFullLoad;
+import nesting.node.ethernet.VlanEtherHostQ;
 
 
 network TestScenario
@@ -31,31 +31,31 @@ network TestScenario
             datarate = 1Gbps;
         }
     submodules:
-        switchA: EthernetSwitchPreemptable {
+        switchA: VlanEtherSwitchPreemptable {
             parameters:
                 @display("p=188,127");
             gates:
                 ethg[4];
         }
-        switchB: EthernetSwitchPreemptable {
+        switchB: VlanEtherSwitchPreemptable {
             parameters:
                 @display("p=327,127");
             gates:
                 ethg[3];
         }
-        workstation1: FullLoadVLANHost {
+        workstation1: VlanEtherHostFullLoad {
             @display("p=79,62");
         }
-        workstation2: FullLoadVLANHost {
+        workstation2: VlanEtherHostFullLoad {
             @display("p=172,29");
         }
-        backupServer: VLANHost {
+        backupServer: VlanEtherHostQ {
             @display("p=446,54");
         }
-        robotController: VLANEtherHost {
+        robotController: VlanEtherHostSched {
             @display("p=79,202");
         }
-        roboticArm: VLANHost {
+        roboticArm: VlanEtherHostQ {
             @display("p=440,202");
         }
     connections:

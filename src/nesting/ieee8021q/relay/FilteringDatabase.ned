@@ -28,7 +28,7 @@ simple FilteringDatabase
 	    @class(FilteringDatabase);
 	    xml cycle = default(xml("<schedule><cycle>100</cycle></schedule>"));
 	    xml database;
-	    string switchModule = default("^"); // Path to the ~EthernetSwitch module
+	    string switchModule = default("^"); // Path to the ~VlanEtherSwitch module
 	    string clockModule = default("^.clock"); // Path to the ~IClock module.
 	    bool verbose = default(false);
 }
