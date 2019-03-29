@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __MAIN_ETHERVLANTAGGEDTRAFGEN_H_
-#define __MAIN_ETHERVLANTAGGEDTRAFGEN_H_
+#ifndef __NESTING_VETHERTRAFGEN_H
+#define __NESTING_VETHERTRAFGEN_H
 
 #include <omnetpp.h>
 
@@ -35,7 +35,7 @@ using namespace inet;
 namespace nesting {
 
 /** See the NED file for a detailed description */
-class EtherVLANTaggedTrafGen: public EtherTrafGen {
+class VlanEtherTrafGen: public EtherTrafGen {
 private:
     // Parameters from NED file
     cPar* vlanTagEnabled;
@@ -49,4 +49,4 @@ protected:
 
 } // namespace nesting
 
-#endif
+#endif /* __NESTING_VETHERTRAFGEN_H */

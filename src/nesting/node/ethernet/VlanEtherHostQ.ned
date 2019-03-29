@@ -13,39 +13,46 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet.host;
+package nesting.node.ethernet;
 
 import inet.linklayer.ethernet.EtherMacFullDuplex;
-import inet.linklayer.ethernet.IEtherEncap;
-import nesting.application.ethernet.EtherVLANTaggedTrafGen;
-import nesting.linklayer.ethernet.VLANEncap;
+import inet.linklayer.contract.IEthernetInterface;
+import nesting.application.ethernet.VlanEtherTrafGen;
 import nesting.ieee8021q.clock.IClock;
-
 
 //
 // Simple Host with the capability to create and receive VLAN tagged ethernet
 // traffic. Mainly used for test purposes.
 //
-// @see ~EtherVLANTaggedTrafGen
+// @see ~VlanEtherTrafGen
 //
-module VLANHost extends VLANHostBase
+module VlanEtherHostQ
 {
     parameters:
-        @display("bgb=483,473");
+        @display("i=device/pc2;bgb=483,473");
         @networkNode();
-        eth.typename = "VLANEthernetInterfaceSwitchPreemptable";
+        @labels(node,ethernet-node);
+        *.interfaceTableModule = default("");
+        eth.typename = "VlanEthernetInterfaceSwitchPreemptable";
         eth.mac.queueModule = "^.^.eth[0].queuing.transmissionSelection";
         eth.mac.mtu = 1500B;
         eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
         eth.queuing.gateController.macModule = "^.^.^.eth[0].mac";
+    gates:
+        inout ethg @labels(EtherFrame-conn);
     submodules:
-        app: EtherVLANTaggedTrafGen {
+        trafGenApp: VlanEtherTrafGen {
             @display("p=142,70");
         }
         clock: <default("IdealClock")> like IClock {
             @display("p=26,28;is=s");
         }
+        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
+            parameters:
+                @display("p=142,283,row,150;q=txQueue");
+        }
     connections:
-        app.out --> eth.upperLayerIn;
-        eth.upperLayerOut --> app.in;
+        eth.upperLayerIn <-- trafGenApp.out;
+        eth.upperLayerOut --> trafGenApp.in;
+        eth.phys <--> ethg;
 }

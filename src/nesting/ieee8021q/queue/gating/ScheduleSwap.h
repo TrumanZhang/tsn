@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include "inet/common/ModuleAccess.h"
 #include "GateController.h"
-#include "../../../application/ethernet/SchedEtherVLANTrafGen.h"
+#include "../../../application/ethernet/VlanEtherTrafGenSched.h"
 #include "../../clock/IClock.h"
 #include "../../relay/FilteringDatabase.h"
 #include "../../clock/IClockListener.h"

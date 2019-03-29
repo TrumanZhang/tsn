@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.node.ethernet;
+package nesting.linklayer.ethernet;
 
 @namespace();
 
@@ -28,7 +28,7 @@ import inet.networklayer.common.InterfaceEntry;
 //
 // This module implements an ethernet interface that supports frame preemption.
 //
-module VLANEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEthernetInterface
+module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEthernetInterface
 {
     parameters:
         @class(inet::InterfaceEntry);
