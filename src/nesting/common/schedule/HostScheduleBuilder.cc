@@ -22,8 +22,8 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
     HostSchedule<Ieee8021QCtrl>* schedule =
             new HostSchedule<Ieee8021QCtrl>();
 
-    //extract cycle from second xml argument (xml root)
-    int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
+    // extract cycle time of host
+    int cycle = atoi(xml->getFirstChildWithTag("cycle")->getNodeValue());
     schedule->setCycle(cycle);
 
     std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");

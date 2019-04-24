@@ -45,7 +45,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
         cXMLElement *xml) {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
     const char* lengthCString =
-            xml->getFirstChildWithTag("cycle")->getNodeValue();
+            xml->getFirstChildWithTag("defaultcycle")->getNodeValue();
     unsigned int length = atoi(lengthCString);
     std::string gateString(kMaxSupportedQueues, '1');
     GateBitvector bitvector = GateBitvector(gateString);

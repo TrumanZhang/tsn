@@ -270,7 +270,7 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
     //try to extract the part of the schedule belonging to this switch and port
     if (xml != nullptr && xml->hasChildren()) {
         for (cXMLElement* host : xml->getChildren()) {
-            if (strcmp(host->getTagName(), "cycle") != 0
+            if (strcmp(host->getTagName(), "defaultcycle") != 0
                     && host->getAttribute("name") == switchString) {
                 for (cXMLElement* port : host->getChildrenByTagName("port")) {
                     if (port->getAttribute("id") == portString) {
