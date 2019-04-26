@@ -39,7 +39,7 @@ protected:
     /**
      * Total cycletime of this schedule.
      */
-    int cycle = 0;
+    simtime_t cycle = 0;
 
 public:
     HostSchedule() {
@@ -55,12 +55,12 @@ public:
     }
 
     /** Sets the Cycletime of this schedule. */
-    virtual void setCycle(unsigned int cycleLength) {
+    virtual void setCycle(simtime_t cycleLength) {
         cycle = cycleLength;
     }
 
     /** Returns the number of entries of the schedule. */
-    virtual unsigned int getCycle() const {
+    virtual simtime_t getCycle() const {
         return cycle;
     }
 

@@ -26,7 +26,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         // Get length
         const char* lengthCString =
                 entry->getFirstChildWithTag("length")->getNodeValue();
-        unsigned int length = atoi(lengthCString);
+        simtime_t length = simTime().parse(lengthCString);
 
         // Get bitvector
         const char* bitvectorCString =
@@ -46,10 +46,11 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
     const char* lengthCString =
             xml->getFirstChildWithTag("defaultcycle")->getNodeValue();
-    unsigned int length = atoi(lengthCString);
+    simtime_t length = simTime().parse(lengthCString);
     std::string gateString(kMaxSupportedQueues, '1');
     GateBitvector bitvector = GateBitvector(gateString);
     schedule->addEntry(length, bitvector);
+    schedule->setCycleTime(length);
     return schedule;
 }
 } // namespace nesting

@@ -78,7 +78,7 @@ protected:
     virtual void handleMessage(cMessage *msg) override;
 
     virtual int numInitStages() const override;
-    virtual int scheduleNextTickEvent();
+    virtual simtime_t scheduleNextTickEvent();
 public:
     virtual void tick(IClock *clock) override;
 
