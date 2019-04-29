@@ -15,17 +15,13 @@
 		<port id="3">
 			<entry>
 				<!-- us -->
-				<length>400</length>
-				<bitvector>11111111</bitvector>
+				<length>20</length>
+				<bitvector>00001111</bitvector>
 			</entry>
-		</port>
-	</switch>
-	<switch name="switchB">
-		<port id="0">
 			<entry>
 				<!-- us -->
-				<length>400</length>
-				<bitvector>11111111</bitvector>
+				<length>20</length>
+				<bitvector>11110000</bitvector>
 			</entry>
 		</port>
 	</switch>

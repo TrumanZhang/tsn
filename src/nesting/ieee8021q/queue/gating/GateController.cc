@@ -69,8 +69,9 @@ void GateController::initialize(int stage) {
 
         switchString =
                 this->getModuleByPath(par("switchModule"))->getFullName();
-        portString = std::to_string(
-                this->getModuleByPath(par("networkInterfaceModule"))->getIndex());
+        portString =
+                std::to_string(
+                        this->getModuleByPath(par("networkInterfaceModule"))->getIndex());
 
         lastChange = simTime();
         currentSchedule = std::unique_ptr < Schedule
@@ -109,6 +110,10 @@ void GateController::tick(IClock *clock) {
 // When the current schedule index is 0, this means that the current
 // schedule's cycle was not started or was just finished. Therefore in this
 // case a new schedule is loaded if available.
+    bool tmp = false;
+    if(nextSchedule) {tmp = true;}
+    bool tmp2 = scheduleIndex == 0;
+    simtime_t tmp3 = clock->getTime();
     if (scheduleIndex == 0 && nextSchedule) {
         // Print warning if the feature is used in combination with frame preemption
         if(preemptMacModule != nullptr) {
