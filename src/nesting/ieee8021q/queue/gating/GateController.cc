@@ -117,13 +117,7 @@ void GateController::tick(IClock *clock) {
     bool tmp3 = currentSchedule->getCycleTime() != 0;
     simtime_t tmp = clock->getTime();
 
-    if ((scheduleIndex == 0 && nextSchedule)
-    || ((cycleStart + currentSchedule->getCycleTime() == clock->getTime())
-            && currentSchedule->getCycleTime() != 0)) {
-
-        if(tmp2 && tmp3) {
-            EV_WARN << "test" << endl;
-        }
+    if (scheduleIndex == 0 && nextSchedule) {
 
         // Print warning if the feature is used in combination with frame preemption
         if(preemptMacModule != nullptr) {
@@ -131,7 +125,8 @@ void GateController::tick(IClock *clock) {
                 EV_WARN << "Using schedule swap in combination with Hold&Release (Frame Preemption) can lead to wrong hold periods."<<endl;
             }
         }
-        // Load new schedule and delete the old one.
+
+        // Load new schedule and delete the old one if there is new schedule.
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
 
@@ -141,9 +136,14 @@ void GateController::tick(IClock *clock) {
             openAllGates();
             return;
         }
+    }
 
+    if((cycleStart + currentSchedule->getCycleTime() == clock->getTime())
+    && currentSchedule->getCycleTime() != 0) {
         // need to be set to 0, if cycle time has ended
         scheduleIndex = 0;
+    }
+    if(scheduleIndex == 0) {
         cycleStart = clock->getTime();
     }
 
@@ -217,8 +217,7 @@ simtime_t GateController::scheduleNextTickEvent() {
     simtime_t tmp5 = currentSchedule->getCycleTime();
     if (clock->getTime() + currentSchedule->getLength(scheduleIndex)
             > cycleStart + currentSchedule->getCycleTime()) {
-        return (cycleStart + currentSchedule->getCycleTime()
-                - clock->getTime());
+        return (cycleStart + currentSchedule->getCycleTime() - clock->getTime());
     } else {
         return currentSchedule->getLength(scheduleIndex);
     }
@@ -261,10 +260,10 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
         } else {
             //if there is a nextSchedule but it is not yet being looked at
             if (!touchedNextSchedule) {
-                bits =
-                        bits
-                                + (currentSchedule->getLength(currentIndex) - timeSinceLastChange)
-                                        / (SimTime(1, SIMTIME_S) / transmitRate);
+                bits = bits
+                        + (currentSchedule->getLength(currentIndex)
+                                - timeSinceLastChange)
+                                / (SimTime(1, SIMTIME_S) / transmitRate);
                 timeSinceLastChange = SIMTIME_ZERO;
                 //if currentIndex is not the last index in currentSchedule
                 if (currentIndex < currentSchedule->size() - 1) {
