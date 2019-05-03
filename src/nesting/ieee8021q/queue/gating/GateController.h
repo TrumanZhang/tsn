@@ -64,6 +64,11 @@ private:
      */
     IClock* clock;
 
+    /**
+     * Specifies the cycle start time.
+     */
+    simtime_t cycleStart;
+
     /** Reference to transmission gate vector module */
     std::vector<TransmissionGate*> transmissionGates;
 
@@ -75,6 +80,9 @@ private:
 protected:
     /** @see cSimpleModule::initialize(int) */
     virtual void initialize(int stage) override;
+
+    /** Schedules the next tick */
+    virtual simtime_t scheduleNextTickEvent();
 
     /** @see cSimpleModule::numInitStages() */
     virtual int numInitStages() const override;

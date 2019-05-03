@@ -26,7 +26,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         // Get length
         const char* lengthCString =
                 entry->getFirstChildWithTag("length")->getNodeValue();
-        unsigned int length = atoi(lengthCString);
+        simtime_t length = simTime().parse(lengthCString);
 
         // Get bitvector
         const char* bitvectorCString =
@@ -38,6 +38,10 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         schedule->addEntry(length, bitvector);
     }
 
+    if (schedule->getLength() > schedule->getCycleTime()) {
+        EV_WARN << "Schedule total Length is greater than Cycle length";
+    }
+
     return schedule;
 }
 
@@ -45,11 +49,12 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
         cXMLElement *xml) {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
     const char* lengthCString =
-            xml->getFirstChildWithTag("cycle")->getNodeValue();
-    unsigned int length = atoi(lengthCString);
+            xml->getFirstChildWithTag("defaultcycle")->getNodeValue();
+    simtime_t length = simTime().parse(lengthCString);
     std::string gateString(kMaxSupportedQueues, '1');
     GateBitvector bitvector = GateBitvector(gateString);
     schedule->addEntry(length, bitvector);
+    schedule->setCycleTime(length);
     return schedule;
 }
 } // namespace nesting

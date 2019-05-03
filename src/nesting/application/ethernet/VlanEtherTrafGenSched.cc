@@ -51,7 +51,7 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
 
-        clock->subscribeTick(this, scheduleNextTickEvent());
+        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
 
         llcSocket.open(-1, ssap);
     }
@@ -136,19 +136,19 @@ void VlanEtherTrafGenSched::tick(IClock *clock) {
             nextSchedule.reset();
         }
         index = 0;
-        clock->subscribeTick(this, scheduleNextTickEvent());
+        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
 
     }
     else {
         sendPacket();
         index++;
-        clock->subscribeTick(this, scheduleNextTickEvent());
+        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
     }
 }
 
 /* This method returns the timeinterval between
  * the last sent frame and the frame to be sent next */
-int VlanEtherTrafGenSched::scheduleNextTickEvent() {
+simtime_t VlanEtherTrafGenSched::scheduleNextTickEvent() {
     if (currentSchedule->size() == 0) {
         return currentSchedule->getCycle();
     } else if (index == currentSchedule->size()) {
@@ -168,7 +168,7 @@ void VlanEtherTrafGenSched::loadScheduleOrDefault(cXMLElement* xml) {
     bool realScheduleFound = false;
     //try to extract the part of the schedule belonging to this host
     for (cXMLElement* hostxml : xml->getChildren()) {
-        if (strcmp(hostxml->getTagName(), "cycle") != 0
+        if (strcmp(hostxml->getTagName(), "defaultcycle") != 0
                 && hostxml->getAttribute("name") == hostName) {
             schedule = HostScheduleBuilder::createHostScheduleFromXML(hostxml,
                     xml);

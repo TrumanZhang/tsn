@@ -19,11 +19,11 @@ namespace nesting {
 
 HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         cXMLElement *xml, cXMLElement *rootXml) {
-    HostSchedule<Ieee8021QCtrl>* schedule =
-            new HostSchedule<Ieee8021QCtrl>();
+    HostSchedule<Ieee8021QCtrl>* schedule = new HostSchedule<Ieee8021QCtrl>();
 
-    //extract cycle from second xml argument (xml root)
-    int cycle = atoi(rootXml->getFirstChildWithTag("cycle")->getNodeValue());
+    // extract cycle time of host
+    simtime_t cycle = simTime().parse(
+            xml->getFirstChildWithTag("cycle")->getNodeValue());
     schedule->setCycle(cycle);
 
     std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
@@ -31,8 +31,10 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         // Get time
         const char* timeCString =
                 entry->getFirstChildWithTag("start")->getNodeValue();
-        unsigned int time = atoi(timeCString);
-
+        simtime_t time = simTime().parse(timeCString);
+        if (time > cycle) {
+            throw cRuntimeError("Frame is scheduled after its host cycle ends!");
+        }
         // Get size
         const char* sizeCString =
                 entry->getFirstChildWithTag("size")->getNodeValue();

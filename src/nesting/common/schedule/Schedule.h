@@ -35,12 +35,18 @@ protected:
      * Schedule entries, that consist of a length in abstract time units and
      * a scheduled object.
      */
-    std::vector<std::tuple<int, T>> entries;
+    std::vector<std::tuple<simtime_t, T>> entries;
 
     /**
      * Total length of all schedule entries combined in abstract time units.
      */
-    int totalLength = 0;
+    simtime_t totalLength = 0;
+
+    /**
+     * Ieee 802.1Q Cycle state machine uses length of gate states and the
+     * cycle time to determine the correct gate state.
+     */
+    simtime_t cycleTime;
 public:
     Schedule() {
     }
@@ -48,6 +54,15 @@ public:
     virtual ~Schedule() {
     }
     ;
+
+    /** Sets the Cycletime of this schedule. */
+    virtual void setCycleTime(simtime_t cycleLength) {
+        cycleTime = cycleLength;
+    }
+
+    virtual simtime_t getCycleTime() {
+        return cycleTime;
+    }
 
     /** Returns the number of entries of the schedule. */
     virtual unsigned int size() const {
@@ -63,12 +78,12 @@ public:
      * Returns the time unit, how long an object at a given index is
      * scheduled.
      */
-    virtual unsigned int getLength(unsigned int index) const {
+    virtual simtime_t getLength(unsigned int index) const {
         return std::get < 0 > (entries[index]);
     }
 
     /** Returns the total length of the schedule in abstract time units. */
-    virtual unsigned int getLength() const {
+    virtual simtime_t getLength() const {
         return totalLength;
     }
 
@@ -85,7 +100,7 @@ public:
      * @param scheduledObject The schedule objects associated with the
      *                        scheduled entry.
      */
-    virtual void addEntry(int length, T scheduledObject) {
+    virtual void addEntry(simtime_t length, T scheduledObject) {
         totalLength += length;
         entries.push_back(make_tuple(length, scheduledObject));
     }

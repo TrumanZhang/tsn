@@ -34,12 +34,12 @@ protected:
      * Schedule entries, that consist of a length in abstract time units and
      * a scheduled object.
      */
-    std::vector<std::tuple<int, int, T>> entries;
+    std::vector<std::tuple<simtime_t, int, T>> entries;
 
     /**
      * Total cycletime of this schedule.
      */
-    int cycle = 0;
+    simtime_t cycle = 0;
 
 public:
     HostSchedule() {
@@ -55,12 +55,12 @@ public:
     }
 
     /** Sets the Cycletime of this schedule. */
-    virtual void setCycle(unsigned int cycleLength) {
+    virtual void setCycle(simtime_t cycleLength) {
         cycle = cycleLength;
     }
 
     /** Returns the number of entries of the schedule. */
-    virtual unsigned int getCycle() const {
+    virtual simtime_t getCycle() const {
         return cycle;
     }
 
@@ -72,7 +72,7 @@ public:
     /**
      * Returns the time when the scheduled object is supposed to be sent.
      */
-    virtual unsigned int getTime(unsigned int index) const {
+    virtual simtime_t getTime(unsigned int index) const {
         return std::get < 0 > (entries[index]);
     }
 
@@ -98,7 +98,7 @@ public:
      * @param scheduledObject The schedule objects associated with the
      *                        scheduled entry.
      */
-    virtual void addEntry(int time, int size, T scheduledObject) {
+    virtual void addEntry(simtime_t time, int size, T scheduledObject) {
         entries.push_back(std::make_tuple(time, size, scheduledObject));
     }
 };

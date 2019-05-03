@@ -40,7 +40,26 @@ void FilteringDatabase::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         cXMLElement* fdb = par("database");
         cXMLElement* cycleXml = par("cycle");
-        cycle = atoi(cycleXml->getFirstChildWithTag("cycle")->getNodeValue());
+
+        std::string switchString =
+                this->getModuleByPath(par("switchModule"))->getFullName();
+        bool foundSwitch = false;
+
+        //try to extract the part of the schedule belonging to this switch
+        if (cycleXml != nullptr && cycleXml->hasChildren()) {
+            for (cXMLElement* host : cycleXml->getChildren()) {
+                if (strcmp(host->getTagName(), "defaultcycle") != 0
+                        && host->getAttribute("name") == switchString) {
+                    cycle = atoi(host->getFirstChildWithTag("cycle")->getNodeValue());
+                    foundSwitch = true;
+                }
+            }
+        }
+        // if switch not in xml, get default cycle time
+        if(foundSwitch == false){
+            cycle = atoi(cycleXml->getFirstChildWithTag("defaultcycle")->getNodeValue());
+        }
+
         loadDatabase(fdb, cycle);
 
         cModule* clockModule = getModuleByPath(par("clockModule"));

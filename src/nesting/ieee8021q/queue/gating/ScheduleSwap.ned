@@ -31,7 +31,7 @@ simple ScheduleSwap
         string gateControllerModules = default("^.eth[%d].queuing.gateController"); // Wildcard path that is used to determine the paths to ~GateController modules
         string tsnGenModule = default("^.trafGenSchedApp"); // Path to the ~VlanEtherTrafGenSched module that generates TSN traffic
         xml schedule = default(xml("<schedules></schedules>")); // Internal micro schedule that manages the micro schedules
-        bool usedInHost = default(false);
+        bool usedInHost = default(false); // is schedule swap used in a host module or a switch module
         bool verbose = default(false);
         @display("i=block/switch");
         @class(ScheduleSwap);
