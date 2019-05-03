@@ -81,7 +81,7 @@ void ScheduleSwap::tick(IClock *clock) {
                 if(filteringDatabaseModule != nullptr && !entry->getChildrenByTagName("routing").empty()) {
                     cXMLElement* newRouting = entry->getFirstChildWithTag("routing")->getFirstChildWithTag("filteringDatabases");
                     FilteringDatabase* routingModule = check_and_cast< FilteringDatabase*>(filteringDatabaseModule);
-                    routingModule->loadDatabase( newRouting , atoi(newScheduleXml->getFirstChildWithTag("cycle")->getNodeValue()));
+                    routingModule->loadDatabase( newRouting , atoi(newScheduleXml->getFirstChildWithTag("defaultcycle")->getNodeValue()));
                 }
             }
             else {
@@ -99,7 +99,7 @@ void ScheduleSwap::tick(IClock *clock) {
             }
         }
         scheduleIndex += 1;
-        if (scheduleIndex<scheduleXml->getChildrenByTagName("entry").size()) {
+        if (scheduleIndex < scheduleXml->getChildrenByTagName("entry").size()) {
             clock->subscribeTick(this, atoi(entry->getFirstChildWithTag("length")->getNodeValue()));
             EV_INFO << getFullPath()<<": Next schedule swap subscribed at " << entry->getFirstChildWithTag("length")->getNodeValue() << "." << endl;
         }

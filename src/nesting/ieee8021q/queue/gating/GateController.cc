@@ -318,6 +318,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
                 } else {
                     //if it is the last index in currentSchedule or schedule hit cycle end, look into nextSchedule from now on
                     touchedNextSchedule = true;
+                    currentIndex = 0;
                     bitvector = nextSchedule->getScheduledObject(currentIndex);
                     // nextSchedule cycle starts in the future, therefore cycleStart of new schedule is the end of the old schedule
                     if (hitCycleEnd) {
@@ -326,7 +327,6 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
                     } else {
                         cycleStart = cycleStart + cumSumGateLength;
                     }
-                    currentIndex = 0;
                     cumSumGateLength = SIMTIME_ZERO;
                 }
             } else {
@@ -398,7 +398,7 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
     }
 
     EV_DEBUG << getFullPath() << ": Loading schedule. Cycle is "
-                    << schedule->getLength() << ". Entry count is "
+                    << schedule->getCycleTime() << ". Entry count is "
                     << schedule->size() << ". Time is "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
 
