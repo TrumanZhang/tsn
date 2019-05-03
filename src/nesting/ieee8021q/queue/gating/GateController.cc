@@ -112,11 +112,6 @@ void GateController::tick(IClock *clock) {
 // case a new schedule is loaded if available.
 // If cycleStart + cycleTime is greater than the current time
 // , a new cycle hast started and the scheduleIndex needs to be reset to 0.
-    bool tmp1 = (scheduleIndex == 0 && nextSchedule);
-    bool tmp2 = (cycleStart + currentSchedule->getCycleTime() == clock->getTime());
-    bool tmp3 = currentSchedule->getCycleTime() != 0;
-    simtime_t tmp = clock->getTime();
-
     if (scheduleIndex == 0 && nextSchedule) {
 
         // Print warning if the feature is used in combination with frame preemption
@@ -213,9 +208,6 @@ void GateController::tick(IClock *clock) {
 
 simtime_t GateController::scheduleNextTickEvent() {
     // combined length of bitvectors is longer than cycle time,
-    simtime_t tmp4 = currentSchedule->getLength(scheduleIndex);
-    simtime_t tmp5 = currentSchedule->getCycleTime();
-    // lastChange = clock->getTime()
     if (clock->getTime() + currentSchedule->getLength(scheduleIndex)
             > cycleStart + currentSchedule->getCycleTime()) {
         return (cycleStart + currentSchedule->getCycleTime() - clock->getTime());
@@ -236,7 +228,6 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
         return 0;
     }
     simtime_t timeSinceLastChange = clock->getTime() - lastChange;
-    simtime_t tmp2 = clock->getTime();
 
     double bits = 0;
     //Has the lookahead already touched the next Schedule
@@ -310,7 +301,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
                 }
                 timeSinceLastChange = SIMTIME_ZERO;
                 //if currentIndex is not the last index in currentSchedule and cycle end not hit
-                if (currentIndex < (int)currentSchedule->size() - 1
+                if (currentIndex < (int) currentSchedule->size() - 1
                         && !hitCycleEnd) {
                     currentIndex = (currentIndex + 1) % currentSchedule->size();
                     bitvector = currentSchedule->getScheduledObject(
