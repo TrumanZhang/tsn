@@ -215,6 +215,7 @@ simtime_t GateController::scheduleNextTickEvent() {
     // combined length of bitvectors is longer than cycle time,
     simtime_t tmp4 = currentSchedule->getLength(scheduleIndex);
     simtime_t tmp5 = currentSchedule->getCycleTime();
+    // lastChange = clock->getTime()
     if (clock->getTime() + currentSchedule->getLength(scheduleIndex)
             > cycleStart + currentSchedule->getCycleTime()) {
         return (cycleStart + currentSchedule->getCycleTime() - clock->getTime());
@@ -235,13 +236,23 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
         return 0;
     }
     simtime_t timeSinceLastChange = clock->getTime() - lastChange;
+    simtime_t tmp2 = clock->getTime();
 
     double bits = 0;
     //Has the lookahead already touched the next Schedule
     bool touchedNextSchedule = false;
-    unsigned int currentIndex = (scheduleIndex + currentSchedule->size() - 1)
+    int currentIndex = (scheduleIndex + currentSchedule->size() - 1)
             % currentSchedule->size();
 
+    // sum up time gate is opened until now since last change
+    simtime_t cumSumGateLength = SIMTIME_ZERO;
+    simtime_t tmp = SIMTIME_ZERO;
+    for (int i = 0; i <= (currentIndex - 1); i++) {
+        // tmp necessary because =+ not defined for simtime_t
+        tmp = cumSumGateLength + currentSchedule->getLength(i);
+        cumSumGateLength = tmp;
+
+    }
     GateBitvector bitvector = currentSchedule->getScheduledObject(currentIndex);
     while (bits < kEthernet2MaximumTransmissionUnitBitLength.get()) {
         //if the bitvector is now closed, return all bit summed up until now
@@ -250,40 +261,97 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
         }
         //only look in current schedule if there is no nextSchedule
         if (!nextSchedule) {
-            bits = bits
-                    + ((currentSchedule->getLength(currentIndex))
-                            - timeSinceLastChange)
-                            / (SimTime(1, SIMTIME_S) / transmitRate);
+            tmp = cumSumGateLength + currentSchedule->getLength(currentIndex);
+            cumSumGateLength = tmp;
+            // take cycle end as upper limit if it is shorter
+            if (cycleStart + cumSumGateLength
+                    > cycleStart + currentSchedule->getCycleTime()) {
+                // calculation needs cumSumGateLength before it became greater than cycle length
+                simtime_t timeLeftInCycle = currentSchedule->getCycleTime()
+                        - (timeSinceLastChange + cumSumGateLength
+                                - currentSchedule->getLength(currentIndex));
+                bits = bits
+                        + (timeLeftInCycle
+                                / (SimTime(1, SIMTIME_S) / transmitRate));
+                currentIndex = 0;
+            } else { // else take bitvector length as upper limit
+                bits = bits
+                        + ((currentSchedule->getLength(currentIndex))
+                                - timeSinceLastChange)
+                                / (SimTime(1, SIMTIME_S) / transmitRate);
+                currentIndex = (currentIndex + 1) % currentSchedule->size();
+            }
             timeSinceLastChange = SIMTIME_ZERO;
-            currentIndex = (currentIndex + 1) % currentSchedule->size();
+            if (currentIndex == 0) {
+                cumSumGateLength = SIMTIME_ZERO;
+            }
             bitvector = currentSchedule->getScheduledObject(currentIndex);
         } else {
             //if there is a nextSchedule but it is not yet being looked at
+            bool hitCycleEnd = false;
             if (!touchedNextSchedule) {
-                bits = bits
-                        + (currentSchedule->getLength(currentIndex)
-                                - timeSinceLastChange)
-                                / (SimTime(1, SIMTIME_S) / transmitRate);
+                tmp = cumSumGateLength
+                        + currentSchedule->getLength(currentIndex);
+                cumSumGateLength = tmp;
+                if (cycleStart + cumSumGateLength
+                        > cycleStart + currentSchedule->getCycleTime()) {
+                    simtime_t timeLeftInCycle = currentSchedule->getCycleTime()
+                            - (timeSinceLastChange + cumSumGateLength
+                                    - currentSchedule->getLength(currentIndex));
+                    bits = bits
+                            + (timeLeftInCycle
+                                    / (SimTime(1, SIMTIME_S) / transmitRate));
+                    hitCycleEnd = true;
+                } else {
+                    bits = bits
+                            + (currentSchedule->getLength(currentIndex)
+                                    - timeSinceLastChange)
+                                    / (SimTime(1, SIMTIME_S) / transmitRate);
+                }
                 timeSinceLastChange = SIMTIME_ZERO;
-                //if currentIndex is not the last index in currentSchedule
-                if (currentIndex < currentSchedule->size() - 1) {
+                //if currentIndex is not the last index in currentSchedule and cycle end not hit
+                if (currentIndex < (int)currentSchedule->size() - 1
+                        && !hitCycleEnd) {
                     currentIndex = (currentIndex + 1) % currentSchedule->size();
                     bitvector = currentSchedule->getScheduledObject(
                             currentIndex);
                 } else {
-                    //if it is the last index in currentSchedule, look into nextSchedule from now on
+                    //if it is the last index in currentSchedule or schedule hit cycle end, look into nextSchedule from now on
                     touchedNextSchedule = true;
-                    currentIndex = 0;
                     bitvector = nextSchedule->getScheduledObject(currentIndex);
+                    // nextSchedule cycle starts in the future, therefore cycleStart of new schedule is the end of the old schedule
+                    if (hitCycleEnd) {
+                        cycleStart = cycleStart
+                                + currentSchedule->getCycleTime();
+                    } else {
+                        cycleStart = cycleStart + cumSumGateLength;
+                    }
+                    currentIndex = 0;
+                    cumSumGateLength = SIMTIME_ZERO;
                 }
             } else {
                 //if the nextSchedule is being looked at
-                bits = bits
-                        + ((nextSchedule->getLength(currentIndex))
-                                - timeSinceLastChange)
-                                / (SimTime(1, SIMTIME_S) / transmitRate);
+                tmp = cumSumGateLength + nextSchedule->getLength(currentIndex);
+                cumSumGateLength = tmp;
+                if (cycleStart + cumSumGateLength
+                        > cycleStart + nextSchedule->getCycleTime()) {
+                    simtime_t timeLeftInCycle = currentSchedule->getCycleTime()
+                    - (timeSinceLastChange + cumSumGateLength
+                            - currentSchedule->getLength(currentIndex));
+                    bits = bits + (timeLeftInCycle
+                            / (SimTime(1, SIMTIME_S) / transmitRate));
+                    currentIndex = 0;
+                } else {
+                    bits = bits
+                    + ((nextSchedule->getLength(currentIndex))
+                            - timeSinceLastChange)
+                    / (SimTime(1, SIMTIME_S) / transmitRate);
+                    currentIndex = (currentIndex + 1) % nextSchedule->size();
+                }
                 timeSinceLastChange = SIMTIME_ZERO;
-                currentIndex = (currentIndex + 1) % nextSchedule->size();
+                if (currentIndex == 0) {
+                    cumSumGateLength = SIMTIME_ZERO;
+                }
                 bitvector = nextSchedule->getScheduledObject(currentIndex);
             }
         }
