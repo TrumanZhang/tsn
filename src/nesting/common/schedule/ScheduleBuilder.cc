@@ -38,6 +38,10 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         schedule->addEntry(length, bitvector);
     }
 
+    if (schedule->getLength() > schedule->getCycleTime()) {
+        EV_WARN << "Schedule total Length is greater than Cycle length";
+    }
+
     return schedule;
 }
 
