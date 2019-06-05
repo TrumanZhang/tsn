@@ -50,14 +50,18 @@ void FilteringDatabase::initialize(int stage) {
             for (cXMLElement* host : cycleXml->getChildren()) {
                 if (strcmp(host->getTagName(), "defaultcycle") != 0
                         && host->getAttribute("name") == switchString) {
-                    cycle = atoi(host->getFirstChildWithTag("cycle")->getNodeValue());
+                    const char* cycleCString = host->getFirstChildWithTag(
+                            "cycle")->getNodeValue();
+                    cycle = simTime().parse(cycleCString);
                     foundSwitch = true;
                 }
             }
         }
         // if switch not in xml, get default cycle time
-        if(foundSwitch == false){
-            cycle = atoi(cycleXml->getFirstChildWithTag("defaultcycle")->getNodeValue());
+        if (foundSwitch == false) {
+            const char* cycleCString = cycleXml->getFirstChildWithTag(
+                    "defaultcycle")->getNodeValue();
+            cycle = simTime().parse(cycleCString);
         }
 
         loadDatabase(fdb, cycle);
@@ -75,7 +79,7 @@ int FilteringDatabase::numInitStages() const {
     return INITSTAGE_LINK_LAYER + 1;
 }
 
-void FilteringDatabase::loadDatabase(cXMLElement* xml, int cycle) {
+void FilteringDatabase::loadDatabase(cXMLElement* xml, simtime_t cycle) {
     newCycle = cycle;
 
     std::string switchName =
@@ -224,7 +228,7 @@ void FilteringDatabase::tick(IClock *clock) {
 
         changeDatabase = false;
     }
-    clock->subscribeTick(this, cycle);
+    clock->subscribeTick(this, cycle.raw());
 }
 
 void FilteringDatabase::handleMessage(cMessage *msg) {

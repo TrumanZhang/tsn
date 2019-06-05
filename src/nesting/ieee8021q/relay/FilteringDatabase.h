@@ -53,8 +53,8 @@ private:
      */
     IClock* clock;
 
-    int cycle = 100;
-    int newCycle = 100;
+    simtime_t cycle = simTime().parse("100us");
+    simtime_t newCycle = simTime().parse("100us");;
 
     bool agingActive = false;
     simtime_t agingThreshold;
@@ -77,7 +77,7 @@ public:
     /** @see IClockListener::tick(IClock*) */
     virtual void tick(IClock *clock) override;
 
-    virtual void loadDatabase(cXMLElement* fdb, int cycle);
+    virtual void loadDatabase(cXMLElement* fdb, simtime_t cycle);
 
     virtual int getPort(MacAddress macAddress, simtime_t curTS);
 
