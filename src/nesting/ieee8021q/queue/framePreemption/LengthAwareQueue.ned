@@ -33,15 +33,14 @@ simple LengthAwareQueue
         string transmissionSelectionAlgorithmModule; // Path to the ~TSAlgorithm module
         @display("i=block/queue");
         @class(LengthAwareQueue);
-        @signal[rcvdPk](type=cPacket);
-        @signal[enqueuePk](type=cPacket);
-        @signal[dequeuePk](type=cPacket);
-        @signal[dropPkByQueue](type=cPacket);
+        @signal[rcvdPk](type=long); // type=unique packet id
+        @signal[enqueuePk](type=long); // type=unique packet id
+        @signal[dequeuePk](type=long); // type=unique packet id
+        @signal[dropPkByQueue](type=long); // type=unique packet id
         @signal[queueingTime](type=simtime_t; unit=s);
         @signal[queueLength](type=long);
-        @signal[preemptedPk](type=cPacket);
-        @statistic[rcvdPk](title="received packets"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="dropped packets"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPk](title="received packets"; record=count,vector; interpolationmode=none);
+        @statistic[dropPk](title="dropped packets"; source=dropPkByQueue; record=count,vector; interpolationmode=none);
         @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);
         @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
         bool verbose = default(false);

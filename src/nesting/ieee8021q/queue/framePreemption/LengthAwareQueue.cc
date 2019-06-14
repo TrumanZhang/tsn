@@ -58,7 +58,7 @@ void LengthAwareQueue::handleMessage(cMessage* msg) {
         }
     } else {
         cPacket* packet = check_and_cast<cPacket*>(msg);
-        emit(rcvdPkSignal, packet);
+        emit(rcvdPkSignal, packet->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
         numPacketsReceived++;
         enqueue(packet);
     }
@@ -66,13 +66,13 @@ void LengthAwareQueue::handleMessage(cMessage* msg) {
 
 void LengthAwareQueue::enqueue(cPacket* packet) {
     if (availableBufferCapacity >= packet->getBitLength()) {
-        emit(enqueuePkSignal, packet);
+        emit(enqueuePkSignal, packet->getTreeId());
         numPacketsEnqueued++;
         queue.insert(packet);
         availableBufferCapacity -= packet->getBitLength();
         handlePacketEnqueuedEvent(packet);
     } else {
-        emit(dropPkByQueueSignal, packet);
+        emit(dropPkByQueueSignal, packet->getTreeId());
         numPacketsDropped++;
         handlePacketEnqueuedEvent(packet);
         delete packet;
@@ -104,7 +104,7 @@ void LengthAwareQueue::handleRequestPacketEvent(uint64_t maxBits) {
 
     cPacket* packetToSend = dequeue();
 
-    emit(dequeuePkSignal, packetToSend);
+    emit(dequeuePkSignal, packetToSend->getTreeId());
     emit(queueingTimeSignal, simTime() - packetToSend->getArrivalTime());
     
     send(packetToSend, "out");
