@@ -28,6 +28,8 @@ simsignal_t EtherMACFullDuplexPreemptable::preemptCurrentFrameSignal =
         registerSignal("preemptCurrentFrameSignal");
 simsignal_t EtherMACFullDuplexPreemptable::transmittedExpressFrameSignal =
         registerSignal("transmittedExpressFrameSignal");
+simsignal_t EtherMACFullDuplexPreemptable::startTransmissionExpressFrameSignal =
+        registerSignal("startTransmissionExpressFrameSignal");
 simsignal_t EtherMACFullDuplexPreemptable::transmittedPreemptableFrameSignal =
         registerSignal("transmittedPreemptableFrameSignal");
 simsignal_t EtherMACFullDuplexPreemptable::transmittedPreemptableFramePartSignal =
@@ -88,7 +90,10 @@ void EtherMACFullDuplexPreemptable::handleMessageWhenUp(cMessage *msg) {
         if (pFrame == nullptr) {
             // is express frame, send up
             EthernetSignal* tmp = check_and_cast<EthernetSignal*>(msg);
-            emit(receivedExpressFrame, tmp);
+            // need to get encapsulated packet, in order to get the right packet id
+            // getting tree id, because it doenn't get changed when packet is copied
+            emit(receivedExpressFrame,
+                    tmp->getEncapsulatedPacket()->getTreeId());
             processMsgFromNetwork(tmp);
         }
         // is preemptible frame
@@ -108,7 +113,8 @@ void EtherMACFullDuplexPreemptable::handleMessageWhenUp(cMessage *msg) {
                 //enough bytes from the preempted frame received -> send it up
                 EthernetSignal* tmp = check_and_cast<EthernetSignal*>(
                         receivedPreemptedFrame);
-                emit(receivedPreemptableFrameFull, tmp);
+                emit(receivedPreemptableFrameFull,
+                        tmp->getEncapsulatedPacket()->getTreeId());
                 processMsgFromNetwork(tmp);
                 receivedPreemptedFrame = nullptr;
             }
@@ -181,7 +187,7 @@ void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
                        << " -- dropping packet " << packet << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
-        emit(packetDroppedSignal, packet, &details);
+        emit(packetDroppedSignal, packet->getTreeId(), &details);
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
@@ -273,6 +279,7 @@ void EtherMACFullDuplexPreemptable::startFrameTransmission() {
     ASSERT(!transmittingExpressFrame);
     ASSERT(!transmittingPreemptableFrame);
     EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS) << "ns:" << " Starting Transmission of " << frame << ". Express: " << isExpressFrame << endl;
+    emit(startTransmissionExpressFrameSignal, curTxFrame->getTreeId());
 
     //If frame preemption is disabled, treat all frames as express so they are properly displayed
     if (!par("enablePreemptingFrames") || isExpressFrame) {
@@ -366,7 +373,8 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
     //TODO add other content from original method
     if (par("enablePreemptingFrames") && transmittingPreemptableFrame) {
         // A (part of a) preemptable frame was sent
-        emit(transmittedPreemptableFramePartSignal, currentPreemptableFrame);
+        emit(transmittedPreemptableFramePartSignal,
+                currentPreemptableFrame->getTreeId());
         bool beginningOfPreemptableFrame = (preemptedBytesSent == 0);
         // Update bytes sent so far for this preemptable frame
         unsigned int bytesSentInThisPart =
@@ -390,15 +398,15 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
             //Add last checksum that is included in the encapped frame instead of the "mpacket"/frame preemption calculation
             preemptedBytesSent = currentPreemptableFrame->getByteLength();
             // final part was sent, therefore transmission is complete
-            emit(transmittedPreemptableFrameSignal, currentPreemptableFrame);
+            emit(transmittedPreemptableFrameSignal, currentPreemptableFrame->getTreeId());
             if (beginningOfPreemptableFrame) {
-                emit(transmittedPreemptableFullSignal, currentPreemptableFrame);
+                emit(transmittedPreemptableFullSignal, currentPreemptableFrame->getTreeId());
             } else {
                 emit(transmittedPreemptableFinalSignal,
-                        currentPreemptableFrame);
+                        currentPreemptableFrame->getTreeId());
             }
         } else {
-            emit(transmittedPreemptableNonFinalSignal, currentPreemptableFrame);
+            emit(transmittedPreemptableNonFinalSignal, currentPreemptableFrame->getTreeId());
         }
         EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS)
                        << "ns:" << " PreemptedFrame " << currentPreemptableFrame
@@ -446,7 +454,7 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
                          << "ns:" << " Express Frame " << curTxFrame
                          << " finished to transmit." << endl;
         //Can only be express frame, as it is the default if frame preemption is disabled
-        emit(transmittedExpressFrameSignal, curTxFrame);
+        emit(transmittedExpressFrameSignal, curTxFrame->getTreeId());
     }
     transmittingExpressFrame = false;
     transmittingPreemptableFrame = false;
@@ -493,7 +501,7 @@ void EtherMACFullDuplexPreemptable::preemptCurrentFrame() {
 
     cancelEvent(endTxMsg);
 
-    emit(preemptCurrentFrameSignal, currentPreemptableFrame);
+    emit(preemptCurrentFrameSignal, currentPreemptableFrame->getTreeId());
 
     EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS)
                    << "ns:" << " Preempting current frame "

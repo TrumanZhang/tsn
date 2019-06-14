@@ -71,6 +71,7 @@ private:
 protected:
     static simsignal_t preemptCurrentFrameSignal;
     static simsignal_t transmittedExpressFrameSignal;
+    static simsignal_t startTransmissionExpressFrameSignal;
     static simsignal_t transmittedPreemptableFrameSignal;
     static simsignal_t transmittedPreemptableFramePartSignal;
     static simsignal_t transmittedPreemptableNonFinalSignal;

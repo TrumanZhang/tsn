@@ -24,21 +24,27 @@ simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
     parameters:
         @class(EtherMACFullDuplexPreemptable);
         bool enablePreemptingFrames = default(false); // frame preemption off or on
-        @signal[preemptCurrentFrameSignal](type=inet::Packet);
-        @signal[transmittedExpressFrameSignal](type=inet::Packet);
-        @signal[transmittedPreemptableFrameSignal](type=inet::Packet);
-        @signal[transmittedPreemptableFramePartSignal](type=inet::Packet);
-        @signal[transmittedPreemptableNonFinalSignal](type=inet::Packet);
-        @signal[transmittedPreemptableFinalSignal](type=inet::Packet);
-        @signal[transmittedPreemptableFullSignal](type=inet::Packet);
+        @signal[preemptCurrentFrameSignal](type=long); // type=unique packet id
+        @signal[transmittedExpressFrameSignal](type=long); // type=unique packet id
+        @signal[startTransmissionExpressFrameSignal](type=long); // type=unique packet id
+        @signal[transmittedPreemptableFrameSignal](type=long); // type=unique packet id
+        @signal[transmittedPreemptableFramePartSignal](type=long); // type=unique packet id
+        @signal[transmittedPreemptableNonFinalSignal](type=long); // type=unique packet id
+        @signal[transmittedPreemptableFinalSignal](type=long); // type=unique packet id
+        @signal[transmittedPreemptableFullSignal](type=long); // type=unique packet id
         @signal[expressFrameEnqueuedWhileSendingPreemptableSignal];
         @signal[eMacDelay](type=simtime_t; unit=s);
         @signal[pMacDelay](type=simtime_t; unit=s);
-        @signal[receivedExpressFrame](type=inet::EthernetSignal);
-        @signal[receivedPreemptableFrameFull](type=inet::EthernetSignal);
+        @signal[receivedExpressFrame](type=long); // type=unique packet id
+        @signal[receivedPreemptableFrameFull](type=long); // type=unique packet id
 
-        @statistic[receivedPreemptableFrameFull](title="receivedPreemptableFrameFull"; record="vector(packetBytes)"; interpolationmode=none);
-        @statistic[receivedExpressFrame](title="receivedExpressFrame"; record="vector(packetBytes)"; interpolationmode=none);
+		@statistic[txExpressFrame](title="txExpressFrame"; source=transmittedExpressFrameSignal ;record=vector; interpolationmode=none);
+		@statistic[txPreemptableFrameFinal](title="txPreemptableFrameFinal"; source=transmittedPreemptableFinalSignal ;record=vector; interpolationmode=none);
+		@statistic[txPreemptableFrameFull](title="txPreemptableFrameFull"; source=transmittedPreemptableFullSignal ;record=vector; interpolationmode=none);
+		@statistic[receivedPreemptableFrameFull](title="receivedPreemptableFrameFull"; record=vector; interpolationmode=none);
+		@statistic[receivedExpressFrame](title="receivedExpressFrame"; record=vector; interpolationmode=none);
+		@statistic[startTxExpressFrames](title="startTxExpressFrames"; source=startTransmissionExpressFrameSignal; record=vector; interpolationmode=none);
+
         @statistic[eMacDelay](title="eMacDelay"; record=histogram,vector; interpolationmode=none);
         @statistic[pMacDelay](title="pMacDelay"; record=histogram,vector; interpolationmode=none);
         @statistic[preemptions](title="preemptions"; source=preemptCurrentFrameSignal; record=count; interpolationmode=none);
