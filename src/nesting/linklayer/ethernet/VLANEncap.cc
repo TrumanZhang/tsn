@@ -80,7 +80,7 @@ void VLANEncap::processPacketFromHigherLevel(inet::Packet *packet) {
         EV_INFO << getFullPath() << ":Encapsulating higher layer packet `"
                        << packet->getName() << "' into VLAN tag" << endl;
         totalEncap++;
-        emit(encapPkSignal, packet);
+        emit(encapPkSignal, packet->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
     }
     packet->insertAtFront(ethernetMacHeader);
     auto oldFcs = packet->removeAtBack<inet::EthernetFcs>();
@@ -142,7 +142,7 @@ void VLANEncap::processPacketFromLowerLevel(inet::Packet *packet) {
                         << packet->getName() << "' to higher layer" << endl;
 
         totalDecap++;
-        emit(decapPkSignal, packet);
+        emit(decapPkSignal, packet->getTreeId());
     } else {
         auto vlanTag = packet->addTagIfAbsent<VLANTagInd>();
         vlanTag->setPcp(kDefaultPCPValue);

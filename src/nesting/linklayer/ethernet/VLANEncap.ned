@@ -51,10 +51,10 @@ simple VLANEncap like IEtherEncap
         @class(VLANEncap);
         bool tagUntaggedFrames = default(false);	// If true, the encap process will add a VLAN Tag to untagged frames. This alters the frame size.
         int pvid = default(1);						// Default port-VID inserted in control info of (vlan-)untagged frames. 
-        @signal[encapPk](type=cPacket);
-        @signal[decapPk](type=cPacket);
-        @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[encapPk](type=long); // type=unique packet id
+        @signal[decapPk](type=long); // type=unique packet id
+        @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,vector; interpolationmode=none);
+        @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,vector; interpolationmode=none);
         bool verbose = default(false);
     gates:
         input upperLayerIn @labels(Ieee8021QCtrl/down);
