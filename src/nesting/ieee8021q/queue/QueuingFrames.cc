@@ -36,6 +36,11 @@ void QueuingFrames::initialize() {
 }
 
 void QueuingFrames::handleMessage(cMessage *msg) {
+    if (dynamic_cast<inet::Request*>(msg)) {
+        delete msg;
+        return;
+    }
+
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
 
     // switch ingoing VLAN Tag to outgoing Tag
