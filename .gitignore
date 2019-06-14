@@ -21,4 +21,8 @@
 *.exe
 *_m.h
 *_m.cc
+*.sca
+*.vec
+*.elog
+*.anf
 .idea
