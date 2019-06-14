@@ -68,6 +68,9 @@ protected:
     int ssap = -1;
     int dsap = -1;
 
+    cMessage* jitterMsg = new cMessage("jitterMsg");
+    double jitter;
+
     Ieee8022LlcSocket llcSocket;
 
     int seqNum = 0;
@@ -76,11 +79,14 @@ protected:
     virtual void sendPacket();
     virtual void receivePacket(Packet *msg);
     virtual void handleMessage(cMessage *msg) override;
+    virtual void sendDelayed();
 
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
 public:
     virtual void tick(IClock *clock) override;
+
+    ~VlanEtherTrafGenSched();
 
     /** Loads a new schedule into the gate controller. */
     virtual void loadScheduleOrDefault(cXMLElement* xml);

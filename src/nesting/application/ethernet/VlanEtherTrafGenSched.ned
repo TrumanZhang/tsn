@@ -33,15 +33,16 @@ simple VlanEtherTrafGenSched
     parameters:
         @class(VlanEtherTrafGenSched);
 
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
+        @signal[sentPk](type=long); // type=unique packet id
+        @signal[rcvdPk](type=long); // type=unique packet id
 
         //Actual schedule has to be set in .ini file
         xml initialSchedule = default(xml("<schedule><cycle>100</cycle></schedule>"));
         xml emptySchedule = default(xml("<schedule><cycle>100</cycle></schedule>"));
         string clockModule = default("^.clock");
         string hostModule = default("^");
-		bool verbose = default(false);
+        bool verbose = default(false);
+        double jitter = default(0); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
     gates:
         input in;
         output out;

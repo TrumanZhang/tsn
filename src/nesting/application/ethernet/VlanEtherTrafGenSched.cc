@@ -21,6 +21,10 @@ namespace nesting {
 
 Define_Module(VlanEtherTrafGenSched);
 
+VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
+    delete (jitterMsg);
+}
+
 void VlanEtherTrafGenSched::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         // Signals
@@ -29,6 +33,8 @@ void VlanEtherTrafGenSched::initialize(int stage) {
 
         seqNum = 0;
         //WATCH(seqNum);
+
+        jitter = par("jitter");
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -51,7 +57,8 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
 
-        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+        clock->subscribeTick(this,
+                scheduleNextTickEvent().raw() / clock->getClockRate().raw());
 
         llcSocket.open(-1, ssap);
     }
@@ -63,7 +70,10 @@ int VlanEtherTrafGenSched::numInitStages() const {
 
 void VlanEtherTrafGenSched::handleMessage(cMessage *msg) {
     if (msg->isSelfMessage()) {
-        //disregard for now
+        if (msg == jitterMsg) {
+            sendDelayed();
+        }
+
     } else {
         receivePacket(check_and_cast<Packet *>(msg));
     }
@@ -108,7 +118,7 @@ void VlanEtherTrafGenSched::sendPacket() {
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
                     << endl;
 
-    emit(sentPkSignal, datapacket);
+    emit(sentPkSignal, datapacket->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
     send(datapacket, "out");
     TSNpacketsSent++;
 }
@@ -119,7 +129,7 @@ void VlanEtherTrafGenSched::receivePacket(Packet *msg) {
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
 
     packetsReceived++;
-    emit(rcvdPkSignal, msg);
+    emit(rcvdPkSignal, msg->getTreeId());
 
     delete msg;
 }
@@ -140,10 +150,19 @@ void VlanEtherTrafGenSched::tick(IClock *clock) {
 
     }
     else {
-        sendPacket();
-        index++;
-        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+        double delay = (double)rand() / (double)RAND_MAX;
+        double jitter_delay = delay * jitter;
+        scheduleAt(simTime() + jitter_delay, jitterMsg);
+
     }
+}
+
+void VlanEtherTrafGenSched::sendDelayed() {
+
+    sendPacket();
+    index++;
+    clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+
 }
 
 /* This method returns the timeinterval between
@@ -186,7 +205,7 @@ void VlanEtherTrafGenSched::loadScheduleOrDefault(cXMLElement* xml) {
         schedule = HostScheduleBuilder::createHostScheduleFromXML(defaultXml,
                 xml);
     }
-    std::unique_ptr < HostSchedule < Ieee8021QCtrl >> schedulePtr(schedule);
+    std::unique_ptr<HostSchedule<Ieee8021QCtrl>> schedulePtr(schedule);
 
     nextSchedule.reset();
     nextSchedule = move(schedulePtr);
