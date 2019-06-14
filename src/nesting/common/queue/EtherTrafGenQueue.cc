@@ -51,6 +51,7 @@ void EtherTrafGenQueue::initialize() {
     dei = &par("dei");
     vid = &par("vid");
     packetLength = &par("packetLength");
+    randomPacketLengthEnabled = par("randomPacketLengthEnabled");
     const char *destAddress = par("destAddress");
     if (!destMacAddress.tryParse(destAddress)) {
         throw new cRuntimeError("Invalid MAC Address");
@@ -78,7 +79,12 @@ Packet* EtherTrafGenQueue::generatePacket() {
 
     // create new packet
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-    long len = packetLength->intValue();
+    long len;
+    if (randomPacketLengthEnabled) {
+        len = cComponent::intuniform(64, 1450, 0);
+    } else {
+        len = packetLength->intValue();
+    }
     const auto& payload = makeShared<ByteCountChunk>(B(len));
     // set creation time
     auto timeTag = payload->addTag<CreationTimeTag>();
@@ -116,11 +122,11 @@ void EtherTrafGenQueue::requestPacket() {
     Enter_Method("requestPacket(...)");
 
     /*
-    if(doNotSendFirstInitPacket) {
-        doNotSendFirstInitPacket = false;
-        return;
-    }
-    */
+     if(doNotSendFirstInitPacket) {
+     doNotSendFirstInitPacket = false;
+     return;
+     }
+     */
 
     Packet* packet = generatePacket();
 
@@ -135,7 +141,7 @@ void EtherTrafGenQueue::requestPacket() {
         }
         EV_TRACE << endl;
     }
-    emit(sentPkSignal, packet);
+    emit(sentPkSignal, packet->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
     send(packet, "out");
     packetsSent++;
 }

@@ -62,6 +62,7 @@ protected:
     Ieee8022LlcSocket llcSocket;
 
     cPar* packetLength;
+    bool randomPacketLengthEnabled;
 
     /** Amount of packets sent for statistic. */
     long packetsSent;

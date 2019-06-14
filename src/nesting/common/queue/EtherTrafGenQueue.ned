@@ -34,8 +34,9 @@ simple EtherTrafGenQueue
         bool dei = default(false);				// DEI (Drop Eligible Indicator) that is added to the packets control information
         int vid = default(1);					// VID (VLAN Identifier) value that is added to the packets control information
         volatile int packetLength @unit(B);		// length of packets to send
-        @signal[sentPk](type=cPacket);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        bool randomPacketLengthEnabled = default(false);
+        @signal[sentPk](type=long); // type=unique packet id
+        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,vector; interpolationmode=none);
         bool verbose = default(false);
     gates:
         output out @labels(Ieee8021QCtrl/down);
