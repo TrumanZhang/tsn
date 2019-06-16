@@ -63,6 +63,8 @@ protected:
     // receive statistics
     long TSNpacketsSent = 0;
     long packetsReceived = 0;
+    simsignal_t sentPkIdSignal;
+    simsignal_t rcvdPkIdSignal;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
     int ssap = -1;

@@ -33,8 +33,11 @@ simple VlanEtherTrafGenSched
     parameters:
         @class(VlanEtherTrafGenSched);
 
-        @signal[sentPk](type=long); // type=unique packet id
-        @signal[rcvdPk](type=long); // type=unique packet id
+        @signal[sentPkId](type=long); // type=unique packet id
+        @signal[rcvdPkId](type=long); // type=unique packet id
+        @signal[sentPk](type=inet::Packet);
+        @signal[rcvdPk](type=inet::Packet);
+        
 
         //Actual schedule has to be set in .ini file
         xml initialSchedule = default(xml("<schedule><cycle>100</cycle></schedule>"));
@@ -43,6 +46,10 @@ simple VlanEtherTrafGenSched
         string hostModule = default("^");
         bool verbose = default(false);
         double jitter = default(0); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
+        
+        @statistic[packetReceived](title="packets received"; source=rcvdPkId; record=count, vector; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=sentPkId; record=count, vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
         input in;
         output out;

@@ -28,6 +28,8 @@ VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
 void VlanEtherTrafGenSched::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         // Signals
+        sentPkIdSignal = registerSignal("sentPkId");
+        rcvdPkIdSignal = registerSignal("rcvdPkId");
         sentPkSignal = registerSignal("sentPk");
         rcvdPkSignal = registerSignal("rcvdPk");
 
@@ -118,7 +120,8 @@ void VlanEtherTrafGenSched::sendPacket() {
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
                     << endl;
 
-    emit(sentPkSignal, datapacket->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
+    emit(sentPkIdSignal, datapacket->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
+    emit(sentPkSignal, datapacket);
     send(datapacket, "out");
     TSNpacketsSent++;
 }
@@ -129,7 +132,8 @@ void VlanEtherTrafGenSched::receivePacket(Packet *msg) {
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
 
     packetsReceived++;
-    emit(rcvdPkSignal, msg->getTreeId());
+    emit(rcvdPkIdSignal, msg->getTreeId());
+    emit(rcvdPkSignal, msg);
 
     delete msg;
 }
