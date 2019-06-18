@@ -44,27 +44,62 @@ void QueuingFrames::handleMessage(cMessage *msg) {
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
 
     // switch ingoing VLAN Tag to outgoing Tag
-    auto vlanTagIn = packet->removeTag<VLANTagInd>();
-    int pcpValue = vlanTagIn->getPcp();
+    int pcpValue;
+    int DeValue;
+    int VIDValue;
+    if (packet->findTag<VLANTagInd>()) {
+        auto vlanTagIn = packet->removeTag<VLANTagInd>();
+        pcpValue = vlanTagIn->getPcp();
+        DeValue = vlanTagIn->getDe();
+        VIDValue = vlanTagIn->getVID();
+        delete vlanTagIn;
+    } else {
+        auto vlanTagIn = packet->removeTag<VLANTagReq>();
+        pcpValue = vlanTagIn->getPcp();
+        DeValue = vlanTagIn->getDe();
+        VIDValue = vlanTagIn->getVID();
+        delete vlanTagIn;
+    }
     auto vlanTagOut = packet->addTag<VLANTagReq>();
     vlanTagOut->setPcp(pcpValue);
-    vlanTagOut->setDe(vlanTagIn->getDe());
-    vlanTagOut->setVID(vlanTagIn->getVID());
+    vlanTagOut->setDe(DeValue);
+    vlanTagOut->setVID(VIDValue);
 
     // switch ingoing MAC Tag to outgoing MAC Tag
-    auto macTagIn = packet->removeTag<inet::MacAddressInd>();
+    inet::MacAddress in;
+    inet::MacAddress out;
+    if (packet->findTag<inet::MacAddressInd>()) {
+        auto macTagIn = packet->removeTag<inet::MacAddressInd>();
+        in = macTagIn->getSrcAddress();
+        out = macTagIn->getDestAddress();
+        delete macTagIn;
+    } else {
+        auto macTagIn = packet->removeTag<inet::MacAddressReq>();
+        in = macTagIn->getSrcAddress();
+        out = macTagIn->getDestAddress();
+        delete macTagIn;
+    }
     auto macTagOut = packet->addTag<inet::MacAddressReq>();
-    macTagOut->setDestAddress(macTagIn->getDestAddress());
-    macTagOut->setSrcAddress(macTagIn->getSrcAddress());
+    macTagOut->setDestAddress(out);
+    macTagOut->setSrcAddress(in);
 
-    // switch ingoing sap tag to outgoing sap tag
-    auto sapTagIn = packet->removeTag<inet::Ieee802SapInd>();
+    // switch incoming llsap tag
+    int ssap;
+    int dsap;
+    if (packet->findTag<inet::Ieee802SapInd>()) {
+        auto sapTagIn = packet->removeTag<inet::Ieee802SapInd>();
+        ssap = sapTagIn->getSsap();
+        dsap = sapTagIn->getDsap();
+        delete sapTagIn;
+    } else {
+        auto sapTagIn = packet->removeTag<inet::Ieee802SapReq>();
+        ssap = sapTagIn->getSsap();
+        dsap = sapTagIn->getDsap();
+        delete sapTagIn;
+    }
     auto sapTagOut = packet->addTag<inet::Ieee802SapReq>();
-    sapTagOut->setDsap(sapTagIn->getDsap());
-    sapTagOut->setSsap(sapTagIn->getSsap());
-    delete macTagIn;
-    delete vlanTagIn;
-    delete sapTagIn;
+    sapTagOut->setDsap(dsap);
+    sapTagOut->setSsap(ssap);
 
     // remove encapsulation
     packet->trim();

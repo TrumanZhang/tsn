@@ -56,9 +56,12 @@ module VlanEtherHostSched
 
             @display("p=330,149;b=29,25");
         }
-        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
-            parameters:
-                @display("p=138,271,row,150;q=txQueue");
+        eth: <default("VlanEthernetInterfaceSwitchPreemptable")> like IEthernetInterface {
+            mac.queueModule = "^.^.eth.queuing.transmissionSelection";
+            mac.mtu = 1500B;
+            queuing.tsAlgorithms[*].macModule = "^.^.^.eth.mac";
+            queuing.gateController.macModule = "^.^.^.eth.mac";
+            @display("p=142,283,row,150;q=txQueue");
         }
     connections:
         trafGenSchedApp.out --> eth.upperLayerIn;

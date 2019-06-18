@@ -18,6 +18,7 @@ package nesting.node.ethernet;
 import inet.common.queue.Sink;
 import inet.linklayer.contract.IEthernetInterface;
 import nesting.common.queue.EtherTrafGenQueue;
+import nesting.ieee8021q.clock.IClock;
 
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
@@ -31,7 +32,6 @@ module VlanEtherHostFullLoad
         @networkNode();
         @labels(node,ethernet-node);
         *.interfaceTableModule = default("");
-        eth.mac.queueModule = "^.^.trafGenQueueApp";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -41,9 +41,15 @@ module VlanEtherHostFullLoad
         sink: Sink {
             @display("p=84,69");
         }
-        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
-            parameters:
-                @display("p=142,283,row,150;q=txQueue");
+        eth: <default("VlanEthernetInterfaceSwitchPreemptable")> like IEthernetInterface {
+            mac.queueModule = "^.^.eth.queuing.transmissionSelection";
+            mac.mtu = 1500B;
+            queuing.tsAlgorithms[*].macModule = "^.^.^.eth.mac";
+            queuing.gateController.macModule = "^.^.^.eth.mac";
+            @display("p=142,283,row,150;q=txQueue");
+        }
+        clock: <default("IdealClock")> like IClock {
+            @display("p=330,69");
         }
     connections:
         eth.upperLayerIn <-- trafGenQueueApp.out;

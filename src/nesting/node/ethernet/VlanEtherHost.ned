@@ -18,6 +18,7 @@ package nesting.node.ethernet;
 
 import inet.linklayer.contract.IEthernetInterface;
 import nesting.application.ethernet.VlanEtherTrafGen;
+import nesting.ieee8021q.clock.IClock;
 
 //
 // Simple Host with the capability to create and receive VLAN tagged ethernet
@@ -38,9 +39,15 @@ module VlanEtherHost
         trafGenApp: VlanEtherTrafGen {
             @display("p=142,70");
         }
-        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
-            parameters:
-                @display("p=142,283,row,150;q=txQueue");
+        eth: <default("VlanEthernetInterfaceSwitchPreemptable")> like IEthernetInterface {
+            mac.queueModule = "^.^.eth.queuing.transmissionSelection";
+            mac.mtu = 1500B;
+            queuing.tsAlgorithms[*].macModule = "^.^.^.eth.mac";
+            queuing.gateController.macModule = "^.^.^.eth.mac";
+            @display("p=142,283,row,150;q=txQueue");
+        }
+        clock: <default("IdealClock")> like IClock {
+            @display("p=27,32;is=s");
         }
     connections:
         eth.upperLayerIn <-- trafGenApp.out;
