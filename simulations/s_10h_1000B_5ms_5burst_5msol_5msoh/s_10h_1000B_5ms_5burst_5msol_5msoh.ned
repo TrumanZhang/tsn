@@ -24,255 +24,123 @@ network s_10h_1000B_5ms_5burst_5msol_5msoh
     submodules:
     
     
-        h8: VlanEtherHostSched{
-            @display("p=716,-20");
-        }
-    
-        s6: VlanEtherSwitchPreemptable{
-            parameters:
-                @display("p=682,460");
-            gates:
-                ethg[3]; 
-        }
-        h6: VlanEtherHostSched{
-            @display("p=799,503");
-        }
-    
-        s1: VlanEtherSwitchPreemptable{
-            parameters:
-                @display("p=-47,452");
-            gates:
-                ethg[2]; 
-        }
-        h1: VlanEtherHostSched{
-            @display("p=-58,311");
-        }
-    
-        h4: VlanEtherHostSched{
-            @display("p=390,833");
-        }
-    
-        h10: VlanEtherHostSched{
-            @display("p=317,104");
-        }
-    
-        s9: VlanEtherSwitchPreemptable{
-            parameters:
-                @display("p=489,-3");
-            gates:
-                ethg[3]; 
-        }
-        s3: VlanEtherSwitchPreemptable{
-            parameters:
-                @display("p=177,700");
-            gates:
-                ethg[3]; 
-        }
-        s8: VlanEtherSwitchPreemptable{
-            parameters:
-                @display("p=642,84");
-            gates:
-                ethg[3]; 
-        }
-        h5: VlanEtherHostSched{
-            @display("p=637,721");
-        }
-    
-        s10: VlanEtherSwitchPreemptable{
-            parameters:
-                @display("p=387,24");
-            gates:
-                ethg[2]; 
-        }
         s5: VlanEtherSwitchPreemptable{
             parameters:
-                @display("p=559,624");
+                @display("p=252,533");
             gates:
                 ethg[3]; 
         }
         h9: VlanEtherHostSched{
-            @display("p=350,-52");
+            @display("p=644,122");
+        }
+    
+        h7: VlanEtherHostSched{
+            @display("p=201,183");
         }
     
         s4: VlanEtherSwitchPreemptable{
             parameters:
-                @display("p=375,710");
+                @display("p=387,593");
             gates:
                 ethg[3]; 
         }
         s2: VlanEtherSwitchPreemptable{
             parameters:
-                @display("p=17,601");
+                @display("p=387,655");
             gates:
                 ethg[3]; 
         }
+        s8: VlanEtherSwitchPreemptable{
+            parameters:
+                @display("p=409,135");
+            gates:
+                ethg[3]; 
+        }
+        s9: VlanEtherSwitchPreemptable{
+            parameters:
+                @display("p=559,91");
+            gates:
+                ethg[3]; 
+        }
+        s1: VlanEtherSwitchPreemptable{
+            parameters:
+                @display("p=388,796");
+            gates:
+                ethg[2]; 
+        }
+        s10: VlanEtherSwitchPreemptable{
+            parameters:
+                @display("p=667,22");
+            gates:
+                ethg[2]; 
+        }
+        h8: VlanEtherHostSched{
+            @display("p=385,39");
+        }
+    
+        h4: VlanEtherHostSched{
+            @display("p=482,665");
+        }
+    
+        h1: VlanEtherHostSched{
+            @display("p=389,900");
+        }
+    
+        h3: VlanEtherHostSched{
+            @display("p=515,473");
+        }
+    
+        h5: VlanEtherHostSched{
+            @display("p=172,611");
+        }
+    
         h2: VlanEtherHostSched{
-            @display("p=-100,644");
+            @display("p=341,570");
+        }
+    
+        h10: VlanEtherHostSched{
+            @display("p=750,-33");
         }
     
         s7: VlanEtherSwitchPreemptable{
             parameters:
-                @display("p=712,263");
+                @display("p=281,241");
             gates:
                 ethg[3]; 
         }
-        h7: VlanEtherHostSched{
-            @display("p=835,233");
+        s3: VlanEtherSwitchPreemptable{
+            parameters:
+                @display("p=462,569");
+            gates:
+                ethg[3]; 
+        }
+        h6: VlanEtherHostSched{
+            @display("p=113,443");
         }
     
-        h3: VlanEtherHostSched{
-            @display("p=120,809");
+        s6: VlanEtherSwitchPreemptable{
+            parameters:
+                @display("p=215,393");
+            gates:
+                ethg[3]; 
         }
-    
     connections:
     
     
     
-    h8.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s8.ethg$i[2];
+    s5.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s6.ethg$i[1];
     
     
     
     
     
-    s6.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h6.ethg$i;
+    s5.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h5.ethg$i;
     
     
     
     
     
-    s6.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s7.ethg$i[0];
-    
-    
-    
-    
-    
-    s6.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s5.ethg$i[1];
-    
-    
-    
-    
-    
-    h6.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s6.ethg$i[0];
-    
-    
-    
-    
-    
-    s1.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h1.ethg$i;
-    
-    
-    
-    
-    
-    s1.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s2.ethg$i[1];
-    
-    
-    
-    
-    
-    h1.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s1.ethg$i[0];
-    
-    
-    
-    
-    
-    h4.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s4.ethg$i[0];
-    
-    
-    
-    
-    
-    h10.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s10.ethg$i[0];
-    
-    
-    
-    
-    
-    s9.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s10.ethg$i[1];
-    
-    
-    
-    
-    
-    s9.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h9.ethg$i;
-    
-    
-    
-    
-    
-    s9.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s8.ethg$i[0];
-    
-    
-    
-    
-    
-    s3.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h3.ethg$i;
-    
-    
-    
-    
-    
-    s3.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s4.ethg$i[1];
-    
-    
-    
-    
-    
-    s3.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s2.ethg$i[0];
-    
-    
-    
-    
-    
-    s8.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s9.ethg$i[2];
-    
-    
-    
-    
-    
-    s8.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s7.ethg$i[2];
-    
-    
-    
-    
-    
-    s8.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h8.ethg$i;
-    
-    
-    
-    
-    
-    h5.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s5.ethg$i[0];
-    
-    
-    
-    
-    
-    s10.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h10.ethg$i;
-    
-    
-    
-    
-    
-    s10.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s9.ethg$i[0];
-    
-    
-    
-    
-    
-    s5.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h5.ethg$i;
-    
-    
-    
-    
-    
-    s5.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s6.ethg$i[2];
-    
-    
-    
-    
-    
-    s5.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s4.ethg$i[2];
+    s5.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s4.ethg$i[0];
     
     
     
@@ -284,49 +152,151 @@ network s_10h_1000B_5ms_5burst_5msol_5msoh
     
     
     
-    s4.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h4.ethg$i;
+    h7.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s7.ethg$i[1];
     
     
     
     
     
-    s4.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s3.ethg$i[1];
+    s4.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s5.ethg$i[2];
     
     
     
     
     
-    s4.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s5.ethg$i[2];
+    s4.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h4.ethg$i;
     
     
     
     
     
-    s2.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s3.ethg$i[2];
+    s4.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s3.ethg$i[2];
     
     
     
     
     
-    s2.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s1.ethg$i[1];
+    s2.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s3.ethg$i[0];
     
     
     
     
     
-    s2.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h2.ethg$i;
+    s2.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h2.ethg$i;
     
     
     
     
     
-    h2.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s2.ethg$i[2];
+    s2.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s1.ethg$i[0];
     
     
     
     
     
-    s7.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s6.ethg$i[1];
+    s8.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h8.ethg$i;
+    
+    
+    
+    
+    
+    s8.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s7.ethg$i[2];
+    
+    
+    
+    
+    
+    s8.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s9.ethg$i[0];
+    
+    
+    
+    
+    
+    s9.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s8.ethg$i[2];
+    
+    
+    
+    
+    
+    s9.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h9.ethg$i;
+    
+    
+    
+    
+    
+    s9.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s10.ethg$i[0];
+    
+    
+    
+    
+    
+    s1.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s2.ethg$i[2];
+    
+    
+    
+    
+    
+    s1.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h1.ethg$i;
+    
+    
+    
+    
+    
+    s10.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s9.ethg$i[2];
+    
+    
+    
+    
+    
+    s10.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h10.ethg$i;
+    
+    
+    
+    
+    
+    h8.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s8.ethg$i[0];
+    
+    
+    
+    
+    
+    h4.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s4.ethg$i[1];
+    
+    
+    
+    
+    
+    h1.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s1.ethg$i[1];
+    
+    
+    
+    
+    
+    h3.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s3.ethg$i[1];
+    
+    
+    
+    
+    
+    h5.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s5.ethg$i[1];
+    
+    
+    
+    
+    
+    h2.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s2.ethg$i[1];
+    
+    
+    
+    
+    
+    h10.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s10.ethg$i[1];
+    
+    
+    
+    
+    
+    s7.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s6.ethg$i[0];
     
     
     
@@ -344,13 +314,43 @@ network s_10h_1000B_5ms_5burst_5msol_5msoh
     
     
     
-    h7.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s7.ethg$i[1];
+    s3.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s2.ethg$i[0];
     
     
     
     
     
-    h3.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s3.ethg$i[0];
+    s3.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h3.ethg$i;
+    
+    
+    
+    
+    
+    s3.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s4.ethg$i[2];
+    
+    
+    
+    
+    
+    h6.ethg$o --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s6.ethg$i[2];
+    
+    
+    
+    
+    
+    s6.ethg$o[0] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s7.ethg$i[0];
+    
+    
+    
+    
+    
+    s6.ethg$o[1] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> s5.ethg$i[0];
+    
+    
+    
+    
+    
+    s6.ethg$o[2] --> {delay = 1e-06s; datarate = 1000000000.0bps;} --> h6.ethg$i;
     
     
     

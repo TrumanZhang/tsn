@@ -2,266 +2,266 @@
 <schedule>
 	<defaultcycle>1s</defaultcycle>
 	<host name="h2">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h3">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h4">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h5">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h6">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h7">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h8">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
 	<host name="h9">
-		<cycle>5ms</cycle>
+		<cycle>10ms</cycle>
 		<entry>
 			<start>0ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>1ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>2ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>3ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 		<entry>
 			<start>4ns</start>
 			<queue>7</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
@@ -270,7 +270,7 @@
 		<entry>
 			<start>0ms</start>
 			<queue>6</queue>
-			<dest>00:00:00:00:00:03</dest>
+			<dest>00:00:00:00:00:08</dest>
 			<size>300</size>
 		</entry>
 	</host>
@@ -289,7 +289,7 @@
 	</switch>
 	<switch name="s9">
 		<cycle>10ms</cycle>
-		<port id="0">
+		<port id="2">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
@@ -302,7 +302,7 @@
 	</switch>
 	<switch name="s8">
 		<cycle>10ms</cycle>
-		<port id="1">
+		<port id="0">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
@@ -315,7 +315,7 @@
 	</switch>
 	<switch name="s7">
 		<cycle>10ms</cycle>
-		<port id="1">
+		<port id="2">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
@@ -328,7 +328,7 @@
 	</switch>
 	<switch name="s6">
 		<cycle>10ms</cycle>
-		<port id="0">
+		<port id="2">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
@@ -341,7 +341,7 @@
 	</switch>
 	<switch name="s5">
 		<cycle>10ms</cycle>
-		<port id="1">
+		<port id="0">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
@@ -367,7 +367,7 @@
 	</switch>
 	<switch name="s3">
 		<cycle>10ms</cycle>
-		<port id="1">
+		<port id="2">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
@@ -380,7 +380,7 @@
 	</switch>
 	<switch name="s2">
 		<cycle>10ms</cycle>
-		<port id="2">
+		<port id="0">
 			<entry>
 				<length>5ms</length>
 				<bitvector>00000001</bitvector>
