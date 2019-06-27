@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<filteringDatabases>
+	<filteringDatabase id="s5">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="1"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s2">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="1"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s3">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="0"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s6">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="0"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s10">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="1"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s8">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="1"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s9">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="1"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s7">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="2"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s1">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="0"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+	<filteringDatabase id="s4">
+		<static>
+			<forward>
+				<individualAddress macAddress="00:00:00:00:00:0f" port="0"/>
+			</forward>
+		</static>
+	</filteringDatabase>
+</filteringDatabases>
