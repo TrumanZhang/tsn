@@ -81,9 +81,9 @@ double CreditBasedShaper::creditsForTime(double creditPerSecond,
         simtime_t time) {
     assert(creditPerSecond > 0);
     assert(time >= SimTime::ZERO);
+    double timeInSeconds = time / SimTime(1, SIMTIME_S);
+    return timeInSeconds * creditPerSecond;
 
-    simtime_t secondsPerCredit = SimTime(1, SIMTIME_S) / creditPerSecond;
-    return time / secondsPerCredit;
 }
 
 simtime_t CreditBasedShaper::timeForCredits(double creditPerSecond,
@@ -95,7 +95,7 @@ simtime_t CreditBasedShaper::timeForCredits(double creditPerSecond,
     return seconds * SimTime(1, SIMTIME_S);
 }
 
-simtime_t CreditBasedShaper::idleTimeToZeroCredit() {
+simtime_t CreditBasedShaper::zeroCreditTime() {
     assert(credit < 0);
     return simTime() + timeForCredits(getIdleSlope(), 0 - credit);
 }
@@ -113,13 +113,13 @@ void CreditBasedShaper::updateState(State newState) {
     EV_DEBUG << getFullPath() << ": New state: [state=";
     switch (state) {
     case kIdle:
-        EV_INFO << "idle";
+        EV_DEBUG << "idle";
         break;
     case kSpendCredit:
-        EV_INFO << "spendCredit";
+        EV_DEBUG << "spendCredit";
         break;
     case kEarnCredit:
-        EV_INFO << "earnCredit";
+        EV_DEBUG << "earnCredit";
         break;
     }
     EV_DEBUG << ",credit=" << credit << "]" << endl;
@@ -130,19 +130,17 @@ void CreditBasedShaper::spendCredit(Packet* packet) {
             transmissionTime(packet));
     credit -= spendCredit;
 
-    EV_DEBUG << getFullPath() << ": Spending " << spendCredit
-                    << " credit to transmit "
-                    << Ieee8021q::getFinalEthernet2FrameBitLength(packet)
-                    << "bits (" << packet->getBitLength()
-                    << "bits payload without headers)." << endl;
+    EV_DEBUG << getFullPath() << ": Spending " << spendCredit << " credit for " << packet->getBitLength() << " bits payload." << endl;
+    EV_WARN << getFullPath() << ": Spending " << spendCredit << " credit = "
+        << Ieee8021q::getFinalEthernet2FrameBitLength(packet) << "bits / " << getSendSlope() << " slope" << endl;
 }
 
 void CreditBasedShaper::earnCredits(simtime_t time) {
     double earnedCredit = creditsForTime(getIdleSlope(), time);
     credit += earnedCredit;
 
-    EV_DEBUG << getFullPath() << ": Earned " << earnedCredit << " credit."
-                    << endl;
+    EV_DEBUG << getFullPath() << ": Earned " << earnedCredit << " credit." << endl;
+    EV_WARN << getFullPath() << ": Earned " << earnedCredit << " credit = " << time << " time * " << getIdleSlope() << " slope" << endl;
 }
 
 void CreditBasedShaper::resetCredit() {
@@ -152,7 +150,7 @@ void CreditBasedShaper::resetCredit() {
 }
 
 bool CreditBasedShaper::isCreditPositive() {
-    return static_cast<int>(credit) >= 0;
+    return credit >= 0.0;
 }
 
 bool CreditBasedShaper::isPacketReadyForTransmission() {
@@ -162,12 +160,18 @@ bool CreditBasedShaper::isPacketReadyForTransmission() {
 
 void CreditBasedShaper::handleGateStateChangedEvent() {
     if (transmissionGate->isGateOpen()) {
+        assert(state != kEarnCredit);
         EV_TRACE << getFullPath() << ": Handle gate opened event." << endl;
-        if (state == kIdle && isPacketReadyForTransmission()) {
+        if (state == kIdle && !isCreditPositive()) {
+            EV_DEBUG << getFullPath() << ": Credit negative." << endl;
+            EV_DEBUG << getFullPath() << ": Zero credit scheduled for " << zeroCreditTime() << "(+" << timeForCredits(getIdleSlope(), 0 - credit) << ")" << endl;
             updateState(kEarnCredit);
-            if (!isCreditPositive()) {
-                scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
-            }
+            scheduleAt(zeroCreditTime(), &reachedZeroCreditMessage);
+            // if isPacketReadyForTransmission() handle in reachedZeroCredit
+        }
+        else if (state == kIdle && isPacketReadyForTransmission()) { // credit is positive
+            updateState(kEarnCredit);
+            // if isPacketReadyForTransmission() packet was already enqueued.
         }
     } else {
         EV_TRACE << getFullPath() << ": Handle gate closed event." << endl;
@@ -177,6 +181,7 @@ void CreditBasedShaper::handleGateStateChangedEvent() {
             updateState(kIdle);
         }
     }
+    // if kSpendCredit: do nothing, handle in handleEndSpendingCreditEvent
 }
 
 void CreditBasedShaper::handlePacketEnqueuedEvent() {
@@ -184,42 +189,26 @@ void CreditBasedShaper::handlePacketEnqueuedEvent() {
 
     EV_TRACE << getFullPath() << ": Handle packet enqueued event." << endl;
 
-    if (state == kIdle && transmissionGate->isGateOpen()) {
+    if (state == kIdle && transmissionGate->isGateOpen()) { // queue was empty
         updateState(kEarnCredit);
-    } else if (state == kEarnCredit) {
-        cancelEvent(&reachedZeroCreditMessage);
-        earnCredits(simTime() - lastEventTimestamp);
-        updateState(kEarnCredit);
-    }
-
-    // If new state is earning credits then maybe send self message to signal
-    // when zero credits are reached.
-    if (state == kEarnCredit && !isCreditPositive()) {
-        scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
-    }
-
-    // If positive amount of credit is available pass packetEnqueued event to
-    // subsequent queues.
-    if (isCreditPositive()) {
+        assert(isCreditPositive());
         transmissionGate->packetEnqueued();
     }
 }
 
 void CreditBasedShaper::handleSendPacketEvent(Packet* packet) {
-    assert(state != kSpendCredit);
+    assert(state == kEarnCredit);
     assert(isCreditPositive());
     assert(!reachedZeroCreditMessage.isScheduled());
 
     EV_TRACE << getFullPath() << ": Handle send packet event." << endl;
 
-    if (state == kEarnCredit) {
-        earnCredits(simTime() - lastEventTimestamp);
-    }
-
+    earnCredits(simTime() - lastEventTimestamp);
+    updateState(kSpendCredit);
     spendCredit(packet);
 
+    EV_DEBUG << getFullPath() << ": handleEndSpendingCreditEvent scheduled for " << simTime() + transmissionTime(packet) << "(+" << transmissionTime(packet) << ")" << endl;
     scheduleAt(simTime() + transmissionTime(packet), &endSpendingCreditMessage);
-    updateState(kSpendCredit);
 }
 
 void CreditBasedShaper::handleEndSpendingCreditEvent() {
@@ -227,17 +216,25 @@ void CreditBasedShaper::handleEndSpendingCreditEvent() {
 
     EV_TRACE << getFullPath() << ": Handle end spending credit event." << endl;
 
-    if (!isPacketReadyForTransmission() && isCreditPositive()) {
-        resetCredit();
+    if (!transmissionGate->isGateOpen()){
+        EV_DEBUG << getFullPath() << ": Gate not open." << endl;
         updateState(kIdle);
-    } else if (isPacketReadyForTransmission()
-            && transmissionGate->isGateOpen()) {
+    }
+    else if (!isCreditPositive()){
+        EV_DEBUG << getFullPath() << ": Credit negative." << endl;
+        EV_DEBUG << getFullPath() << ": Zero credit scheduled for " << zeroCreditTime() << "(+" << timeForCredits(getIdleSlope(), 0 - credit) << ")" << endl;
         updateState(kEarnCredit);
-        if (credit < 0) {
-            scheduleAt(idleTimeToZeroCredit(), &reachedZeroCreditMessage);
-        }
-    } else {
+        scheduleAt(zeroCreditTime(), &reachedZeroCreditMessage);
+    }
+    else if (!isPacketReadyForTransmission()) {
+        EV_DEBUG << getFullPath() << ": Queue empty." << endl;
         updateState(kIdle);
+        resetCredit();
+    } 
+    else { // open positive ready => send
+        EV_DEBUG << getFullPath() << ": Ready to transmit." << endl;
+        updateState(kEarnCredit);
+        transmissionGate->packetEnqueued();
     }
 }
 
@@ -248,12 +245,20 @@ void CreditBasedShaper::handleZeroCreditReachedEvent() {
     EV_TRACE << getFullPath() << ": Handle zero credit reached event." << endl;
 
     earnCredits(simTime() - lastEventTimestamp);
-    updateState(kEarnCredit);
-    assert(isCreditPositive());
+    EV_WARN << getFullPath() << ": credit " << credit << " isCreditPositive " << isCreditPositive() << endl;
+    assert(credit >= - 0.1); // allowed rounding error
+    resetCredit();
 
-    if (isCreditPositive() && isPacketReadyForTransmission()) {
+    if (isPacketReadyForTransmission()) {
+        EV_DEBUG << getFullPath() << ": Ready to transmit." << endl;
+        updateState(kEarnCredit);
         transmissionGate->packetEnqueued();
     }
+    else { // queue empty
+        EV_DEBUG << getFullPath() << ": Queue empty." << endl;
+        updateState(kIdle);
+        resetCredit();
+    } 
 }
 
 bool CreditBasedShaper::isEmpty(uint64_t maxBits) {
