@@ -101,8 +101,9 @@ simtime_t CreditBasedShaper::zeroCreditTime() {
 }
 
 simtime_t CreditBasedShaper::transmissionTime(Packet* packet) {
-    simtime_t transmissionTime = timeForCredits(getPortTransmitRate(),
-            Ieee8021q::getFinalEthernet2FrameBitLength(packet));
+    // Ieee8021q::getFinalEthernet2FrameBitLength(packet) is somehow wrong (1704B instead of correctly 1521B + 8B PHY + IFG)
+    int lengthInBits = packet->getBitLength() + (21 + 8 + 12) * 8;
+    simtime_t transmissionTime = timeForCredits(getPortTransmitRate(), lengthInBits);
     return transmissionTime;
 }
 
@@ -126,13 +127,12 @@ void CreditBasedShaper::updateState(State newState) {
 }
 
 void CreditBasedShaper::spendCredit(Packet* packet) {
-    double spendCredit = creditsForTime(getSendSlope(),
-            transmissionTime(packet));
+    double spendCredit = creditsForTime(getSendSlope(), transmissionTime(packet));
     credit -= spendCredit;
 
     EV_DEBUG << getFullPath() << ": Spending " << spendCredit << " credit for " << packet->getBitLength() << " bits payload." << endl;
     EV_WARN << getFullPath() << ": Spending " << spendCredit << " credit = "
-        << Ieee8021q::getFinalEthernet2FrameBitLength(packet) << "bits / " << getSendSlope() << " slope" << endl;
+        << packet->getByteLength() + (21 + 8 + 12) << "B / " << getSendSlope() << " slope" << endl;
 }
 
 void CreditBasedShaper::earnCredits(simtime_t time) {
