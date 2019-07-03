@@ -155,7 +155,7 @@ void VlanEtherTrafGenSched::tick(IClock *clock) {
     }
     else {
         double delay = (double)rand() / (double)RAND_MAX;
-        double jitter_delay = delay * jitter;
+        simtime_t jitter_delay = delay * jitter;
         scheduleAt(simTime() + jitter_delay, jitterMsg);
 
     }

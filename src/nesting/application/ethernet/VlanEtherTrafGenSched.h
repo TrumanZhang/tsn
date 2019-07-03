@@ -71,7 +71,7 @@ protected:
     int dsap = -1;
 
     cMessage* jitterMsg = new cMessage("jitterMsg");
-    double jitter;
+    simtime_t jitter;
 
     Ieee8022LlcSocket llcSocket;
 
