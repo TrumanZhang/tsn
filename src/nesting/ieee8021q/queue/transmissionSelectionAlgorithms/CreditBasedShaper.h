@@ -35,13 +35,15 @@ class CreditBasedShaper: public TSAlgorithm {
 protected:
     /**
      * Enumeration to represent the internal state of the credit-based-shaper
-     * transmission selection algorithm. The state can be (1) earning credits,
-     * (2) spending credits or (3) staying idle.
+     * transmission selection algorithm. The state can be 
+     * (1) earning credits: gate open AND (packet queued OR neg credit)
+     * (2) spending credits: transmitting
+     * (3) staying idle: no packet OR gate closed
      */
     enum State {
         kEarnCredit, kSpendCredit, kIdle
     };
-protected:
+
     /**
      * The rate of change of credit as factor of the transmission rate of the
      * Mac module.
@@ -75,7 +77,7 @@ protected:
      * packet-enqueued event subsequent queuing components.
      */
     cMessage reachedZeroCreditMessage = cMessage("reachedZeroCredit");
-protected:
+
     /** @copydoc cSimpleModule::initialize() */
     virtual void initialize() override;
 
@@ -129,7 +131,7 @@ protected:
      * Returns the time needed to earn enough credits to reach zero or rather a
      * positive amount of credit.
      */
-    virtual simtime_t idleTimeToZeroCredit();
+    virtual simtime_t zeroCreditTime();
 
     /** Calculates the time needed to transmit a packet. */
     virtual simtime_t transmissionTime(Packet* packet);
