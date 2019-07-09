@@ -14,6 +14,7 @@
 // 
 
 #include "VlanEtherTrafGenSched.h"
+#include <algorithm>
 
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
@@ -22,7 +23,11 @@ namespace nesting {
 Define_Module(VlanEtherTrafGenSched);
 
 VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
-    delete (jitterMsg);
+    for (cMessage* msg : jitterMsgVector) {
+        cancelEvent(msg);
+        delete (msg);
+    }
+    jitterMsgVector.clear();
 }
 
 void VlanEtherTrafGenSched::initialize(int stage) {
@@ -48,6 +53,8 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         clock = check_and_cast<IClock*>(clockModule);
 
         llcSocket.setOutputGate(gate("out"));
+        // set seed for random jitter calculation
+        srand(1000);
     } else if (stage == INITSTAGE_LINK_LAYER) {
         //clock module reference from ned parameter
 
@@ -72,10 +79,7 @@ int VlanEtherTrafGenSched::numInitStages() const {
 
 void VlanEtherTrafGenSched::handleMessage(cMessage *msg) {
     if (msg->isSelfMessage()) {
-        if (msg == jitterMsg) {
-            sendDelayed();
-        }
-
+        sendDelayed(msg);
     } else {
         receivePacket(check_and_cast<Packet *>(msg));
     }
@@ -88,7 +92,7 @@ void VlanEtherTrafGenSched::sendPacket() {
 
     // create new packet
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-    long len = currentSchedule->getSize(index);
+    long len = currentSchedule->getSize(indexTx % currentSchedule->size());
     const auto& payload = makeShared<ByteCountChunk>(B(len));
     // set creation time
     auto timeTag = payload->addTag<CreationTimeTag>();
@@ -106,7 +110,8 @@ void VlanEtherTrafGenSched::sendPacket() {
     seqNum++;
 
     // get scheduled control data
-    Ieee8021QCtrl header = currentSchedule->getScheduledObject(index);
+    Ieee8021QCtrl header = currentSchedule->getScheduledObject(
+            indexTx % currentSchedule->size());
     // create mac control info
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(header.macTag.getDestAddress());
@@ -143,29 +148,38 @@ void VlanEtherTrafGenSched::tick(IClock *clock) {
     // When the current schedule index is 0, this means that the current
     // schedule's cycle was not started or was just finished. Therefore in this
     // case a new schedule is loaded if available.
-    if (index == currentSchedule->size() ) {
+    if (indexSchedule == currentSchedule->size() ) {
         // Load new schedule and delete the old one.
         if (nextSchedule) {
             currentSchedule = move(nextSchedule);
             nextSchedule.reset();
         }
-        index = 0;
+        indexSchedule = 0;
         clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
 
     }
     else {
         double delay = (double)rand() / (double)RAND_MAX;
         simtime_t jitter_delay = delay * jitter;
+        cMessage* jitterMsg = new cMessage();
+        jitterMsgVector.push_back(jitterMsg);
+        indexSchedule++;
         scheduleAt(simTime() + jitter_delay, jitterMsg);
+        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
 
     }
 }
 
-void VlanEtherTrafGenSched::sendDelayed() {
-
+void VlanEtherTrafGenSched::sendDelayed(cMessage *msg) {
     sendPacket();
-    index++;
-    clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+    indexTx++;
+    std::vector<cMessage*>::iterator it = std::find(jitterMsgVector.begin(),
+            jitterMsgVector.end(), msg);
+    if (it != jitterMsgVector.end()) {
+        jitterMsgVector.erase(it);
+    } else {
+        throw cRuntimeError("Jitter message not found in vector!");
+    }
 
 }
 
@@ -174,13 +188,15 @@ void VlanEtherTrafGenSched::sendDelayed() {
 simtime_t VlanEtherTrafGenSched::scheduleNextTickEvent() {
     if (currentSchedule->size() == 0) {
         return currentSchedule->getCycle();
-    } else if (index == currentSchedule->size()) {
-        return currentSchedule->getCycle() - currentSchedule->getTime(index - 1);
-    } else if (index % currentSchedule->size() == 0) {
-        return currentSchedule->getTime(index);
+    } else if (indexSchedule == currentSchedule->size()) {
+        return currentSchedule->getCycle()
+                - currentSchedule->getTime(indexSchedule - 1);
+    } else if (indexSchedule % currentSchedule->size() == 0) {
+        return currentSchedule->getTime(indexSchedule);
     } else {
-        return currentSchedule->getTime(index % currentSchedule->size())
-                - currentSchedule->getTime(index % currentSchedule->size() - 1);
+        return currentSchedule->getTime(indexSchedule % currentSchedule->size())
+                - currentSchedule->getTime(
+                        indexSchedule % currentSchedule->size() - 1);
     }
 }
 

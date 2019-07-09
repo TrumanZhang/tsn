@@ -54,7 +54,10 @@ private:
     std::unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
-    long int index = 0;
+    long int indexSchedule = 0;
+
+    /** Index for the net packet to be sent out. */
+    long int indexTx = 0;
 
     IClock *clock;
 
@@ -70,8 +73,8 @@ protected:
     int ssap = -1;
     int dsap = -1;
 
-    cMessage* jitterMsg = new cMessage("jitterMsg");
     simtime_t jitter;
+    std::vector<cMessage*> jitterMsgVector;
 
     Ieee8022LlcSocket llcSocket;
 
@@ -81,7 +84,7 @@ protected:
     virtual void sendPacket();
     virtual void receivePacket(Packet *msg);
     virtual void handleMessage(cMessage *msg) override;
-    virtual void sendDelayed();
+    virtual void sendDelayed(cMessage *msg);
 
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
