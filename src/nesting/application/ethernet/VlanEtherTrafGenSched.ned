@@ -46,6 +46,7 @@ simple VlanEtherTrafGenSched
         string hostModule = default("^");
         bool verbose = default(false);
         double jitter @unit(s) = default(0s); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
+        int seed = default(0);
         
         @statistic[packetReceived](title="packets received"; source=rcvdPkId; record=count, vector; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=sentPkId; record=count, vector; interpolationmode=none);

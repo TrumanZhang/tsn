@@ -42,6 +42,9 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         //WATCH(seqNum);
 
         jitter = par("jitter");
+        seed = par("seed");
+        // set seed for random jitter calculation
+        srand(seed);
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -53,8 +56,6 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         clock = check_and_cast<IClock*>(clockModule);
 
         llcSocket.setOutputGate(gate("out"));
-        // set seed for random jitter calculation
-        srand(1000);
     } else if (stage == INITSTAGE_LINK_LAYER) {
         //clock module reference from ned parameter
 

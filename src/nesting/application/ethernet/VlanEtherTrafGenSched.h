@@ -74,6 +74,7 @@ protected:
     int dsap = -1;
 
     simtime_t jitter;
+    int seed;
     std::vector<cMessage*> jitterMsgVector;
 
     Ieee8022LlcSocket llcSocket;
