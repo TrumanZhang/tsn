@@ -39,6 +39,7 @@ module VlanEtherSwitchPreemptable
         eth[sizeof(ethg)]: VlanEthernetInterfaceSwitchPreemptable {
             mac.queueModule = "^.^.eth[" + string(index) + "].queuing.transmissionSelection";
             mac.mtu = 1500B;
+            mac.promiscuous = true;
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
             queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
             @display("p=132,391,r,200");
