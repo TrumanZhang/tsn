@@ -1,0 +1,29 @@
+image: niessan/omnetpp-inet:latest
+
+stages:
+    - build
+    - test
+
+before_script:
+    - export NESTING=$(pwd)
+    - export INET=/root/models/inet
+
+build:
+    stage: build
+    script:
+        - make INET=$INET makefiles
+        - make INET=$INET -j$(grep -c proc /proc/cpuinfo)
+        - test -f src/libnesting.so
+    artifacts:
+        paths:
+            - src/libnesting.so
+            - out/
+
+test:
+    stage: test
+    script:
+        - test -f $NESTING/tests/test.sh
+        - bash $NESTING/tests/test.sh
+    artifacts:
+        paths:
+            - work

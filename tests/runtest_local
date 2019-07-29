@@ -5,8 +5,8 @@
 #
 
 # Absolute locations of NeSTiNg and INET project directories:
-NESTING=$(cd "${0%/*}/.." && pwd) || exit 1
-INET=$(cd "$NESTING/../inet" && pwd) || exit 1
+[ -z "$NESTING" ] && echo "NESTING variable must point to NESTING project directory" && exit 1
+[ -z "$INET" ] && echo "INET variable must point to INET project directory" && exit 1
 
 TESTFILES=$([ 0 -eq $# ] && echo "*.test" || echo "$*")
 
