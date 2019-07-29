@@ -1,3 +1,5 @@
+![pipeline status](https://gitlab-vs.informatik.uni-stuttgart.de/nesting/nestingng/badges/master/pipeline.svg)
+
 # NeSTiNg - Network Simulator for Time-sensitive Networking
 
 NeSTiNg is a simulation model for Time-sensitive Networking (TSN) using the OMNeT++ discrete event simulation framework.

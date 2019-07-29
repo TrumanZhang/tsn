@@ -1,7 +1,7 @@
 ###
 # Location of INET project directory (relative to './src/' and './simulations/'):
 #
-INET = ../../inet
+INET ?= ../../inet
 #
 ###
 
