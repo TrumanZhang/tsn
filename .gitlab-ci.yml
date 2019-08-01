@@ -22,7 +22,6 @@ build:
 test:
     stage: test
     script:
-        - test -f $NESTING/tests/test.sh
         - bash $NESTING/tests/test.sh
     artifacts:
         paths:
