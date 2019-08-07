@@ -186,10 +186,13 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
         }
         std::string portsString = multicastAddress->getAttribute("ports");
         std::vector<int> port;
-        unsigned int i = 0;
-        while (i <= portsString.length()) {
-            port.push_back(portsString[i] - '0');
-            i += 2;
+        std::stringstream stream(portsString);
+        while(1) {
+           int n;
+           stream >> n;
+           if(!stream)
+              break;
+           port.push_back(n);
         }
 
         uint8_t vid = 0;
