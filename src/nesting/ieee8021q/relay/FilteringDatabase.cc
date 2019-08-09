@@ -47,21 +47,19 @@ void FilteringDatabase::initialize(int stage) {
 
         //try to extract the part of the schedule belonging to this switch
         if (cycleXml != nullptr && cycleXml->hasChildren()) {
-            for (cXMLElement* host : cycleXml->getChildren()) {
-                if (strcmp(host->getTagName(), "defaultcycle") != 0
-                        && host->getAttribute("name") == switchString) {
-                    const char* cycleCString = host->getFirstChildWithTag(
-                            "cycle")->getNodeValue();
-                    cycle = simTime().parse(cycleCString);
+            for (cXMLElement* host : cycleXml->getChildrenByTagName("switch")) {
+                if (host->getAttribute("name") != NULL && host->getAttribute("name") == switchString) {
+                    const char* cycleString = host->getFirstChildWithTag("cycle")->getNodeValue();
+                    cycle = simTime().parse(cycleString);
                     foundSwitch = true;
                 }
             }
-        }
-        // if switch not in xml, get default cycle time
-        if (foundSwitch == false) {
-            const char* cycleCString = cycleXml->getFirstChildWithTag(
-                    "defaultcycle")->getNodeValue();
-            cycle = simTime().parse(cycleCString);
+            // if switch not in xml, get default cycle time
+            if (foundSwitch == false) {
+                const char* cycleString = cycleXml->getFirstChildWithTag(
+                        "defaultcycle")->getNodeValue();
+                cycle = simTime().parse(cycleString);
+            }
         }
 
         loadDatabase(fdb, cycle);
