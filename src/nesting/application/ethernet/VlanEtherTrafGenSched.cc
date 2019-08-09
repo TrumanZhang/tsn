@@ -42,9 +42,10 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         //WATCH(seqNum);
 
         jitter = par("jitter");
-        seed = par("seed");
         // set seed for random jitter calculation
-        srand(seed);
+        int seed = par("seed");
+        generator.seed(seed);
+        distribution = *new std::uniform_real_distribution<double>(0, 1.0);
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -160,7 +161,7 @@ void VlanEtherTrafGenSched::tick(IClock *clock) {
 
     }
     else {
-        double delay = (double)rand() / (double)RAND_MAX;
+        double delay = distribution(generator); // random
         simtime_t jitter_delay = delay * jitter;
         cMessage* jitterMsg = new cMessage();
         jitterMsgVector.push_back(jitterMsg);

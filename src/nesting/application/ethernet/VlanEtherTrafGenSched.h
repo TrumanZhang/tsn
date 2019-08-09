@@ -18,6 +18,8 @@
 
 #include <omnetpp.h>
 #include <memory>
+#include <random>
+#include <iostream>
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
 #include "inet/common/ModuleAccess.h"
@@ -76,6 +78,9 @@ protected:
     simtime_t jitter;
     int seed;
     std::vector<cMessage*> jitterMsgVector;
+
+    std::mt19937 generator;
+    std::uniform_real_distribution<double> distribution;
 
     Ieee8022LlcSocket llcSocket;
 
