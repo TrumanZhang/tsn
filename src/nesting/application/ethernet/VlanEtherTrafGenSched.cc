@@ -177,6 +177,8 @@ void VlanEtherTrafGenSched::sendDelayed(cMessage *msg) {
     std::vector<cMessage*>::iterator it = std::find(jitterMsgVector.begin(),
             jitterMsgVector.end(), msg);
     if (it != jitterMsgVector.end()) {
+        cMessage* dlMsg = *it;
+        delete dlMsg;
         jitterMsgVector.erase(it);
     } else {
         throw cRuntimeError("Jitter message not found in vector!");
