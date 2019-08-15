@@ -37,6 +37,8 @@ simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
         @signal[pMacDelay](type=simtime_t; unit=s);
         @signal[receivedExpressFrame](type=long); // type=unique packet id
         @signal[receivedPreemptableFrameFull](type=long); // type=unique packet id
+        @signal[receivedExpressFrameFromUpper]; // type=unique packet id
+        
 
 		@statistic[txExpressFrame](title="txExpressFrame"; source=transmittedExpressFrameSignal ;record=vector; interpolationmode=none);
 		@statistic[txPreemptableFrameFinal](title="txPreemptableFrameFinal"; source=transmittedPreemptableFinalSignal ;record=vector; interpolationmode=none);
@@ -44,7 +46,7 @@ simple EtherMACFullDuplexPreemptable extends EtherMacFullDuplex
 		@statistic[receivedPreemptableFrameFull](title="receivedPreemptableFrameFull"; record=vector; interpolationmode=none);
 		@statistic[receivedExpressFrame](title="receivedExpressFrame"; record=vector; interpolationmode=none);
 		@statistic[startTxExpressFrames](title="startTxExpressFrames"; source=startTransmissionExpressFrameSignal; record=vector; interpolationmode=none);
-
+		@statistic[receivedExpressFrameFromUpper](title="receivedExpressFrameFromUpper";record=vector; interpolationmode=none;);
         @statistic[eMacDelay](title="eMacDelay"; record=histogram,vector; interpolationmode=none);
         @statistic[pMacDelay](title="pMacDelay"; record=histogram,vector; interpolationmode=none);
         @statistic[preemptions](title="preemptions"; source=preemptCurrentFrameSignal; record=count; interpolationmode=none);

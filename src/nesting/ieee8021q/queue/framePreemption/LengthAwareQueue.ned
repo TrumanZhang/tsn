@@ -40,6 +40,7 @@ simple LengthAwareQueue
         @signal[queueingTime](type=simtime_t; unit=s);
         @signal[queueLength](type=long);
         @statistic[enqueuePk](record=vector; interpolationmode=none);
+        @statistic[dequeuePk](record=vector; interpolationmode=none);
         @statistic[rcvdPk](title="received packets"; record=count,vector; interpolationmode=none);
         @statistic[dropPk](title="dropped packets"; source=dropPkByQueue; record=count,vector; interpolationmode=none);
         @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);

@@ -50,6 +50,8 @@ simsignal_t EtherMACFullDuplexPreemptable::receivedExpressFrame =
         registerSignal("receivedExpressFrame");
 simsignal_t EtherMACFullDuplexPreemptable::receivedPreemptableFrameFull =
         registerSignal("receivedPreemptableFrameFull");
+simsignal_t EtherMACFullDuplexPreemptable::receivedExpressFrameFromUpper =
+        registerSignal("receivedExpressFrameFromUpper");
 
 EtherMACFullDuplexPreemptable::~EtherMACFullDuplexPreemptable() {
     cancelAndDelete(recheckForQueuedExpressFrameMsg);
@@ -157,6 +159,7 @@ void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
         pFrameArrivalTime = simTime();
     } else {
         eFrameArrivalTime = simTime();
+        emit(receivedExpressFrameFromUpper, packet->getTreeId());
     }
 
     bool isExpressFrame = !(packet->arrivedOn("upperLayerPreemptableIn"));
@@ -398,15 +401,18 @@ void EtherMACFullDuplexPreemptable::handleEndTxPeriod() {
             //Add last checksum that is included in the encapped frame instead of the "mpacket"/frame preemption calculation
             preemptedBytesSent = currentPreemptableFrame->getByteLength();
             // final part was sent, therefore transmission is complete
-            emit(transmittedPreemptableFrameSignal, currentPreemptableFrame->getTreeId());
+            emit(transmittedPreemptableFrameSignal,
+                    currentPreemptableFrame->getTreeId());
             if (beginningOfPreemptableFrame) {
-                emit(transmittedPreemptableFullSignal, currentPreemptableFrame->getTreeId());
+                emit(transmittedPreemptableFullSignal,
+                        currentPreemptableFrame->getTreeId());
             } else {
                 emit(transmittedPreemptableFinalSignal,
                         currentPreemptableFrame->getTreeId());
             }
         } else {
-            emit(transmittedPreemptableNonFinalSignal, currentPreemptableFrame->getTreeId());
+            emit(transmittedPreemptableNonFinalSignal,
+                    currentPreemptableFrame->getTreeId());
         }
         EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS)
                        << "ns:" << " PreemptedFrame " << currentPreemptableFrame
