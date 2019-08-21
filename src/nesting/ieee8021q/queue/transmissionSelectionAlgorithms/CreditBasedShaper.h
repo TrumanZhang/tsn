@@ -21,8 +21,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 
-#include "TSAlgorithm.h"
-#include "../../Ieee8021q.h"
+#include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/TSAlgorithm.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
 
 using namespace omnetpp;
 
