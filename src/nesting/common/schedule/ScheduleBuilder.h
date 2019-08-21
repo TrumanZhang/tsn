@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include <algorithm>
 #include "Schedule.h"
-#include "../../ieee8021q/Ieee8021q.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
 
 using namespace omnetpp;
 
