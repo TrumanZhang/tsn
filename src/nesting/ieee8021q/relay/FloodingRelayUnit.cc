@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "FloodingRelayUnit.h"
+#include "nesting/ieee8021q/relay/FloodingRelayUnit.h"
 
 namespace nesting {
 
