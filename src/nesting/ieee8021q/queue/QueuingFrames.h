@@ -23,8 +23,8 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "nesting/ieee8021q/Ieee8021q.h"
-#include "nesting/linklayer/common/VLANTag_m.h"
+#include "../Ieee8021q.h"
+#include "../../linklayer/common/VLANTag_m.h"
 
 using namespace omnetpp;
 

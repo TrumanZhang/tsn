@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/application/ethernet/VlanEtherTrafGen.h"
+#include "VlanEtherTrafGen.h"
 
 namespace nesting {
 

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
+#include "VlanEtherTrafGenSched.h"
 
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 

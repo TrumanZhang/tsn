@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/common/queue/EtherTrafGenQueue.h"
+#include "EtherTrafGenQueue.h"
 
 #include <omnetpp/ccomponent.h>
 #include <omnetpp/cexception.h>

@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "IClock.h"
 
 using namespace omnetpp;
 

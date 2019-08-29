@@ -20,7 +20,7 @@
 
 //#include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/packet/Packet.h"
-#include "nesting/linklayer/common/VLANTag_m.h"
+#include "../linklayer/common/VLANTag_m.h"
 
 namespace nesting {
 
