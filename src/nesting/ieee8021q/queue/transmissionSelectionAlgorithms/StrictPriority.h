@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 
-#include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/TSAlgorithm.h"
+#include "TSAlgorithm.h"
 
 using namespace omnetpp;
 

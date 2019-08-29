@@ -21,8 +21,8 @@
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "nesting/ieee8021q/queue/TransmissionSelection.h"
-#include "nesting/ieee8021q/Ieee8021q.h"
+#include "../../ieee8021q/queue/TransmissionSelection.h"
+#include "../../ieee8021q/Ieee8021q.h"
 
 using namespace inet;
 

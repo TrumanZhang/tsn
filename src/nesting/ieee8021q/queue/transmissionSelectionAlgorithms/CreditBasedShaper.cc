@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/CreditBasedShaper.h"
+#include "CreditBasedShaper.h"
 
 namespace nesting {
 

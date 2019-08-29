@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 
-#include "nesting/ieee8021q/clock/IClockListener.h"
+#include "IClockListener.h"
 
 using namespace omnetpp;
 

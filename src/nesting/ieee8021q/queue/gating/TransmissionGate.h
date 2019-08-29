@@ -20,14 +20,14 @@
 #include <list>
 #include <algorithm>
 
-#include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/TSAlgorithm.h"
+#include "../transmissionSelectionAlgorithms/TSAlgorithm.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "inet/common/packet/Packet.h"
-#include "nesting/ieee8021q/clock/IClock.h"
-#include "nesting/ieee8021q/queue/gating/GateController.h"
-#include "nesting/ieee8021q/queue/TransmissionSelection.h"
-#include "nesting/ieee8021q/queue/framePreemption/IPreemptableQueue.h"
+#include "../../clock/IClock.h"
+#include "GateController.h"
+#include "../TransmissionSelection.h"
+#include "../framePreemption/IPreemptableQueue.h"
 
 using namespace omnetpp;
 

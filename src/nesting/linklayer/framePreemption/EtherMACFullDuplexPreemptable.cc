@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "nesting/linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
+#include "EtherMACFullDuplexPreemptable.h"
 
 #include "inet/common/queue/IPassiveQueue.h"
 // #include "inet/common/NotifierConsts.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "nesting/linklayer/framePreemption/PreemptedFrame.h"
+#include "PreemptedFrame.h"
 
 namespace nesting {
 

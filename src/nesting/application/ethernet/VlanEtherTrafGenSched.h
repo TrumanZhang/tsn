@@ -29,9 +29,9 @@
 #include "inet/common/TimeTag_m.h"
 #include <omnetpp/cxmlelement.h>
 #include <vector>
-#include "nesting/common/schedule/HostSchedule.h"
-#include "nesting/common/schedule/HostScheduleBuilder.h"
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "../../common/schedule/HostSchedule.h"
+#include "../../common/schedule/HostScheduleBuilder.h"
+#include "../../ieee8021q/clock/IClock.h"
 
 using namespace omnetpp;
 using namespace inet;

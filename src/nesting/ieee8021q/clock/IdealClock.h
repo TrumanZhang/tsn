@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include <tuple>
 
-#include "nesting/ieee8021q/clock/ClockBase.h"
+#include "ClockBase.h"
 
 using namespace omnetpp;
 

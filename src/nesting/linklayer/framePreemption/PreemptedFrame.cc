@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "nesting/linklayer/framePreemption/PreemptedFrame.h"
+#include "PreemptedFrame.h"
 
 namespace nesting {
 PreemptedFrame::PreemptedFrame(const cFramePointer& completeFrame) {

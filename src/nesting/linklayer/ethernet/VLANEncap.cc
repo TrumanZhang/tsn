@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/linklayer/ethernet/VLANEncap.h"
+#include "VLANEncap.h"
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {

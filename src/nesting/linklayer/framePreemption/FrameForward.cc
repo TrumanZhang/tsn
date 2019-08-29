@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/linklayer/framePreemption/FrameForward.h"
+#include "FrameForward.h"
 namespace nesting {
 
 Define_Module(FrameForward);

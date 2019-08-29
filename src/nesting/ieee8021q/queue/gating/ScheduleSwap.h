@@ -19,11 +19,11 @@
 #include <omnetpp.h>
 #include "inet/common/ModuleAccess.h"
 #include "GateController.h"
-#include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
-#include "nesting/ieee8021q/clock/IClock.h"
-#include "nesting/ieee8021q/relay/FilteringDatabase.h"
-#include "nesting/ieee8021q/clock/IClockListener.h"
-#include "nesting/ieee8021q/Ieee8021q.h"
+#include "../../../application/ethernet/VlanEtherTrafGenSched.h"
+#include "../../clock/IClock.h"
+#include "../../relay/FilteringDatabase.h"
+#include "../../clock/IClockListener.h"
+#include "../../Ieee8021q.h"
 
 using namespace omnetpp;
 

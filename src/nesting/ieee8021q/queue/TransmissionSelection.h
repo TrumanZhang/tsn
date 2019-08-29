@@ -20,7 +20,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
+#include "gating/TransmissionGate.h"
 
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
