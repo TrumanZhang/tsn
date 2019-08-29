@@ -22,7 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "FilteringDatabase.h"
+#include "nesting/ieee8021q/relay/FilteringDatabase.h"
 
 using namespace omnetpp;
 using namespace inet;

@@ -21,9 +21,9 @@
 
 #include "inet/common/ModuleAccess.h"
 
-#include "../../Ieee8021q.h"
-#include "../transmissionSelectionAlgorithms/TSAlgorithm.h"
-#include "IPreemptableQueue.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
+#include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/TSAlgorithm.h"
+#include "nesting/ieee8021q/queue/framePreemption/IPreemptableQueue.h"
 
 using namespace omnetpp;
 using namespace inet;

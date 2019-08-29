@@ -30,7 +30,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
-#include "../../linklayer/common/VLANTag_m.h"
+#include "nesting/linklayer/common/VLANTag_m.h"
 
 using namespace omnetpp;
 using namespace inet;

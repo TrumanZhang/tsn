@@ -22,9 +22,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 
-#include "../gating/TransmissionGate.h"
-#include "../framePreemption/LengthAwareQueue.h"
-#include "../framePreemption/IPreemptableQueue.h"
+#include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
+#include "nesting/ieee8021q/queue/framePreemption/LengthAwareQueue.h"
+#include "nesting/ieee8021q/queue/framePreemption/IPreemptableQueue.h"
 
 using namespace omnetpp;
 using namespace inet;
