@@ -22,6 +22,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+
 #include "FilteringDatabase.h"
 
 using namespace omnetpp;
@@ -38,8 +40,10 @@ private:
     int numberOfPorts;
     //TODO: Create parameter for filtering database aging
     simtime_t fdbAgingThreshold = 1000;
+    IInterfaceTable *ifTable = nullptr;
 protected:
-    virtual void initialize();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage* msg);
     virtual void processBroadcast(Packet* packet);
     virtual void processMulticast(Packet* packet);

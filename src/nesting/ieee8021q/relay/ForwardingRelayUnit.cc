@@ -14,16 +14,22 @@
 // 
 
 #include "ForwardingRelayUnit.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
+
+#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace nesting {
 
 Define_Module(ForwardingRelayUnit);
 
-void ForwardingRelayUnit::initialize() {
-    fdb = getModuleFromPar<FilteringDatabase>(par("filteringDatabaseModule"),
-            this);
-    numberOfPorts = par("numberOfPorts");
+void ForwardingRelayUnit::initialize(int stage) {
+    if (stage == INITSTAGE_LOCAL) {
+        fdb = getModuleFromPar<FilteringDatabase>(par("filteringDatabaseModule"), this);
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        numberOfPorts = par("numberOfPorts");
+    } else if (stage == INITSTAGE_LINK_LAYER) {
+        registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
+    }
 }
 
 void ForwardingRelayUnit::handleMessage(cMessage *msg) {

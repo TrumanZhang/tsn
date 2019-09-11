@@ -36,7 +36,6 @@ module VlanEtherHostSched
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2;bgb=385,371");
-        *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
     gates:
         inout ethg @labels(EtherFrame-conn);
@@ -59,6 +58,7 @@ module VlanEtherHostSched
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=138,271,row,150;q=txQueue");
+                interfaceTableModule = "^.interfaceTable";
         }
     connections:
         trafGenSchedApp.out --> eth.upperLayerIn;

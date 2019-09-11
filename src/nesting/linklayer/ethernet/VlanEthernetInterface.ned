@@ -15,13 +15,13 @@
 
 package nesting.linklayer.ethernet;
 
-@namespace();
-
 import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.ethernet.EtherEncap;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.InterfaceEntry;
 import nesting.linklayer.ethernet.VLANEncap;
+
+@namespace();
 
 //
 // Ethernet network interface, used in Host modules in nesting project.
@@ -29,13 +29,13 @@ import nesting.linklayer.ethernet.VLANEncap;
 module VlanEthernetInterface extends InterfaceEntry like IEthernetInterface
 {
     parameters:
+        @display("i=block/ifcard;bgl=2");
         @class(inet::InterfaceEntry);
-        string interfaceTableModule;
         string address = default("auto"); // MAC address
         string fcsMode @enum("declared","computed") = default("declared");
-        @display("i=block/ifcard;bgl=2");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
+        string interfaceTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;

@@ -13,20 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.relay;
+package nesting.linklayer.ieee8021q;
+
+import inet.linklayer.ieee8021q.IIeee8021qEncap;
+import inet.linklayer.ieee8021q.Ieee8021qEncap;
+
 
 //
-// Implementations of this module interface should perform relaying of packets
-// between input-, output- and management-connections of an ethernet switch.
+// TODO auto-generated module
 //
-moduleinterface RelayUnit {
+simple EnhancedIeee8021qEncap extends Ieee8021qEncap like IIeee8021qEncap
+{
     parameters:
-        @display("i=block/switch");
-        int numberOfPorts;
-        bool verbose;
-    gates:
-        input in[numberOfPorts];
-        output out[numberOfPorts];
-        input managementIn[];
-        output managementOut[];
+        @class(EnhancedIeee8021qEncap);
 }

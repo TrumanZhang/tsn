@@ -17,7 +17,9 @@ package nesting.node.ethernet;
 
 import inet.common.queue.Sink;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
 import nesting.common.queue.EtherTrafGenQueue;
+
 
 //
 // VLAN capable host module, that sends packets with the maximum throughput the
@@ -30,8 +32,7 @@ module VlanEtherHostFullLoad
         @display("i=device/pc2;bgb=363,398");
         @networkNode();
         @labels(node,ethernet-node);
-        *.interfaceTableModule = default("");
-        eth.mac.queueModule = "^.^.trafGenQueueApp";
+        
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -44,6 +45,11 @@ module VlanEtherHostFullLoad
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
+                interfaceTableModule = "^.interfaceTable";
+                mac.queueModule = "^.^.trafGenQueueApp";
+        }
+        interfaceTable: InterfaceTable {
+            @display("p=325,82");
         }
     connections:
         eth.upperLayerIn <-- trafGenQueueApp.out;

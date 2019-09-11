@@ -13,24 +13,37 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.relay;
+cplusplus{{
+#include "inet/common/TagBase_m.h"
+}}
+
+class noncobject inet::TagBase;
+
+namespace nesting;
 
 //
-// Whenever this implementation of a ~RelayUnit receives a packet on an in-
-// port, it sends out duplicated packets on every out-port except the one
-// with equal index to the in-port.
+// This is an abstract base class that should not be directly added as a tag.
 //
-// @see ~RelayUnit
-//
-simple FloodingRelayUnit like RelayUnit {
-    parameters:
-        @display("i=block/switch");
-        @class(FloodingRelayUnit);
-        int numberOfPorts;
-        bool verbose = default(false);
-    gates:
-        input in[numberOfPorts];
-        output out[numberOfPorts];
-        input managementIn[];
-        output managementOut[];
+class VlanTagBase extends inet::TagBase
+{
+    int vlanId = -1;
+    int pcp = 0;
+    bool de;
 }
+
+//
+// This request determines the vlan that should be used to send the packet.
+// It may be present on a packet from the application to the mac protocol.
+//
+class VlanReq extends VlanTagBase
+{
+}
+
+//
+// This indication specifies the vlan that was used to receive the packet.
+// It may be present on a packet from the mac protocol to the application.
+//
+class VlanInd extends VlanTagBase
+{
+}
+
