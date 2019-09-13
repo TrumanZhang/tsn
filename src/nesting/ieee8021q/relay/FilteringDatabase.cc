@@ -15,6 +15,8 @@
 
 #include "FilteringDatabase.h"
 
+#include "inet/common/ModuleAccess.h"
+
 namespace nesting {
 
 Define_Module(FilteringDatabase);
@@ -38,6 +40,9 @@ void FilteringDatabase::clearAdminFdb() {
 }
 void FilteringDatabase::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
+        clock = check_and_cast<IClock*>(getModuleByPath(par("clockModule")));
+        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+    } else if (stage == INITSTAGE_LINK_LAYER) {
         cXMLElement* fdb = par("database");
         cXMLElement* cycleXml = par("cycle");
 
@@ -56,19 +61,12 @@ void FilteringDatabase::initialize(int stage) {
             }
             // if switch not in xml, get default cycle time
             if (foundSwitch == false) {
-                const char* cycleString = cycleXml->getFirstChildWithTag(
-                        "defaultcycle")->getNodeValue();
+                const char* cycleString = cycleXml->getFirstChildWithTag("defaultcycle")->getNodeValue();
                 cycle = simTime().parse(cycleString);
             }
         }
 
         loadDatabase(fdb, cycle);
-
-        cModule* clockModule = getModuleByPath(par("clockModule"));
-        clock = check_and_cast<IClock*>(clockModule);
-
-//    WATCH_MAP(fdb)
-    } else if (stage == INITSTAGE_LINK_LAYER) {
         clock->subscribeTick(this, 0);
     }
 }
@@ -127,8 +125,7 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
 
     for (auto individualAddress : individualAddresses) {
 
-        std::string macAddressStr = std::string(
-                individualAddress->getAttribute("macAddress"));
+        std::string macAddressStr = std::string(individualAddress->getAttribute("macAddress"));
         if (macAddressStr.empty()) {
             throw cRuntimeError(
                     "individualAddress tag in forwarding database XML must have an "
@@ -141,9 +138,10 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                             "port attribute");
         }
 
-        std::vector<int> port;
-        port.insert(port.begin(), 1,
-                atoi(individualAddress->getAttribute("port")));
+        std::vector<int> interfaceIds;
+        int port = atoi(individualAddress->getAttribute("port"));
+        int interfaceId = ifTable->getInterface(port)->getInterfaceId();
+        interfaceIds.insert(interfaceIds.begin(), 1, interfaceId);
 
         uint8_t vid = 0;
         if (individualAddress->getAttribute("vid"))
@@ -156,8 +154,7 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
             if (!macAddress.tryParse(macAddressStr.c_str())) {
                 throw new cRuntimeError("Cannot parse invalid Mac address.");
             }
-            adminFdb.insert( { macAddress,
-                    std::pair<simtime_t, std::vector<int>>(0, port) });
+            adminFdb.insert({macAddress, std::pair<simtime_t, std::vector<int>>(0, interfaceIds)});
         } else {
             // TODO
             throw cRuntimeError(
@@ -236,14 +233,13 @@ void FilteringDatabase::handleMessage(cMessage *msg) {
     throw cRuntimeError("Must not receive messages.");
 }
 
-void FilteringDatabase::insert(MacAddress macAddress, simtime_t curTS,
-        int port) {
+void FilteringDatabase::insert(MacAddress macAddress, simtime_t curTS, int interfaceId) {
     std::vector<int> tmp;
-    tmp.insert(tmp.begin(), 1, port);
+    tmp.insert(tmp.begin(), 1, interfaceId);
     operFdb[macAddress] = std::pair<simtime_t, std::vector<int>>(curTS, tmp);
 }
 
-int FilteringDatabase::getPort(MacAddress macAddress, simtime_t curTS) {
+int FilteringDatabase::getDestInterfaceId(MacAddress macAddress, simtime_t curTS) {
     simtime_t ts;
     std::vector<int> port;
 
@@ -270,7 +266,7 @@ int FilteringDatabase::getPort(MacAddress macAddress, simtime_t curTS) {
     return -1;
 }
 
-std::vector<int> FilteringDatabase::getPorts(MacAddress macAddress,
+std::vector<int> FilteringDatabase::getDestInterfaceIds(MacAddress macAddress,
         simtime_t curTS) {
     simtime_t ts;
     std::vector<int> ports;

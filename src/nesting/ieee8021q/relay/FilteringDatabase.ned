@@ -30,5 +30,6 @@ simple FilteringDatabase
 	    xml database;
 	    string switchModule = default("^"); // Path to the ~VlanEtherSwitch module
 	    string clockModule = default("^.clock"); // Path to the ~IClock module.
+	    string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
 	    bool verbose = default(false);
 }

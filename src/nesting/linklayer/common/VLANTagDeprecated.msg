@@ -13,20 +13,33 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.relay;
+cplusplus{{
+#include "inet/common/TagBase_m.h"
+}}
+
+class noncobject inet::TagBase;
+
+namespace nesting;
+
+class DeprecatedVLANTagBase extends inet::TagBase
+{
+    uint8_t pcp;    
+    bool de;        
+    short VID=0;
+}
 
 //
-// Implementations of this module interface should perform relaying of packets
-// between input-, output- and management-connections of an ethernet switch.
+// Determines VLAN 802.1Q parameters for an outgoing packet.
 //
-moduleinterface RelayUnit {
-    parameters:
-        @display("i=block/switch");
-        int numberOfPorts;
-        bool verbose;
-    gates:
-        input in[numberOfPorts];
-        output out[numberOfPorts];
-        input managementIn[];
-        output managementOut[];
+class VLANTagReq extends DeprecatedVLANTagBase
+{
+    
+}
+
+//
+// Specifies VLAN 802.1Q parameters for an incoming packet.
+//
+class VLANTagInd extends DeprecatedVLANTagBase
+{
+    
 }

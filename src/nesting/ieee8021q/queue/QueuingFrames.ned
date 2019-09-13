@@ -27,6 +27,7 @@ simple QueuingFrames {
     parameters:
         @display("i=block/classifier");
         @class(QueuingFrames);
+        string vlanTagType @enum("c","s") = default("c");
         bool verbose = default(false);
     gates:
         input in;

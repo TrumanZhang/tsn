@@ -15,14 +15,15 @@
 
 package nesting.node.ethernet;
 
+import inet.common.MessageDispatcher;
 import inet.common.queue.Delayer;
+import inet.linklayer.contract.IMacRelayUnit;
 import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.contract.IEthernetInterface;
 import nesting.ieee8021q.clock.IClock;
-import nesting.ieee8021q.relay.FilteringDatabase;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
-import nesting.ieee8021q.relay.RelayUnit;
+import nesting.ieee8021q.relay.FilteringDatabase;
 import nesting.linklayer.ethernet.VlanEthernetInterfaceSwitchPreemptable;
+
 
 //
 // This module implements a switch that supports frame preemption.
@@ -31,8 +32,10 @@ module VlanEtherSwitchPreemptable
 {
     parameters:
         @networkNode();
-        @display("i=device/switch;bgb=,466");
-        **.interfaceTableModule = default("");
+        @display("i=device/switch;bgb=1429,570");
+        *.vlanTagType = default("c");
+        *.interfaceTableModule = absPath(".interfaceTable");
+        *.filteringDatabaseModule = absPath(".filteringDatabase");
     gates:
         inout ethg[];
     submodules:
@@ -40,16 +43,19 @@ module VlanEtherSwitchPreemptable
             mac.queueModule = "^.^.eth[" + string(index) + "].queuing.transmissionSelection";
             mac.mtu = 1500B;
             mac.promiscuous = true;
+            mac.interfaceTableModule = "^.interfaceTable";
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
-            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
-            @display("p=132,391,r,200");
+            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac"; 
+            encapE.typename = "EtherEncapDummy";
+            encapP.typename = "EtherEncapDummy";
+            @display("p=249,480,r,150");
         }
-        relayUnit: <default("ForwardingRelayUnit")> like RelayUnit {
+        relayUnit: <default("ForwardingRelayUnit")> like IMacRelayUnit {
             numberOfPorts = sizeof(ethg);
-            @display("p=219,189");
+            @display("p=800,264");
         }
-        processingDelay[sizeof(ethg)]: Delayer {
-            @display("p=132,268,r,200;i=block/delay");
+        processingDelay: Delayer {
+            @display("p=925,264,r,200;i=block/delay");
             delay = default(4us);
         }
         clock: <default("IdealClock")> like IClock {
@@ -64,13 +70,24 @@ module VlanEtherSwitchPreemptable
         interfaceTable: InterfaceTable {
             @display("p=60,31;is=s");
         }
-
+        up: MessageDispatcher {
+            parameters:
+                @display("p=800,160;b=1200,5");
+        }
+        down: MessageDispatcher {
+            parameters:
+                @display("p=800,380;b=1200,5");
+        }
     connections:
         for i=0..sizeof(ethg)-1 {
             eth[i].phys <--> ethg[i];
-            eth[i].upperLayerOut --> processingDelay[i].in;
-            processingDelay[i].out --> relayUnit.in[i];
-            relayUnit.out[i] --> eth[i].upperLayerIn;
+            eth[i].upperLayerOut --> down.in++;
+            down.out++ --> eth[i].upperLayerIn;
         }
+        down.out++ --> relayUnit.ifIn;
+        relayUnit.ifOut --> processingDelay.in;
+        processingDelay.out --> down.in++;
+        relayUnit.upperLayerOut --> up.in++;
+        relayUnit.upperLayerIn <-- up.out++;
 }
 
