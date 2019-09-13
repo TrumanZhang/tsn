@@ -46,11 +46,6 @@ void TransmissionSelection::initialize() {
             tGates.push_back(tg);
         }
     }
-
-    // so that EtherEncap does not drop packets
-    llcSocket.setOutputGate(gate("eOut"));
-
-    llcSocket.open(-1, ssap);
 }
 
 void TransmissionSelection::handleMessage(cMessage* msg) {

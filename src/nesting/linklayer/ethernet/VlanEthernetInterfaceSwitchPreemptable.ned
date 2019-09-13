@@ -52,20 +52,20 @@ module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEther
             parameters:
                 @display("p=202,61;q=l2queue");
         }
-        qEncapE: <default("EnhancedIeee8021qEncap")> like IIeee8021qEncap {
-            parameters:
-                @display("p=90,333");
-        }
         encapE: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=90,202");
         }
-        qEncapP: <default("Ieee8021qEncap")> like IIeee8021qEncap {
-            @display("p=202,333");
-        }
         encapP: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=202,202");
+        }
+        qEncapE: <default("EnhancedIeee8021qEncap")> like IIeee8021qEncap {
+            parameters:
+                @display("p=90,333");
+        }
+        qEncapP: <default("Ieee8021qEncap")> like IIeee8021qEncap {
+            @display("p=202,333");
         }
         frameForward: FrameForward {
             @display("p=90,61");

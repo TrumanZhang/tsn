@@ -44,6 +44,8 @@ module VlanEtherSwitchPreemptable
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
             queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
             interfaceTableModule = "^.interfaceTable";
+            encapE.typename = "EtherEncapDummy";
+            encapP.typename = "EtherEncapDummy";
             @display("p=249,480,r,200");
         }
         relayUnit: <default("ForwardingRelayUnit")> like IMacRelayUnit {
