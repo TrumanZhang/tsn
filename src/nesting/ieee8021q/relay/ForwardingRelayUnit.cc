@@ -20,6 +20,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
+#include "../../linklayer/vlan/VlanTag_m.h"
+
 namespace nesting {
 
 Define_Module(ForwardingRelayUnit);
@@ -39,6 +41,20 @@ void ForwardingRelayUnit::handleMessage(cMessage *msg) {
     Packet* packet = check_and_cast<Packet*>(msg);
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+
+    // Remove old service indications but keep packet protocol tag and add VLAN request
+    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+    auto vlanInd = packet->removeTag<VlanInd>();
+    packet->clearTags();
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    auto vlanReq = packet->addTag<VlanReq>();
+    vlanReq->setVlanId(vlanInd->getVlanId());
+    vlanReq->setPcp(vlanInd->getPcp());
+    vlanReq->setDe(vlanInd->getDe());
+    delete oldPacketProtocolTag;
+
+    packet->trim();
 
     // Distinguish between broadcast-, multicast- and unicast-ethernet frames
     if (frame->getDest().isBroadcast()) {
@@ -67,7 +83,7 @@ void ForwardingRelayUnit::processMulticast(Packet* packet, int arrivalInterfaceI
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalGate = packet->getArrivalGate()->getIndex();
 
-    std::vector<int> forwardingPorts = fdb->getPorts(frame->getDest(), simTime());
+    std::vector<int> forwardingPorts = fdb->getDestInterfaceIds(frame->getDest(), simTime());
 
     if (forwardingPorts.at(0) == -1) {
         throw cRuntimeError(
@@ -94,14 +110,15 @@ void ForwardingRelayUnit::processUnicast(Packet* packet, int arrivalInterfaceId)
     //Learning MAC port mappings
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     learn(frame->getSrc(), arrivalInterfaceId);
-    int forwardingPort = fdb->getPort(frame->getDest(), simTime());
+    int destInterfaceId = fdb->getDestInterfaceId(frame->getDest(), simTime());
 
     //Routing entry available?
-    if (forwardingPort == -1) {
-        EV_INFO << getFullPath() << ": Broadcasting packets `" << packet << "` to all ports" << endl;
+    if (destInterfaceId == -1) {
+        EV_INFO << getFullPath() << ": Broadcasting packet `" << packet << "` to all ports" << endl;
         processBroadcast(packet, arrivalInterfaceId);
     } else {;
-        EV_INFO << getFullPath() << ": Forwarding packet `" << packet << "` to port " << forwardingPort << endl;
+        EV_INFO << getFullPath() << ": Forwarding packet `" << packet << "` to port " << destInterfaceId << endl;
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterfaceId);
         send(packet, gate("ifOut"));
     }
 }
