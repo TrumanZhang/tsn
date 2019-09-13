@@ -19,8 +19,7 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-
-#include "../../linklayer/vlan/VlanTag_m.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
 
 namespace nesting {
 
@@ -50,8 +49,6 @@ void ForwardingRelayUnit::handleMessage(cMessage *msg) {
     *newPacketProtocolTag = *oldPacketProtocolTag;
     auto vlanReq = packet->addTag<VlanReq>();
     vlanReq->setVlanId(vlanInd->getVlanId());
-    vlanReq->setPcp(vlanInd->getPcp());
-    vlanReq->setDe(vlanInd->getDe());
     delete oldPacketProtocolTag;
 
     packet->trim();

@@ -13,17 +13,33 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.linklayer.ieee8021q;
+cplusplus{{
+#include "inet/common/TagBase_m.h"
+}}
 
-import inet.linklayer.ieee8021q.IIeee8021qEncap;
-import inet.linklayer.ieee8021q.Ieee8021qEncap;
+class noncobject inet::TagBase;
 
+namespace nesting;
 
-//
-// TODO auto-generated module
-//
-simple EnhancedIeee8021qEncap extends Ieee8021qEncap like IIeee8021qEncap
+class DeprecatedVLANTagBase extends inet::TagBase
 {
-    parameters:
-        @class(EnhancedIeee8021qEncap);
+    uint8_t pcp;    
+    bool de;        
+    short VID=0;
+}
+
+//
+// Determines VLAN 802.1Q parameters for an outgoing packet.
+//
+class VLANTagReq extends DeprecatedVLANTagBase
+{
+    
+}
+
+//
+// Specifies VLAN 802.1Q parameters for an incoming packet.
+//
+class VLANTagInd extends DeprecatedVLANTagBase
+{
+    
 }

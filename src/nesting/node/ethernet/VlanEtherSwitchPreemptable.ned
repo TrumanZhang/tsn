@@ -33,6 +33,9 @@ module VlanEtherSwitchPreemptable
     parameters:
         @networkNode();
         @display("i=device/switch;bgb=1429,570");
+        *.vlanTagType = default("c");
+        *.interfaceTableModule = absPath(".interfaceTable");
+        *.filteringDatabaseModule = absPath(".filteringDatabase");
     gates:
         inout ethg[];
     submodules:
@@ -42,8 +45,7 @@ module VlanEtherSwitchPreemptable
             mac.promiscuous = true;
             mac.interfaceTableModule = "^.interfaceTable";
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
-            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
-            interfaceTableModule = "^.interfaceTable";
+            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac"; 
             encapE.typename = "EtherEncapDummy";
             encapP.typename = "EtherEncapDummy";
             @display("p=249,480,r,150");

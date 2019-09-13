@@ -38,7 +38,6 @@ module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEther
         *.fcsMode = fcsMode;
         bool framePreemptionDisabled = default(true);
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -60,7 +59,7 @@ module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEther
             parameters:
                 @display("p=202,202");
         }
-        qEncapE: <default("EnhancedIeee8021qEncap")> like IIeee8021qEncap {
+        qEncapE: <default("Ieee8021qEncap")> like IIeee8021qEncap {
             parameters:
                 @display("p=90,333");
         }

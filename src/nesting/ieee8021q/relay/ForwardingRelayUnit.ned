@@ -33,6 +33,7 @@ simple ForwardingRelayUnit like IMacRelayUnit
         int numberOfPorts;
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
+        string vlanTagType @enum("c","s") = default("c");
         bool verbose = default(false);
 	gates:
    		input ifIn @labels(EtherFrame);
