@@ -46,7 +46,7 @@ module VlanEtherSwitchPreemptable
             interfaceTableModule = "^.interfaceTable";
             encapE.typename = "EtherEncapDummy";
             encapP.typename = "EtherEncapDummy";
-            @display("p=249,480,r,200");
+            @display("p=249,480,r,150");
         }
         relayUnit: <default("ForwardingRelayUnit")> like IMacRelayUnit {
             numberOfPorts = sizeof(ethg);
