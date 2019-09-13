@@ -16,6 +16,7 @@
 #include "ForwardingRelayUnit.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace nesting {
 
@@ -34,12 +35,12 @@ void ForwardingRelayUnit::initialize(int stage) {
 
 void ForwardingRelayUnit::handleMessage(cMessage *msg) {
     Packet* packet = check_and_cast<Packet*>(msg);
-    auto macTag = packet->getTag<MacAddressInd>();
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
 
     // Distinguish between broadcast-, multicast- and unicast-ethernet frames
-    if (macTag->getDestAddress().isBroadcast()) {
+    if (frame->getDest().isBroadcast()) {
         processBroadcast(packet);
-    } else if (macTag->getDestAddress().isMulticast()) {
+    } else if (frame->getDest().isMulticast()) {
         processMulticast(packet);
     } else {
         processUnicast(packet);
@@ -60,11 +61,10 @@ void ForwardingRelayUnit::processBroadcast(Packet* packet) {
 }
 
 void ForwardingRelayUnit::processMulticast(Packet* packet) {
-    auto macTag = packet->getTag<MacAddressInd>();
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalGate = packet->getArrivalGate()->getIndex();
 
-    std::vector<int> forwardingPorts = fdb->getPorts(macTag->getDestAddress(),
-            simTime());
+    std::vector<int> forwardingPorts = fdb->getPorts(frame->getDest(), simTime());
 
     if (forwardingPorts.at(0) == -1) {
         throw cRuntimeError(
@@ -81,32 +81,27 @@ void ForwardingRelayUnit::processMulticast(Packet* packet) {
             forwardingPortsString = forwardingPortsString.append(
                     std::to_string(forwardingPort));
         }
-        EV_INFO << getFullPath() << ": Forwarding multicast packet `" << packet
-                       << "` to ports " << forwardingPortsString << endl;
+        EV_INFO << getFullPath() << ": Forwarding multicast packet `" << packet << "` to ports "
+                << forwardingPortsString << endl;
     }
     delete packet;
 }
 
 void ForwardingRelayUnit::processUnicast(Packet* packet) {
-    // Control info is needed to retrieve destination MAC address
-    auto macTag = packet->getTag<MacAddressInd>();
-
     //Learning MAC port mappings
-    fdb->insert(macTag->getSrcAddress(), simTime(),
-            packet->getArrivalGate()->getIndex());
-    int forwardingPort = fdb->getPort(macTag->getDestAddress(), simTime());
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
+    fdb->insert(frame->getSrc(), simTime(), packet->getArrivalGate()->getIndex());
+    int forwardingPort = fdb->getPort(frame->getDest(), simTime());
 
     Packet* dupPacket;
     //Routing entry available?
     if (forwardingPort == -1) {
         dupPacket = packet->dup();
         processBroadcast(dupPacket);
-        EV_INFO << getFullPath() << ": Broadcasting packets `" << packet
-                       << "` to all ports" << endl;
+        EV_INFO << getFullPath() << ": Broadcasting packets `" << packet << "` to all ports" << endl;
     } else {
         dupPacket = packet->dup();
-        EV_INFO << getFullPath() << ": Forwarding packet `" << packet
-                       << "` to port " << forwardingPort << endl;
+        EV_INFO << getFullPath() << ": Forwarding packet `" << packet << "` to port " << forwardingPort << endl;
         send(dupPacket, gate("out", forwardingPort));
     }
 
