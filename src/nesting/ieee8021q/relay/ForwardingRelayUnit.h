@@ -19,9 +19,8 @@
 #include <unordered_map>
 #include <omnetpp.h>
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #include "FilteringDatabase.h"
@@ -38,16 +37,16 @@ class ForwardingRelayUnit: public cSimpleModule {
 private:
     FilteringDatabase* fdb;
     int numberOfPorts;
-    //TODO: Create parameter for filtering database aging
-    simtime_t fdbAgingThreshold = 1000;
-    IInterfaceTable *ifTable = nullptr;
+    simtime_t fdbAgingThreshold = 1000; //TODO: Create parameter for filtering database aging
+    IInterfaceTable *ifTable;
 protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage* msg);
-    virtual void processBroadcast(Packet* packet);
-    virtual void processMulticast(Packet* packet);
-    virtual void processUnicast(Packet* packet);
+    virtual void processBroadcast(Packet* packet, int arrivalInterfaceId);
+    virtual void processMulticast(Packet* packet, int arrivalInterfaceId);
+    virtual void processUnicast(Packet* packet, int arrivalInterfaceId);
+    virtual void learn(MacAddress srcAddr, int arrivalInterfaceId);
 
 public:
     //TODO: Fix filtering database aging parameter!
