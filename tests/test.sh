@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ -z "$NESTING" ] || [ -z "$INET" ]
+then
+    echo "The \$NESTING and \$INET environment variables must contain the paths to the NESTING and INET directories."
+    exit 1 
+fi
+
 echo
 echo "=== Generating tests ==="
 echo
