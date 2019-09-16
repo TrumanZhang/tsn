@@ -24,7 +24,9 @@ import nesting.ieee8021q.clock.IClock;
 
 network Test
 {
-    @display("bgb=501,311");
+    parameters:
+        @display("bgb=509,232");
+        int numHosts = default(3);
     types:
         channel C extends DatarateChannel
         {
@@ -34,34 +36,28 @@ network Test
         module ScheduledTrafficHost extends StandardHost
         {
             parameters:
-                @display("bgb=1255.2749,738.675");
                 numApps = 1;
                 app[0].typename = "UdpScheduledTrafficApp";
                 app[0].clockModule = "^.clock";
                 app[0].interfaceTableModule = "^.interfaceTable";
             submodules:
                 clock: <"IdealClock"> like IClock {
-                    @display("is=s;p=124.424995,647.32495");
+                    @display("is=s;p=452.4,75.4");
                 }
         }
     submodules:
-        h1: ScheduledTrafficHost {
-            @display("p=196,62");
-        }
-        h2: ScheduledTrafficHost {
-            @display("p=411,62");
-        }
-        h3: ScheduledTrafficHost {
-            @display("p=299,233");
+        host[numHosts]: ScheduledTrafficHost {
+            @display("p=209,146,r,100");
         }
         s1: EtherSwitch {
-            @display("p=299,132");
+            @display("p=209,46");
+            numEthInterfaces = numHosts;
         }
         configurator: Ipv4NetworkConfigurator {
             @display("is=s;p=60,31");
         }
     connections:
-        h1.ethg++ <--> C <--> s1.ethg++;
-        h2.ethg++ <--> C <-->  s1.ethg++;
-        h3.ethg++ <--> C <-->  s1.ethg++;
+        for i=0..numHosts-1 {
+            host[i].ethg++ <--> C <--> s1.ethg[i];
+        }
 }
