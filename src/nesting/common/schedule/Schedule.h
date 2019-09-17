@@ -25,84 +25,69 @@ using namespace omnetpp;
 namespace nesting {
 
 /**
- * A schedule is an array of entries, that consist of a bitvector representing
- * gate states and an time value.
+ * A schedule is more or less a list consisting of tuples of scheduled objects and time intervals.
+ * For more information about terminologies and context see chapters 8.6.8.4 and 8.6.9 of the IEEE802.1Q standard.
  */
 template<typename T>
 class Schedule {
 protected:
-    /**
-     * Schedule entries, that consist of a length in abstract time units and
-     * a scheduled object.
-     */
-    std::vector<std::tuple<simtime_t, T>> entries;
-
-    /**
-     * Total length of all schedule entries combined in abstract time units.
-     */
-    simtime_t totalLength = 0;
-
-    /**
-     * Ieee 802.1Q Cycle state machine uses length of gate states and the
-     * cycle time to determine the correct gate state.
-     */
-    simtime_t cycleTime;
+    std::vector<std::tuple<simtime_t, T>> controlList;
+    simtime_t baseTime = SimTime::ZERO;
+    simtime_t cycleTime = SimTime::ZERO;
+    simtime_t cycleTimeExtension = SimTime::ZERO;
+    simtime_t sumTimeIntervals = SimTime::ZERO;
 public:
-    Schedule() {
+    Schedule() {}
+
+    virtual ~Schedule() {};
+
+    virtual void setBaseTime(simtime_t baseTime) {
+        this->baseTime = baseTime;
     }
 
-    virtual ~Schedule() {
-    }
-    ;
-
-    /** Sets the Cycletime of this schedule. */
-    virtual void setCycleTime(simtime_t cycleLength) {
-        cycleTime = cycleLength;
+    virtual simtime_t getBaseTime() const {
+        return baseTime;
     }
 
-    virtual simtime_t getCycleTime() {
+    virtual void setCycleTime(simtime_t cycleTime) {
+        this->cycleTime = cycleTime;
+    }
+
+    virtual simtime_t getCycleTime() const {
         return cycleTime;
     }
 
-    /** Returns the number of entries of the schedule. */
-    virtual unsigned int size() const {
-        return entries.size();
+    virtual void setCycleTimeExtension(simtime_t cycleTimeExtension) {
+        this->cycleTimeExtension = cycleTimeExtension;
     }
 
-    /** Returns the scheduled object at a given index. */
-    virtual T getScheduledObject(unsigned int index) const {
-        return std::get < 1 > (entries[index]);
+    virtual simtime_t getCycleTimeExtension() const {
+        return cycleTimeExtension;
     }
 
-    /**
-     * Returns the time unit, how long an object at a given index is
-     * scheduled.
-     */
-    virtual simtime_t getLength(unsigned int index) const {
-        return std::get < 0 > (entries[index]);
+    virtual unsigned int getControlListLength() const {
+        return controlList.size();
     }
 
-    /** Returns the total length of the schedule in abstract time units. */
-    virtual simtime_t getLength() const {
-        return totalLength;
+    virtual const T& getControlListEntry(unsigned int controlListIndex) const {
+        return std::get<1>(controlList[controlListIndex]);
     }
 
-    /** Returns true if the schedule contains no entries. Otherwise false. */
+    virtual simtime_t getTimeInterval(unsigned int controlListIndex) const {
+        return std::get<0>(controlList[controlListIndex]);
+    }
+
     virtual bool isEmpty() const {
-        return entries.empty();
+        return controlList.empty();
     }
 
-    /**
-     * Adds a new entry add the end of the schedule.
-     *
-     * @param length          The length of the schedule entry in abstract
-     *                        time units.
-     * @param scheduledObject The schedule objects associated with the
-     *                        scheduled entry.
-     */
-    virtual void addEntry(simtime_t length, T scheduledObject) {
-        totalLength += length;
-        entries.push_back(make_tuple(length, scheduledObject));
+    virtual void addControlListEntry(simtime_t timeInterval, T controlListEntry) {
+        sumTimeIntervals += timeInterval;
+        controlList.push_back(make_tuple(timeInterval, controlListEntry));
+    }
+
+    virtual simtime_t getSumTimeIntervals() const {
+        return sumTimeIntervals;
     }
 };
 

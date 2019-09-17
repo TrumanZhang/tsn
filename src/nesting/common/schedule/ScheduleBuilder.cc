@@ -35,10 +35,10 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         reverse(originalVector.begin(), originalVector.end());
         GateBitvector bitvector = GateBitvector(originalVector);
 
-        schedule->addEntry(length, bitvector);
+        schedule->addControlListEntry(length, bitvector);
     }
 
-    if (schedule->getLength() > schedule->getCycleTime()) {
+    if (schedule->getSumTimeIntervals() > schedule->getCycleTime()) {
         EV_WARN << "Schedule total Length is greater than Cycle length";
     }
 
@@ -53,7 +53,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
     simtime_t length = simTime().parse(lengthCString);
     std::string gateString(kMaxSupportedQueues, '1');
     GateBitvector bitvector = GateBitvector(gateString);
-    schedule->addEntry(length, bitvector);
+    schedule->addControlListEntry(length, bitvector);
     schedule->setCycleTime(length);
     return schedule;
 }
