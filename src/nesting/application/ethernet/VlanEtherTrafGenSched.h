@@ -75,10 +75,14 @@ protected:
     int ssap = -1;
     int dsap = -1;
 
+    // maximum time scheduled packet can be delayed from ini file
     simtime_t jitter;
+    // seed to seed the random number generator for random delays bounded by jitter variable
     int seed;
+    // vector to hold all messages that delays scheduled packets. Msgs need to be saved until delayed packet was sent
+    // ,in order to delete said msg and avoid a memory leak
     std::vector<cMessage*> jitterMsgVector;
-
+    // random number generator
     std::mt19937 generator;
     std::uniform_real_distribution<double> distribution;
 

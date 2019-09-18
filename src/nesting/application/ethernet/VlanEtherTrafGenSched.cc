@@ -23,6 +23,7 @@ namespace nesting {
 Define_Module(VlanEtherTrafGenSched);
 
 VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
+    // delete jitter msg for not yet sent packets
     for (cMessage* msg : jitterMsgVector) {
         cancelEvent(msg);
         delete (msg);
@@ -163,7 +164,9 @@ void VlanEtherTrafGenSched::tick(IClock *clock) {
     else {
         double delay = distribution(generator); // random
         simtime_t jitter_delay = delay * jitter;
+        // jitter msg to delay schedules packets
         cMessage* jitterMsg = new cMessage();
+        // save msg in vector
         jitterMsgVector.push_back(jitterMsg);
         indexSchedule++;
         scheduleAt(simTime() + jitter_delay, jitterMsg);
@@ -180,6 +183,7 @@ void VlanEtherTrafGenSched::sendDelayed(cMessage *msg) {
     if (it != jitterMsgVector.end()) {
         cMessage* dlMsg = *it;
         delete dlMsg;
+        // delete msg from vector because delayed packet was sent
         jitterMsgVector.erase(it);
     } else {
         throw cRuntimeError("Jitter message not found in vector!");
