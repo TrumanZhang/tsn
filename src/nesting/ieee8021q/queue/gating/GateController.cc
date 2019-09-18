@@ -164,7 +164,7 @@ void GateController::tick(IClock *clock) {
     }
     //Set gate states for every gate
     setGateStates(bitvector, releaseNeeded);
-
+    // from high prio to low prio
     EV_DEBUG << getFullPath() << ": Got Tick. Setting gates to "<< bitvector << " at time "<< clock->getTime().inUnit(SIMTIME_US) << endl;
     std::stringstream ss;
     for (TransmissionGate* transmissionGate : transmissionGates) {
@@ -175,7 +175,9 @@ void GateController::tick(IClock *clock) {
             ss << "0";
         }
     }
-    EV_DEBUG << getFullPath() << ": Actual gate states: " << ss.str() << " at time "<< clock->getTime().inUnit(SIMTIME_US) << endl;
+    std::string ss_str = ss.str();
+    std::reverse(ss_str.begin(), ss_str.end());
+    EV_DEBUG << getFullPath() << ": Actual gate states: " << ss_str << " at time "<< clock->getTime().inUnit(SIMTIME_US) << endl;
 
     // Subscribe to the tick, on which a new schedule entry is loaded.
     clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
