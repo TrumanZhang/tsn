@@ -20,6 +20,9 @@
 
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/networklayer/common/L3Address.h"
+
+#include "../../common/schedule/Schedule.h"
 
 using namespace omnetpp;
 
@@ -30,9 +33,27 @@ namespace nesting {
  */
 class UdpScheduledTrafficApp : public inet::ApplicationBase, public inet::UdpSocket::ICallback
 {
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+public:
+    struct SendEvent {
+        inet::L3Address destAddress;
+        int destPort;
+        int pcp;
+        int vid;
+        int payloadSize;
+        int maxPayloadFragmentSize;
+    };
+protected:
+    int localPort = -1;
+    Schedule<SendEvent> schedule;
+    // statistics
+    int numSent = 0;
+    int numReceived = 0;
+public:
+    static Schedule<SendEvent> buildSchedule(cXMLElement *xml);
+protected:
+    virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void finish() override;
 
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void handleStartOperation(inet::LifecycleOperation *operation) override;
@@ -42,6 +63,7 @@ class UdpScheduledTrafficApp : public inet::ApplicationBase, public inet::UdpSoc
     virtual void socketDataArrived(inet::UdpSocket *socket, inet::Packet *packet) override;
     virtual void socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication) override;
     virtual void socketClosed(inet::UdpSocket *socket) override;
+
 };
 
 } //namespace

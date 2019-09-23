@@ -26,16 +26,15 @@ simple UdpScheduledTrafficApp like IApp
     parameters:
         @display("i=block/app");
         string interfaceTableModule; // The path to the InterfaceTable module
-        string clockModule;
-        xml trafficSchedule = xml("<schedule/>");
+        string clockModule;  // The path to the clock module
+        xml trafficSchedule = xml("<schedule baseTime=\"0s\" cycleTime=\"1s\"/>");
+        int localPort = default(-1);  // local UDP port number (-1: use ephemeral port)
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
-        @signal[outOfOrderPk](type=inet::Packet);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; source=packetDropped; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[outOfOrderPk](title="packets received out of order"; source=outOfOrderPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
         input socketIn @labels(UdpControlInfo/up);

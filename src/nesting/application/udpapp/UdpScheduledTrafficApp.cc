@@ -19,12 +19,19 @@ namespace nesting {
 
 Define_Module(UdpScheduledTrafficApp);
 
-void UdpScheduledTrafficApp::initialize()
+void UdpScheduledTrafficApp::initialize(int stage)
 {
-    // TODO - Generated method body
+    ApplicationBase::initialize(stage);
+    if (stage == inet::INITSTAGE_LOCAL) {
+        schedule = buildSchedule(par("trafficSchedule").xmlValue());
+        localPort = par("localPort").intValue();
+        // statistics
+        WATCH(numSent);
+        WATCH(numReceived);
+    }
 }
 
-void UdpScheduledTrafficApp::handleMessage(cMessage *msg)
+void UdpScheduledTrafficApp::finish()
 {
     // TODO - Generated method body
 }

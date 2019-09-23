@@ -39,7 +39,7 @@ protected:
 public:
     Schedule() {}
 
-    virtual ~Schedule() {};
+    virtual ~Schedule() {}
 
     virtual void setBaseTime(simtime_t baseTime) {
         this->baseTime = baseTime;
@@ -83,7 +83,7 @@ public:
 
     virtual void addControlListEntry(simtime_t timeInterval, T controlListEntry) {
         sumTimeIntervals += timeInterval;
-        controlList.push_back(make_tuple(timeInterval, controlListEntry));
+        controlList.push_back(std::make_tuple(timeInterval, controlListEntry));
     }
 
     virtual simtime_t getSumTimeIntervals() const {

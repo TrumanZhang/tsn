@@ -34,9 +34,7 @@ class IClockListener;
  */
 class IClock {
 public:
-    virtual ~IClock() {
-    }
-    ;
+    virtual ~IClock() {};
 
     /** Returns the clock's local time. */
     virtual simtime_t getTime() = 0;
@@ -44,6 +42,7 @@ public:
     /** Return clockrate as a simtime object. */
     virtual simtime_t getClockRate() = 0;
 
+    /** Subscribe clock event. Method is idempotent. */
     virtual void subscribeTick(IClockListener* listener,
             unsigned int idleTicks) = 0;
 
