@@ -84,7 +84,7 @@ protected:
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
 public:
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 
     ~VlanEtherTrafGenSched();
 

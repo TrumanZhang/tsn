@@ -34,7 +34,7 @@ protected:
     virtual ScheduledTick lastTick() override;
 
     /** @copydoc simtime_t ClockBase::scheduleTick(unsigned int) */
-    virtual simtime_t scheduleTick(unsigned int idleTicks) override;
+    virtual simtime_t scheduleTick(unsigned idleTicks) override;
 public:
     virtual ~IdealClock() {};
 };

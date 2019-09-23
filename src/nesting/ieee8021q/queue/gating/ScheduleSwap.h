@@ -53,7 +53,7 @@ protected:
     virtual int numInitStages() const override;
 public:
     /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 };
 }
 #endif

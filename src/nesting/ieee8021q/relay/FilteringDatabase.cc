@@ -215,7 +215,7 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
     }
 }
 
-void FilteringDatabase::tick(IClock *clock) {
+void FilteringDatabase::tick(IClock *clock, short kind) {
     if (changeDatabase) {
         operFdb.swap(adminFdb);
         cycle = newCycle;

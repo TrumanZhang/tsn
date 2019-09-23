@@ -27,7 +27,7 @@ ClockBase::ScheduledTick IdealClock::lastTick() {
     return result;
 }
 
-simtime_t IdealClock::scheduleTick(unsigned int idleTicks) {
+simtime_t IdealClock::scheduleTick(unsigned idleTicks) {
     return lastGlobalTickTimestamp + clockRate * idleTicks;
 }
 

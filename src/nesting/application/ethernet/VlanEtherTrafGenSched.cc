@@ -134,7 +134,7 @@ void VlanEtherTrafGenSched::receivePacket(Packet *msg) {
     delete msg;
 }
 
-void VlanEtherTrafGenSched::tick(IClock *clock) {
+void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
     Enter_Method("tick()");
     // When the current schedule index is 0, this means that the current
     // schedule's cycle was not started or was just finished. Therefore in this

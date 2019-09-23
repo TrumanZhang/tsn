@@ -61,39 +61,47 @@ void ClockBase::handleMessage(cMessage* message) {
     }
 }
 
-void ClockBase::addScheduledTickListener(unsigned int idleTicks,
+void ClockBase::addScheduledTickListener(unsigned idleTicks, short kind,
         IClockListener* listener) {
 
     Enter_Method_Silent();
 
-    // Binary search to find scheduled entry with equal or more idle ticks.
+    // Binary search to find scheduled entry with equal or more idle ticks
+    // and is of same kind.
     std::list<ScheduledTickEntry*>::iterator it = lower_bound(
-    scheduledTicks.begin(),
-    scheduledTicks.end(),
-    idleTicks,
-    [](ScheduledTickEntry*& elem, unsigned int idleTicks) {
-        return elem->scheduledTick.ticks < idleTicks;
-    }
+        scheduledTicks.begin(),
+        scheduledTicks.end(),
+        std::make_tuple(idleTicks, kind),
+        [](ScheduledTickEntry*& elem, std::tuple<unsigned, short> idleTicksAndKind) {
+            unsigned idleTicks = std::get<0>(idleTicksAndKind);
+            short kind = std::get<1>(idleTicksAndKind);
+            if (idleTicks == elem->scheduledTick.ticks) {
+                return elem->scheduledTick.kind < kind;
+            }
+            return elem->scheduledTick.ticks < idleTicks;
+        }
     );
 
     // Schedule tick if it was not already scheduled by previous subscription.
     ScheduledTickEntry* scheduledTickEntry;
-    if (it != scheduledTicks.end() && (*it)->scheduledTick.ticks == idleTicks) {
+    if (it != scheduledTicks.end()
+            && (*it)->scheduledTick.ticks == idleTicks
+            && (*it)->scheduledTick.kind == kind) {
         scheduledTickEntry = *it;
-    }
-    else {
+    } else {
         // Insert scheduled tick into datastructure.
         scheduledTickEntry = new ScheduledTickEntry();
         scheduledTickEntry->scheduledTick.ticks = idleTicks;
+        scheduledTickEntry->scheduledTick.kind = kind;
         scheduledTickEntry->scheduledTick.timestamp = scheduleTick(idleTicks);
-        scheduledTickEntry->tickMessage = new cMessage();
+        scheduledTickEntry->tickMessage = new cMessage(nullptr, kind);
 
         it = scheduledTicks.insert(it, scheduledTickEntry);
 
         // Send self-message
         scheduleAt(
-        scheduledTickEntry->scheduledTick.timestamp,
-        scheduledTickEntry->tickMessage
+            scheduledTickEntry->scheduledTick.timestamp,
+            scheduledTickEntry->tickMessage
         );
         if(par("verbose")) {
             EV_DEBUG << getFullPath()<<": Scheduled new tick event in t-" << idleTicks
@@ -106,9 +114,9 @@ void ClockBase::addScheduledTickListener(unsigned int idleTicks,
 
     // Add listener if he was not already added
     bool listenerNotAdded = find(
-    scheduledTickEntry->listeners.begin(),
-    scheduledTickEntry->listeners.end(),
-    listener
+        scheduledTickEntry->listeners.begin(),
+        scheduledTickEntry->listeners.end(),
+        listener
     ) == scheduledTickEntry->listeners.end();
 
     if (listenerNotAdded) {
@@ -183,18 +191,18 @@ void ClockBase::notifyNextTick() {
     // Remove the next tick so that notified listeners are able to schedule a new
     // tick event for t-0 ticks without interfering with the current next tick
     // that also happens at t-0.
-    ScheduledTickEntry* nextScheduledTickListeners = scheduledTicks.front();
+    ScheduledTickEntry* nextScheduledTick = scheduledTicks.front();
     scheduledTicks.pop_front();
 
     // Notify listeners that subscribed current tick
-    for (IClockListener* listener : nextScheduledTickListeners->listeners) {
-        listener->tick(this);
+    for (IClockListener* listener : nextScheduledTick->listeners) {
+        listener->tick(this, nextScheduledTick->scheduledTick.kind);
     }
 
     // Insert the next tick back into the datastructure. After this, it should be
     // possible that two ticks are scheduled for t-0. One currently processed by
     // the clock, another one scheduled.
-    scheduledTicks.push_front(nextScheduledTickListeners);
+    scheduledTicks.push_front(nextScheduledTick);
 }
 
 simtime_t ClockBase::getTime() {
@@ -209,12 +217,12 @@ simtime_t ClockBase::getClockRate() {
 }
 
 void ClockBase::subscribeTick(IClockListener* listener,
-        unsigned int idleTicks) {
+        unsigned idleTicks, short kind) {
     Enter_Method_Silent();
     if (!tick) {
         updateTime();
     }
-    addScheduledTickListener(idleTicks, listener);
+    addScheduledTickListener(idleTicks, kind, listener);
 }
 
 void ClockBase::unsubscribeTicks(IClockListener* listener) {

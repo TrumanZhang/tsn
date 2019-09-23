@@ -33,7 +33,7 @@ public:
     virtual ~IClockListener() {}
 
     /** Notifies a listener about a subscribed clock tick. */
-    virtual void tick(IClock *clock) = 0;
+    virtual void tick(IClock *clock, short kind) = 0;
 };
 
 } // namespace nesting

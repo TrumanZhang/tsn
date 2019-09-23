@@ -99,7 +99,7 @@ public:
     virtual ~GateController();
 
     /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 
     /** Calculate the maximum bit size that can be transmitted until the next gate state change.
      *  Returns an unsigned integer value.

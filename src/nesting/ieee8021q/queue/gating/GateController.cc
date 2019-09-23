@@ -104,7 +104,7 @@ void GateController::handleMessage(cMessage *msg) {
     throw cRuntimeError("cannot handle messages");
 }
 
-void GateController::tick(IClock *clock) {
+void GateController::tick(IClock *clock, short kind) {
     Enter_Method("tick()");
 
 // When the current schedule index is 0, this means that the current

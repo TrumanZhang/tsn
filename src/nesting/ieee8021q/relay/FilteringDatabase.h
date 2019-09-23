@@ -80,7 +80,7 @@ public:
     virtual ~FilteringDatabase();
 
     /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 
     virtual void loadDatabase(cXMLElement* fdb, simtime_t cycle);
 
