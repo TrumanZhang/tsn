@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "HostScheduleBuilder.h"
+#include "nesting/common/schedule/HostScheduleBuilder.h"
 
 namespace nesting {
 

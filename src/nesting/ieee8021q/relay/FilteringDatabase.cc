@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "FilteringDatabase.h"
+#include "nesting/ieee8021q/relay/FilteringDatabase.h"
 
 #include "inet/common/ModuleAccess.h"
 

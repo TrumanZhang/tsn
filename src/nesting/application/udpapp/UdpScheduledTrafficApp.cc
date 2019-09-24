@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "UdpScheduledTrafficApp.h"
+#include "nesting/application/udpapp/UdpScheduledTrafficApp.h"
 
 namespace nesting {
 

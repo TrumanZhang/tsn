@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ScheduleSwap.h"
+#include "nesting/ieee8021q/queue/gating/ScheduleSwap.h"
 
 namespace nesting {
 
