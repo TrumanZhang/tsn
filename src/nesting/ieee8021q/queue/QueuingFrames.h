@@ -23,8 +23,8 @@
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/vlan/VlanTag_m.h"
 
-#include "../Ieee8021q.h"
-#include "../../linklayer/vlan/VlanTagType.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
+#include "nesting/linklayer/vlan/VlanTagType.h"
 
 using namespace omnetpp;
 

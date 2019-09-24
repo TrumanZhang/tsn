@@ -17,7 +17,8 @@
 #define NESTING_IEEE8021Q_QUEUE_FRAMEPREEMPTION_PREEMPTEDFRAME_H_
 
 #include <omnetpp.h>
-#include "PreemptedFrame_m.h"
+
+#include "nesting/linklayer/framePreemption/PreemptedFrame_m.h"
 
 using namespace omnetpp;
 namespace nesting {

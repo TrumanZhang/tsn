@@ -15,6 +15,10 @@
 
 #include "EtherTrafGenQueue.h"
 
+#include <cstdio>
+#include <iostream>
+#include <string>
+
 #include <omnetpp/ccomponent.h>
 #include <omnetpp/cexception.h>
 #include <omnetpp/clog.h>
@@ -27,9 +31,6 @@
 #include <omnetpp/cwatch.h>
 #include <omnetpp/regmacros.h>
 #include <omnetpp/simutil.h>
-#include <cstdio>
-#include <iostream>
-#include <string>
 
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 

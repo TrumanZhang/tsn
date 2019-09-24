@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../queue/TransmissionSelection.h"
+#include "nesting/ieee8021q/queue/TransmissionSelection.h"
 
 namespace nesting {
 

@@ -22,7 +22,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/networklayer/common/L3Address.h"
 
-#include "../../common/schedule/Schedule.h"
+#include "nesting/common/schedule/Schedule.h"
 
 using namespace omnetpp;
 

@@ -25,10 +25,10 @@
 #include <map>
 #endif
 
-#include "Schedule.h"
-#include "IScheduleManagerListener.h"
-#include "../../ieee8021q/clock/IClock.h"
-#include "../../ieee8021q/clock/IClockListener.h"
+#include "nesting/common/schedule/Schedule.h"
+#include "nesting/common/schedule/IScheduleManagerListener.h"
+#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/ieee8021q/clock/IClockListener.h"
 
 namespace nesting {
 

@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 
-#include "ScheduleManager.h"
+#include "nesting/common/schedule/ScheduleManager.h"
 
 namespace nesting {
 

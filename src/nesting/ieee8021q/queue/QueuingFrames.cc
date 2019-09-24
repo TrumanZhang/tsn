@@ -15,10 +15,10 @@
 
 #include "QueuingFrames.h"
 
+#include <string>
+
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-
-#include <string>
 
 namespace nesting {
 

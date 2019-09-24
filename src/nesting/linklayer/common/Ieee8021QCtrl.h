@@ -13,7 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "VLANTagDeprecated_m.h"
+#include "nesting/linklayer/common/VLANTagDeprecated_m.h"
+
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace nesting {
