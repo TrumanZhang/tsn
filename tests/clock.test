@@ -100,14 +100,21 @@ void TestClock::tick(IClock *clock, short kind)
 
     switch (tickCount) {
     case 0:
-        assert(kind == 0);
+        if (kind != 0) {
+        	throw cRuntimeError("Expected tick #1 to be of kind 0");
+        }
         break;
     case 1:
-        assert(kind == 0);
+        if (kind != 0) {
+        	throw cRuntimeError("Expected tick #2 to be of kind 0");
+        }
         break;
     case 2:
-        assert(kind == 0);
+        if (kind != 0) {
+        	throw cRuntimeError("Expected tick #3 to be of kind 0");
+        }
         /*
+        TODO update test case
         clock->unsubscribeTicks(this);
         clock->subscribeTick(this, 4, 5);
         clock->subscribeTick(this, 4, 4);
@@ -115,16 +122,19 @@ void TestClock::tick(IClock *clock, short kind)
         */
         break;
     case 3:
-        assert(kind == 0);
-        //assert(kind == 3);
+        if (kind != 0) {
+        	throw cRuntimeError("Expected tick #4 to be of kind 0");
+        }
         break;
     case 4:
-        assert(kind == 1);
-        //assert(kind == 4);
+        if (kind != 1) {
+        	throw cRuntimeError("Expected tick #5 to be of kind 1");
+        }
         break;
     case 5:
-        assert(kind == 2);
-        //assert(kind == 5);
+	    if (kind != 2) {
+        	throw cRuntimeError("Expected tick #6 to be of kind 2!");
+        }
         break;
     }
 
