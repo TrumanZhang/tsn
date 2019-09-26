@@ -71,4 +71,10 @@ void UdpScheduledTrafficApp::socketClosed(inet::UdpSocket *socket)
     // TODO
 }
 
+Schedule<UdpScheduledTrafficApp::SendEvent> UdpScheduledTrafficApp::buildSchedule(cXMLElement *xml)
+{
+    // TODO
+    return Schedule<SendEvent>();
+}
+
 } //namespace
