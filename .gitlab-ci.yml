@@ -13,9 +13,9 @@ build:
     script:
         - make INET=$INET makefiles
         - make INET=$INET MODE=debug -j$(grep -c proc /proc/cpuinfo)
-	- make INET=$INET MODE=release -j$(grep -c proc /proc/cpuinfo)
+        - make INET=$INET MODE=release -j$(grep -c proc /proc/cpuinfo)
         - test -f src/libnesting.so
-	- test -f src/libnesting_dbg.so
+        - test -f src/libnesting_dbg.so
     artifacts:
         paths:
             - src/libnesting.so
