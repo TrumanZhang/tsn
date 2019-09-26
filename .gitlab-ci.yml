@@ -35,6 +35,6 @@ test_dbg:
         - MODE=debug bash $NESTING/tests/test.sh
     artifacts:
         paths:
-            - work
+            - work_dbg
 
 
