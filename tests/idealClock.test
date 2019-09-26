@@ -28,6 +28,5 @@ network = Test
 sim-time-limit = 1ms
 record-eventlog = true
 check-signals = false
-debug-on-errors = true
 
 %exitcode: 0
