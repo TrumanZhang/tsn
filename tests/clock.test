@@ -87,7 +87,9 @@ void TestClock::initialize()
 void TestClock::finish()
 {
     EV_INFO << "tickCount=" << tickCount << std::endl;
-    assert(tickCount == 6);
+    if (tickCount != 6) {
+    	throw cRuntimeError("Expected 6 ticks to be scheduled!");
+    }
 }
 
 void TestClock::tick(IClock *clock, short kind)
