@@ -47,6 +47,5 @@ cppcheck:
     artifacts:
         reports:
             codequality: cppcheck-report.json
-    only:
-        - merge_requests
+
 
