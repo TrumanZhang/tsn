@@ -42,7 +42,7 @@ test_dbg:
 code_quality:
     stage: analysis
     script:
-        - 'cppcheck --max-configs=30 --suppress="*:*omnetpp\*" --suppress="*:*inet\*" --suppress="*:*_m.cc" --suppress="*:*_m.h" --enable=all -I $OMNETPP/include -I $INET/src -I $NESTING/ $NESTING/src --template=''{"type": "issue","description": "{message}","check_name": "{id}","location": {"path": "{file}","lines": {"begin": {line}}}, "severity": "{severity}", "fingerprint": "{file}:{line}:{column}"},'' 2> cppcheck-report.json'
+        - 'cppcheck --max-configs=30 --suppress="*:*omnetpp\*" --suppress="*:*inet\*" --suppress="*:*_m.cc" --suppress="*:*_m.h" --enable=all -I $OMNETPP/include -I $INET/src -I $NESTING/ $NESTING/src --template=''{"type": "issue","description": "{message}","check_name": "{id}","location": {"path": "{file}","lines": {"begin": {line}}}, "severity": "{severity}", "fingerprint": "{file}:{line}"},'' 2> cppcheck-report.json'
         - (echo "["; cat cppcheck-report.json; echo "]") > gl-code-quality-report.json
     artifacts:
         reports:
