@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "VlanEtherTrafGenSched.h"
+#include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
 
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
@@ -134,7 +134,7 @@ void VlanEtherTrafGenSched::receivePacket(Packet *msg) {
     delete msg;
 }
 
-void VlanEtherTrafGenSched::tick(IClock *clock) {
+void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
     Enter_Method("tick()");
     // When the current schedule index is 0, this means that the current
     // schedule's cycle was not started or was just finished. Therefore in this

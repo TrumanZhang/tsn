@@ -2,9 +2,11 @@ image: niessan/omnetpp-inet:latest
 
 stages:
     - build
+    - analysis
     - test
 
 before_script:
+    - export OMNETPP=/root/omnetpp
     - export NESTING=$(pwd)
     - export INET=/root/models/inet
 
@@ -12,17 +14,37 @@ build:
     stage: build
     script:
         - make INET=$INET makefiles
-        - make INET=$INET -j$(grep -c proc /proc/cpuinfo)
+        - make INET=$INET MODE=debug -j$(grep -c proc /proc/cpuinfo)
+        - make INET=$INET MODE=release -j$(grep -c proc /proc/cpuinfo)
         - test -f src/libnesting.so
+        - test -f src/libnesting_dbg.so
     artifacts:
         paths:
             - src/libnesting.so
             - out/
 
-test:
+test_release:
     stage: test
     script:
         - bash $NESTING/tests/test.sh
     artifacts:
         paths:
             - work
+
+test_dbg:
+    stage: test
+    script:
+        - MODE=debug bash $NESTING/tests/test.sh
+    artifacts:
+        paths:
+            - work_dbg
+
+cppcheck:
+    stage: analysis
+    script:
+        - 'cppcheck --suppress="*:*omnetpp\*" --suppress="*:*inet\*" --suppress="*:*_m.cc" --suppress="*:*_m.h" --enable=all -I $OMNETPP/include -I $INET/src -I $NESTING/ $NESTING/src --template=''{"type": "issue","description": "{message}","check_name": "{id}","location": {"path": "{file}","lines": {"begin": {line}}}, "severity": "{severity}", "fingerprint": "TODO"},'' 2> cppcheck-report.json.tmp'
+        - (echo "{"; cat cppcheck-report.json.tmp; echo "}") > cppcheck-report.json
+    artifacts:
+        reports:
+            codequality: cppcheck-report.json
+

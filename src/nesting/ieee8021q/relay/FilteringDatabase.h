@@ -23,7 +23,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
-#include "../clock/IClockListener.h"
+#include "nesting/ieee8021q/clock/IClockListener.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -80,7 +80,7 @@ public:
     virtual ~FilteringDatabase();
 
     /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 
     virtual void loadDatabase(cXMLElement* fdb, simtime_t cycle);
 

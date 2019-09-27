@@ -29,7 +29,7 @@ cleanall: checkmakefiles
 #   '--meta:use-exported-libs'
 # for correct resolution of INET dependencies (cf. '.oppbuildspec'):
 #
-MAKEMAKE_OPTIONS = -f --deep -o nesting -O out -KINET_PROJ=$(INET) -DINET_IMPORT -I'$$(INET_PROJ)/src' -L'$$(INET_PROJ)/src' -l'INET$$(D)'
+MAKEMAKE_OPTIONS = -f --deep -o nesting -O out -KINET_PROJ=$(INET) -DINET_IMPORT -I'$$(INET_PROJ)/src' -L'$$(INET_PROJ)/src' -l'INET$$(D)' -I.
 #
 ###
 

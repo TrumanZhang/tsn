@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "IClock.h"
+#include "nesting/ieee8021q/clock/IClock.h"
 
 using namespace omnetpp;
 
@@ -50,6 +50,12 @@ public:
 
         /** Global point in time when the associated ticks will be elapsed. */
         simtime_t timestamp;
+
+        /**
+         * Used defined value that can be used to e.g. identify the actuator
+         * of the event.
+         */
+        short kind = 0;
     };
 
     /**
@@ -136,7 +142,7 @@ protected:
      * @param idleTicks Number of ticks to elapse until the scheduled event.
      * @param listener The listener to subscribe to the tick event.
      */
-    virtual void addScheduledTickListener(unsigned int idleTicks,
+    virtual void addScheduledTickListener(unsigned idleTicks, short kind,
             IClockListener* listener);
 
     /**
@@ -203,7 +209,7 @@ protected:
      * @result          The global time-stamp when the given number of ticks
      *                  will be elapsed.
      */
-    virtual simtime_t scheduleTick(unsigned int idleTicks) = 0;
+    virtual simtime_t scheduleTick(unsigned idleTicks) = 0;
 
 public:
     virtual ~ClockBase();
@@ -225,8 +231,8 @@ public:
      * @param idleTicks The number of ticks to elapse until the listener gets
      *                  notified.
      */
-    virtual void subscribeTick(IClockListener* listener, unsigned int idleTicks)
-            override;
+    virtual void subscribeTick(IClockListener* listener, unsigned idleTicks,
+            short kind = 0) override;
 
     /**
      * Unsubscribes a listener from all ticks he is subscribed to.

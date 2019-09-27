@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "StrictPriority.h"
+#include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/StrictPriority.h"
 
 namespace nesting {
 

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ForwardingRelayUnit.h"
+#include "nesting/ieee8021q/relay/ForwardingRelayUnit.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"

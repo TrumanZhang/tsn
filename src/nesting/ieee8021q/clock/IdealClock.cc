@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "IdealClock.h"
+#include "nesting/ieee8021q/clock/IdealClock.h"
 
 namespace nesting {
 
@@ -27,7 +27,7 @@ ClockBase::ScheduledTick IdealClock::lastTick() {
     return result;
 }
 
-simtime_t IdealClock::scheduleTick(unsigned int idleTicks) {
+simtime_t IdealClock::scheduleTick(unsigned idleTicks) {
     return lastGlobalTickTimestamp + clockRate * idleTicks;
 }
 

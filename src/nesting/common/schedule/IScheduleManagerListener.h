@@ -13,32 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __MAIN_IDEALCLOCK_H_
-#define __MAIN_IDEALCLOCK_H_
+#ifndef NESTING_COMMON_SCHEDULE_ISCHEDULEMANAGERLISTENER_H_
+#define NESTING_COMMON_SCHEDULE_ISCHEDULEMANAGERLISTENER_H_
 
 #include <omnetpp.h>
-#include <tuple>
 
-#include "nesting/ieee8021q/clock/ClockBase.h"
-
-using namespace omnetpp;
+#include "nesting/common/schedule/ScheduleManager.h"
 
 namespace nesting {
 
-/**
- * See the NED file for a detailed description
- */
-class IdealClock: public ClockBase {
-protected:
-    /** @copydoc ScheduleTick ClockBase::lastTick() */
-    virtual ScheduledTick lastTick() override;
+class ScheduleManagerState;
 
-    /** @copydoc simtime_t ClockBase::scheduleTick(unsigned int) */
-    virtual simtime_t scheduleTick(unsigned idleTicks) override;
+template<typename T>
+class IScheduleManagerListener {
 public:
-    virtual ~IdealClock() {};
+    virtual ~IScheduleManagerListener();
+
+    virtual void onExecuteOperation(T operation);
+
+    virtual void onCycleTimerStateChanged(CycleTimerState cycleTimerState);
+
+    virtual void onListExecuteStateChanged(ListExecuteState listExecuteState);
+
+    virtual void onListConfigStateChanged(ListConfigState listConfigState);
 };
 
-} // namespace nesting
+} /* namespace nesting */
 
-#endif
+#endif /* NESTING_COMMON_SCHEDULE_ISCHEDULEMANAGERLISTENER_H_ */

@@ -16,7 +16,7 @@
 #ifndef NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_
 #define NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_
 
-#include "IClock.h"
+#include "nesting/ieee8021q/clock/IClock.h"
 
 namespace nesting {
 
@@ -30,12 +30,10 @@ class IClock;
  */
 class IClockListener {
 public:
-    virtual ~IClockListener() {
-    }
-    ;
+    virtual ~IClockListener() {}
 
     /** Notifies a listener about a subscribed clock tick. */
-    virtual void tick(IClock *clock) = 0;
+    virtual void tick(IClock *clock, short kind) = 0;
 };
 
 } // namespace nesting

@@ -1,0 +1,4 @@
+<schedule baseTime="1s" cycleTime="400us">
+	<entry pcp="7" vid="1" destAddr="141.58.219.100" destPort="2000" payloadSize="2020B" maxPayloadFragmentSize="1470B" timeInterval="50us"/>
+	<entry pcp="7" vid="1" destAddr="141.58.219.100" destPort="2000" payloadSize="1800B" maxPayloadFragmentSize="1470B" timeInterval="150us"/>
+</schedule>

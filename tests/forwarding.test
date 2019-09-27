@@ -3,7 +3,7 @@ Tests the basic forwarding capabilities of the NESTING switch
 
 %file: package.ned
 package @TESTNAME@;
-@namespace(@TESTNAME@);
+@namespace(nesting);
 
 %file: test.ned
 package @TESTNAME@;
@@ -52,9 +52,7 @@ network Test
 network = Test
 sim-time-limit = 1ms
 record-eventlog = true
-check-signals = false
 debug-on-errors = true
-#ned-path = .;../../src
 
 **.h1.eth.address = "00-00-00-00-00-01"
 **.h2.eth.address = "00-00-00-00-00-02"
