@@ -1,8 +1,8 @@
 image: niessan/omnetpp-inet:latest
 
 stages:
-    - build
     - analysis
+    - build
     - test
 
 before_script:
@@ -47,4 +47,6 @@ cppcheck:
     artifacts:
         reports:
             codequality: cppcheck-report.json
+    only:
+        - merge_requests
 
