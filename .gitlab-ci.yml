@@ -26,7 +26,7 @@ build:
 test_release:
     stage: test
     script:
-        - bash $NESTING/tests/test.sh
+        - bash $NESTING/tests/run_tests.sh
     artifacts:
         paths:
             - work
