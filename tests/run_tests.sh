@@ -29,7 +29,3 @@ echo "=== Running tests ==="
 echo
 opp_test run -v -w $NESTING/work$D -p $NESTING/work/nesting $NESTING/tests/*.test \
     -a "-n $NESTING/work:$NESTING/src:$INET/src"
-
-#cd $NESTING/work/forwarding
-#ls -l $NESTING/work/nesting
-#$NESTING/work/nesting -u Cmdenv -n $NESTING/work:$NESTING/src:$INET/src omnetpp.ini _defaults.ini
