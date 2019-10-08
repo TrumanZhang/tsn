@@ -45,7 +45,7 @@ for line in output.stderr.split('\n'):
     if line != '':
         issue = json.loads(line)
         if issue['severity'] == 'information':
-            print(issue['description'], file=sys.stderr)
+            print(issue, file=sys.stderr)
             continue
         else:
             # Use system independent relative paths to source files
