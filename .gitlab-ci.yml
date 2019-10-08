@@ -26,7 +26,7 @@ build:
 test_release:
     stage: test
     script:
-        - bash $NESTING/tests/test.sh
+        - bash $NESTING/tests/run_tests.sh
     artifacts:
         paths:
             - work
@@ -34,7 +34,7 @@ test_release:
 test_dbg:
     stage: test
     script:
-        - MODE=debug bash $NESTING/tests/test.sh
+        - MODE=debug bash $NESTING/tests/run_tests.sh
     artifacts:
         paths:
             - work_dbg
@@ -42,10 +42,9 @@ test_dbg:
 code_quality:
     stage: analysis
     script:
-        - 'cppcheck --suppress="*:*omnetpp\*" --suppress="*:*inet\*" --suppress="*:*_m.cc" --suppress="*:*_m.h" --enable=all -I $OMNETPP/include -I $INET/src -I $NESTING/ $NESTING/src --template=''{"type": "issue","description": "{message}","check_name": "{id}","location": {"path": "{file}","lines": {"begin": {line}}}, "severity": "{severity}", "fingerprint": "{file}:{line}:{column}"},'' 2> cppcheck-report.json'
-        - (echo "{"; cat cppcheck-report.json; echo "}") > gl-code-quality-report.json
+        - python3 $NESTING/tests/run_cppcheck.py gl-code-quality-report.json
     artifacts:
         reports:
             codequality: gl-code-quality-report.json
-
-
+        paths:
+            - gl-code-quality-report.json
