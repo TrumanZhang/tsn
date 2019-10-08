@@ -21,8 +21,8 @@ cppcheck_report_path = "cppcheck_report.json" if len(sys.argv) <= 1 else str(sys
 run_cppcheck_cmd = [
     'cppcheck',
     '--std=c++11',
-    '--suppress=*:*omnetpp\\*',
-    '--suppress=*:*inet\\*',
+    '--suppress=*:*omnetpp*',
+    '--suppress=*:*inet*',
     '--suppress=*:*_m.cc',
     '--suppress=*:*_m.h',
     '--enable=all',
