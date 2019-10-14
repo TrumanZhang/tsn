@@ -38,7 +38,7 @@ test_dbg:
         - MODE=debug bash $NESTING/tests/run_tests.sh
     artifacts:
         paths:
-            - work_dbg
+            - work
 
 code_quality:
     stage: analysis

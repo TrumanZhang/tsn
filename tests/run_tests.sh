@@ -22,7 +22,7 @@ opp_test gen -v -w $NESTING/work $NESTING/tests/*.test || exit 1
 echo
 echo "=== Building tests ==="
 echo
-(cd $NESTING/work; opp_makemake -f --deep -lnesting$D -L$NESTING/src -lINET -L$INET/src -I$NESTING/src -I$INET/src -o nesting; make) || exit 1
+(cd $NESTING/work; opp_makemake -f --deep -lnesting$D -L$NESTING/src -lINET$D -L$INET/src -I$NESTING/src -I$INET/src -o nesting; make) || exit 1
 
 echo
 echo "=== Running tests ==="
