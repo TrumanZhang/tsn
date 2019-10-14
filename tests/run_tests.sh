@@ -6,11 +6,11 @@ then
     exit 1 
 fi
 
-if [ -z "$MODE" ] || [ "$MODE" = "release" ]
+if [ "$MODE" = "debug" ]
 then
-    D=""
-else
     D="_dbg"
+else
+    D=""
 fi
 
 echo
@@ -27,5 +27,5 @@ echo
 echo
 echo "=== Running tests ==="
 echo
-opp_test run -v -w $NESTING/work$D -p $NESTING/work/nesting $NESTING/tests/*.test \
+opp_test run -v -w $NESTING/work -p $NESTING/work/nesting$D $NESTING/tests/*.test \
     -a "-n $NESTING/work:$NESTING/src:$INET/src"
