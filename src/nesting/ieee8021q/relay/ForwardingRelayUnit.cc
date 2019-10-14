@@ -64,13 +64,13 @@ void ForwardingRelayUnit::handleMessage(cMessage *msg) {
 }
 
 void ForwardingRelayUnit::processBroadcast(Packet* packet, int arrivalInterfaceId) {
-    // Flood packets everywhere except of ingress port
-    // TODO this is just a temporary solution not sure how correct that is
-    for (int portId = 0; portId < gateSize("out"); portId++) {
-        cGate *outputGate = gate("out", portId);
-        if (!packet->arrivedOn("in", portId)) {
+    for (int interfacePos = 0; interfacePos < ifTable->getNumInterfaces(); interfacePos++) {
+        InterfaceEntry* destInterface = ifTable->getInterface(interfacePos);
+        int destInterfaceId = destInterface->getInterfaceId();
+        if (destInterfaceId != arrivalInterfaceId) {
             Packet* dupPacket = packet->dup();
-            send(dupPacket, outputGate);
+            dupPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterfaceId);
+            send(dupPacket, gate("ifOut"));
         }
     }
     delete packet;
