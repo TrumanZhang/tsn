@@ -1,0 +1,115 @@
+%description:
+Tests the IdealOscillator submodule
+
+%file: package.ned
+package @TESTNAME@;
+@namespace(nesting);
+
+%file: test.ned
+package @TESTNAME@;
+
+import nesting.common.time.IOscillator;
+
+network Test
+{
+    @display("bgb=280,213");
+    submodules:
+        oscillator: <"IdealOscillator"> like IOscillator {
+            @display("p=87,103");
+        }
+        testIdealOscillator: <"TestIdealOscillator_DefaultBehaviour"> like TestIdealOscillator {
+            @display("p=182.70667,102.24");
+        }
+}
+
+%file: TestOscillator.ned
+package @TESTNAME@;
+
+moduleinterface TestIdealOscillator
+{
+}
+
+%file: TestIdealOscillator_DefaultBehaviour.ned
+package @TESTNAME@;
+
+simple TestIdealOscillator_DefaultBehaviour like TestIdealOscillator
+{
+    parameters:
+        string oscillatorModule = default("^.oscillator");
+}
+
+
+%file: TestIdealOscillator_DefaultBehaviour.h
+#ifndef __TestIdealOscillator_DefaultBehaviour_H_
+#define __TestIdealOscillator_DefaultBehaviour_H_
+
+#include <omnetpp.h>
+
+#include <iostream>
+
+#include "nesting/common/time/IOscillator.h"
+#include "nesting/common/time/IOscillatorListener.h"
+
+using namespace omnetpp;
+
+namespace nesting {
+
+class TestIdealOscillator_DefaultBehaviour : public cSimpleModule, public IOscillatorListener
+{
+protected:
+    IOscillator* oscillator;
+    unsigned tickCount = 0;
+protected:
+    virtual void initialize() override;
+    virtual void finish() override;
+public:
+    virtual void onTick(IOscillator* oscillator, uint64_t kind) override;
+};
+
+} // namespace nesting
+
+#endif
+
+%file: TestIdealOscillator_DefaultBehaviour.cc
+#include "TestIdealOscillator_DefaultBehaviour.h"
+
+#include "inet/common/ModuleAccess.h"
+
+namespace nesting {
+
+Define_Module(TestIdealOscillator_DefaultBehaviour);
+
+void TestIdealOscillator_DefaultBehaviour::initialize()
+{
+    oscillator = check_and_cast<IOscillator*>(getModuleByPath(par("oscillatorModule")));
+    oscillator->subscribeTick(this, 0);
+}
+
+void TestIdealOscillator_DefaultBehaviour::finish()
+{
+	if (tickCount != 10) {
+		throw cRuntimeError("Expected 10 ticks to be scheduled!");
+	}
+}
+
+void TestIdealOscillator_DefaultBehaviour::onTick(IOscillator* oscillator, uint64_t kind)
+{
+    Enter_Method("tick");
+    
+    tickCount++;
+    
+    if (kind < 10) {
+    	oscillator->subscribeTick(this, 0, ++kind);	
+  	}
+}
+
+} // namespace nesting
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 1ms
+record-eventlog = true
+debug-on-errors = true
+
+%exitcode: 0
