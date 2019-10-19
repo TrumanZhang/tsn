@@ -1,0 +1,110 @@
+%description:
+Tests the IdealOscillator submodule
+
+%file: package.ned
+package @TESTNAME@;
+@namespace(@TESTNAME@);
+
+%file: test.ned
+package @TESTNAME@;
+
+import nesting.common.time.IdealOscillator;
+
+network Test
+{
+    @display("bgb=280,213");
+    submodules:
+        oscillator: IdealOscillator {
+            @display("p=87,103");
+        }
+        testIdealOscillator: TestIdealOscillator_AddTicksFront {
+            @display("p=182.70667,102.24");
+        }
+}
+
+%file: TestIdealOscillator_AddTicksFront.ned
+package @TESTNAME@;
+
+simple TestIdealOscillator_AddTicksFront
+{
+    parameters:
+        string oscillatorModule = default("^.oscillator");
+}
+
+
+%file: TestIdealOscillator_AddTicksFront.h
+#ifndef __TestIdealOscillator_AddTicksFront_H_
+#define __TestIdealOscillator_AddTicksFront_H_
+
+#include <omnetpp.h>
+
+#include "nesting/common/time/IOscillator.h"
+#include "nesting/common/time/IOscillatorListener.h"
+#include "nesting/common/time/IdealOscillator.h"
+
+using namespace omnetpp;
+using namespace nesting;
+
+namespace @TESTNAME@ {
+
+class TestIdealOscillator_AddTicksFront : public cSimpleModule, public IOscillatorListener
+{
+protected:
+    IdealOscillator* oscillator;
+    unsigned tickCount = 0;
+protected:
+    virtual void initialize() override;
+    virtual void finish() override;
+public:
+    virtual void onTick(IOscillator* oscillator, uint64_t kind) override;
+};
+
+} // namespace @TESTNAME@
+
+#endif
+
+%file: TestIdealOscillator_AddTicksFront.cc
+#include "TestIdealOscillator_AddTicksFront.h"
+
+#include "inet/common/ModuleAccess.h"
+
+#include <iostream>
+
+namespace @TESTNAME@ {
+
+Define_Module(TestIdealOscillator_AddTicksFront);
+
+void TestIdealOscillator_AddTicksFront::initialize()
+{
+    oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
+    
+    for (int idleTicks = 9; idleTicks >= 0; idleTicks--) {
+    	oscillator->subscribeTick(this, idleTicks, idleTicks);
+    }
+}
+
+void TestIdealOscillator_AddTicksFront::finish()
+{
+	if (tickCount != 10) {
+		throw cRuntimeError("Expected 10 ticks to be scheduled!");
+	}
+}
+
+void TestIdealOscillator_AddTicksFront::onTick(IOscillator* oscillator, uint64_t kind)
+{
+    Enter_Method("tick");
+    EV_INFO << "Tick #" << this->oscillator->getCurrentTick() << " of kind " << kind << std::endl;
+    
+    tickCount++;
+    EV_INFO << "Local tick count: " << tickCount << std::endl;
+}
+
+} // namespace @TESTNAME@
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 1ms
+record-eventlog = true
+
+%exitcode: 0
