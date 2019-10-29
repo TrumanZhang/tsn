@@ -1,9 +1,9 @@
 image: niessan/omnetpp-inet:latest
 
 stages:
-    - analysis
     - build
     - test
+    - analysis
 
 before_script:
     - export OMNETPP=/root/omnetpp
