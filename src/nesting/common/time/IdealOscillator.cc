@@ -92,7 +92,7 @@ uint64_t IdealOscillator::getCurrentTick()
     if (tickEventNow) {
         currentTick = lastTick;
     } else {
-        uint64_t elapsedTicks = std::floor(simTime() / timeOfLastTick);
+        uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / tickRate);
         currentTick = lastTick + elapsedTicks;
     }
 

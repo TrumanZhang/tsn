@@ -52,13 +52,13 @@ protected:
 public:
     IdealOscillator();
     virtual ~IdealOscillator();
+    virtual void subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) override;
+    virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) override;
+    virtual uint64_t getCurrentTick();
 protected:
     virtual void initialize() override;
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) override;
-    virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) override;
-    virtual uint64_t getCurrentTick();
 };
 
 } //namespace
