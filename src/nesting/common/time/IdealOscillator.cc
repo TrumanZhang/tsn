@@ -104,6 +104,8 @@ uint64_t IdealOscillator::getCurrentTick()
 
 void IdealOscillator::subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind)
 {
+    Enter_Method_Silent();
+
     // Calculate current tick count
     uint64_t currentTick = getCurrentTick();
 
