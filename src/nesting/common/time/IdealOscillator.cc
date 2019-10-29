@@ -27,6 +27,7 @@ IdealOscillator::IdealOscillator()
     , lastTick(0)
     , timeOfLastTick(SimTime::ZERO)
     , tickEventNow(false)
+    , tickMessage(cMessage("TickMessage"))
 {
 }
 
@@ -128,7 +129,7 @@ void IdealOscillator::subscribeTick(IOscillatorListener* listener, uint64_t idle
         if (idleTicks == 0) {
             scheduleAt(simTime(), &tickMessage);
         } else {
-            scheduleAt(currentTick + tickRate * idleTicks, &tickMessage);
+            scheduleAt((currentTick - lastTick + idleTicks) * tickRate, &tickMessage);
         }
     }
 

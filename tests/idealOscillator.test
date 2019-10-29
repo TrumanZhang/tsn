@@ -98,8 +98,8 @@ void TestIdealOscillator_DefaultBehaviour::onTick(IOscillator* oscillator, uint6
     
     tickCount++;
     
-    if (kind < 10) {
-    	oscillator->subscribeTick(this, 0, ++kind);	
+    if (tickCount < 10) {
+    	oscillator->subscribeTick(this, 1, kind + 1);	
   	}
 }
 
