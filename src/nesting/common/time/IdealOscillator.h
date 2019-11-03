@@ -20,6 +20,7 @@
 
 #include <list>
 #include <cstdint>
+#include <iostream>
 
 #include "nesting/common/time/IOscillator.h"
 
@@ -32,7 +33,7 @@ namespace nesting {
  */
 class IdealOscillator : public cSimpleModule, public IOscillator
 {
-protected:
+public:
     struct TickEvent {
         TickEvent(IOscillatorListener* listener, uint64_t tick, uint64_t kind);
         IOscillatorListener* listener;
@@ -41,6 +42,7 @@ protected:
         bool operator<(const TickEvent& tickEvent) const;
         bool operator==(const TickEvent& tickEvent) const;
         bool operator!=(const TickEvent& tickEvent) const;
+        friend std::ostream& operator<<(std::ostream& stream, const IdealOscillator::TickEvent* tickEvent);
     };
 protected:
     bool tickEventNow;
@@ -54,13 +56,22 @@ public:
     virtual ~IdealOscillator();
     virtual void subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) override;
     virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) override;
-    virtual uint64_t getCurrentTick();
+    virtual uint64_t getCurrentTick() const override;
 protected:
     virtual void initialize() override;
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
+
+    /**
+     * Should be called after update of event queue. (Re)schedules a
+     * self-message for the next event in the event-queue. This method is
+     * idempotent.
+     */
+    virtual void scheduleNextTick();
 };
 
-} //namespace
+std::ostream& operator<<(std::ostream& stream, const IdealOscillator::TickEvent* tickEvent);
 
+
+} //namespace
 #endif

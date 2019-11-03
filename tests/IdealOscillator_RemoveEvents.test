@@ -17,24 +17,24 @@ network Test
         oscillator: IdealOscillator {
             @display("p=87,103");
         }
-        testIdealOscillator: TestIdealOscillator_AddTicksEnd {
+        testIdealOscillator: TestIdealOscillator {
             @display("p=182.70667,102.24");
         }
 }
 
-%file: TestIdealOscillator_AddTicksEnd.ned
+%file: TestIdealOscillator.ned
 package @TESTNAME@;
 
-simple TestIdealOscillator_AddTicksEnd
+simple TestIdealOscillator
 {
     parameters:
         string oscillatorModule = default("^.oscillator");
 }
 
 
-%file: TestIdealOscillator_AddTicksEnd.h
-#ifndef __TestIdealOscillator_AddTicksEnd_H_
-#define __TestIdealOscillator_AddTicksEnd_H_
+%file: TestIdealOscillator.h
+#ifndef __@TESTNAME@_TestIdealOscillator_H_
+#define __@TESTNAME@_TestIdealOscillator_H_
 
 #include <omnetpp.h>
 
@@ -42,19 +42,20 @@ simple TestIdealOscillator_AddTicksEnd
 #include "nesting/common/time/IOscillatorListener.h"
 #include "nesting/common/time/IdealOscillator.h"
 
+#include <vector>
+
 using namespace omnetpp;
 using namespace nesting;
 
 namespace @TESTNAME@ {
 
-class TestIdealOscillator_AddTicksEnd : public cSimpleModule, public IOscillatorListener
+class TestIdealOscillator : public cSimpleModule, public IOscillatorListener
 {
 protected:
     IdealOscillator* oscillator;
-    unsigned tickCount = 0;
+    std::vector<uint64_t> primes = {2, 3, 5, 7, 11, 13, 17, 19}; // prime numbers <= 20
 protected:
     virtual void initialize() override;
-    virtual void finish() override;
 public:
     virtual void onTick(IOscillator* oscillator, uint64_t kind) override;
 };
@@ -63,42 +64,42 @@ public:
 
 #endif
 
-%file: TestIdealOscillator_AddTicksEnd.cc
-#include "TestIdealOscillator_AddTicksEnd.h"
+%file: TestIdealOscillator.cc
+#include "TestIdealOscillator.h"
 
 #include "inet/common/ModuleAccess.h"
 
 #include <iostream>
+#include <algorithm>
 
 namespace @TESTNAME@ {
 
-Define_Module(TestIdealOscillator_AddTicksEnd);
+Define_Module(TestIdealOscillator);
 
-void TestIdealOscillator_AddTicksEnd::initialize()
+void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
-    oscillator->subscribeTick(this, 0);
+    
+    for (int idleTicks = 2; idleTicks <= 20; idleTicks++) {
+    	oscillator->subscribeTick(this, idleTicks, idleTicks);
+    }
 }
 
-void TestIdealOscillator_AddTicksEnd::finish()
-{
-	if (tickCount != 10) {
-		throw cRuntimeError("Expected 10 ticks to be scheduled!");
-	}
-}
-
-void TestIdealOscillator_AddTicksEnd::onTick(IOscillator* oscillator, uint64_t kind)
+void TestIdealOscillator::onTick(IOscillator* oscillator, uint64_t kind)
 {
     Enter_Method("tick");
-    EV_INFO << "Tick #" << this->oscillator->getCurrentTick() << " of kind " << kind << std::endl;
     
-    tickCount++;
-    EV_INFO << "Local tick count: " << tickCount << std::endl;
+    // Tick should be prime number
+    uint64_t currentTick = oscillator->getCurrentTick();
     
-    kind++;
-    if (kind < 10) {
-    	oscillator->subscribeTick(this, 0, kind);	
-  	}
+    bool isPrime = std::find(primes.begin(), primes.end(), currentTick) != primes.end();
+    if (!isPrime) {
+    	throw cRuntimeError("Current tick should not have been scheduled!");
+    }
+    
+    for (uint64_t tick = currentTick; tick <= 20; tick += currentTick) {
+    	oscillator->unsubscribeTicks(this, tick);
+    }
 }
 
 } // namespace @TESTNAME@
@@ -107,6 +108,5 @@ void TestIdealOscillator_AddTicksEnd::onTick(IOscillator* oscillator, uint64_t k
 [General]
 network = Test
 sim-time-limit = 1ms
-record-eventlog = true
 
 %exitcode: 0

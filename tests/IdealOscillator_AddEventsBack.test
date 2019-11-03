@@ -78,7 +78,7 @@ void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
     
-    for (int idleTicks = 9; idleTicks >= 0; idleTicks--) {
+    for (int idleTicks = 0; idleTicks < 10; idleTicks++) {
     	oscillator->subscribeTick(this, idleTicks, idleTicks);
     }
 }

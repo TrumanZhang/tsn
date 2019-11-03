@@ -29,6 +29,8 @@ public:
     virtual void subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) = 0;
 
     virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) = 0;
+
+    virtual uint64_t getCurrentTick() const = 0;
 };
 
 } // namespace nesting
