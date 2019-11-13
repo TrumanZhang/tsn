@@ -28,50 +28,109 @@ using namespace omnetpp;
 
 namespace nesting {
 
-/**
- * TODO - Generated class
- */
+class IdealOscillatorTick;
+
+/** Implementation of an oscillator module without drift or jitter. */
 class IdealOscillator : public cSimpleModule, public IOscillator
 {
-public:
-    struct TickEvent {
-        TickEvent(IOscillatorListener* listener, uint64_t tick, uint64_t kind);
-        IOscillatorListener* listener;
-        uint64_t tick;
-        uint64_t kind;
-        bool operator<(const TickEvent& tickEvent) const;
-        bool operator==(const TickEvent& tickEvent) const;
-        bool operator!=(const TickEvent& tickEvent) const;
-        friend std::ostream& operator<<(std::ostream& stream, const IdealOscillator::TickEvent* tickEvent);
-    };
 protected:
+    /** Flag that is set to true mid tick event. */
     bool tickEventNow;
+
+    /** Tick rate of the oscillator module in seconds. */
     simtime_t tickRate;
+
+    /** Number/Index of last tick. */
     uint64_t lastTick;
+
+    /** Global simulation time when the last tick event was scheduled. */
     simtime_t timeOfLastTick;
-    std::list<TickEvent*> scheduledEvents; // TODO use shared ptr
+
+    /** Event queue that contains the scheduled tick events. */
+    std::list<IdealOscillatorTick*> scheduledEvents;
+
+    /** Used as self message to notify the component of the next tick event */
     cMessage tickMessage;
 public:
     IdealOscillator();
+
     virtual ~IdealOscillator();
-    virtual void subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) override;
+
+    /** @copydoc IOscillator::subscribeTick() */
+    virtual const IOscillatorTick* subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) override;
+
+    /** @copydoc IOscillator::unsubscribeTick() */
+    virtual void unsubscribeTick(IOscillatorListener* listener, const IOscillatorTick* tick) override;
+
+    /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*, uint64_t) */
     virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) override;
-    virtual uint64_t getCurrentTick() const override;
+
+    /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*) */
+    virtual void unsubscribeTicks(IOscillatorListener* listener) override;
+
+    /** @copydoc IOscillator::isScheduled() */
+    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tick) override;
+
+    /** @copydoc IOscillator::getFrequency() */
+    virtual double getFrequency() const override;
+
+    /** @copydoc IOscillator::setFrequency() */
+    virtual void setFrequency(double frequency) override;
+
+    /** @copydoc IOscillator::updateAndGetCurrentTick() */
+    virtual uint64_t updateAndGetCurrentTick() override;
 protected:
     virtual void initialize() override;
+
     virtual void finish() override;
+
     virtual void handleMessage(cMessage *msg) override;
 
     /**
-     * Should be called after update of event queue. (Re)schedules a
-     * self-message for the next event in the event-queue. This method is
-     * idempotent.
+     * Schedules a self-message so the component is notified about the next
+     * event in the event-queue. Reschedules an already existent self-message
+     * if required.
+     *
+     * This method should be called after every update to the event queue.
      */
     virtual void scheduleNextTick();
 };
 
-std::ostream& operator<<(std::ostream& stream, const IdealOscillator::TickEvent* tickEvent);
+class IdealOscillatorTick : public IOscillatorTick {
+protected:
+    IOscillatorListener* listener;
 
+    uint64_t tick;
 
-} //namespace
+    uint64_t kind;
+public:
+    IdealOscillatorTick();
+
+    virtual ~IdealOscillatorTick();
+
+    virtual IOscillatorListener* getListener() const;
+
+    virtual void setListener(IOscillatorListener* listener);
+
+    virtual uint64_t getTick() const override;
+
+    virtual void setTick(uint64_t tick);
+
+    virtual uint64_t getKind() const override;
+
+    virtual void setKind(uint64_t kind);
+
+    bool operator<(const IdealOscillatorTick& tickEvent) const;
+
+    bool operator==(const IdealOscillatorTick& tickEvent) const;
+
+    bool operator!=(const IdealOscillatorTick& tickEvent) const;
+
+    friend std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEvent);
+};
+
+std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEvent);
+
+} //namespace nesting
+
 #endif

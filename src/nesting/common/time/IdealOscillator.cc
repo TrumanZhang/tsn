@@ -65,21 +65,23 @@ void IdealOscillator::handleMessage(cMessage *msg)
         // Otherwise the self-message shouldn't exist.
         assert(!scheduledEvents.empty());
 
-        TickEvent* tickEvent = scheduledEvents.front();
+        IdealOscillatorTick* tickEvent = scheduledEvents.front();
         scheduledEvents.pop_front();
 
         // Invariant: Monotonic increasing tick count
-        assert(lastTick <= tickEvent->tick);
+        assert(lastTick <= tickEvent->getTick());
         assert(timeOfLastTick <= simTime());
+        // Invariant: (LastTick == CurrentTick) <=> (TimeOfLastTick == CurrentTime)
+        assert((lastTick != tickEvent->getTick()) == (timeOfLastTick == simTime()));
 
         // Update last tick
-        if (lastTick < tickEvent->tick) {
+        if (lastTick < tickEvent->getTick()) {
             timeOfLastTick = simTime();
-            lastTick = tickEvent->tick;
+            lastTick = tickEvent->getTick();
         }
 
         // Notify listener
-        tickEvent->listener->onTick(this, tickEvent->kind);
+        tickEvent->getListener()->onOscillatorTick(this, tickEvent);
 
         delete tickEvent;
 
@@ -90,32 +92,33 @@ void IdealOscillator::handleMessage(cMessage *msg)
 }
 
 void IdealOscillator::scheduleNextTick() {
-    // We don't have to do anything if there are no future events.
-    if (scheduledEvents.empty()) {
-        return;
-    }
-
     // Cancel current self message
     if (tickMessage.isScheduled()) {
         cancelEvent(&tickMessage);
     }
 
-    TickEvent* nextTickEvent = scheduledEvents.front();
+    // We don't have to do anything if there are no future events.
+    if (scheduledEvents.empty()) {
+        return;
+    }
 
-    uint64_t currentTick = getCurrentTick();
-    uint64_t nextScheduledTick = nextTickEvent->tick;
+    IdealOscillatorTick* nextTickEvent = scheduledEvents.front();
+
+    uint64_t currentTick = updateAndGetCurrentTick();
+    uint64_t nextScheduledTick = nextTickEvent->getTick();
+
     // Monotonic increasing ticks
     assert(nextScheduledTick >= currentTick);
 
     scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * tickRate, &tickMessage);
 }
 
-uint64_t IdealOscillator::getCurrentTick() const
+uint64_t IdealOscillator::updateAndGetCurrentTick()
 {
     Enter_Method_Silent();
 
     uint64_t currentTick;
-    if (tickEventNow) { // Check tick event flag to prevent numeric errors. Might not be necessary.
+    if (tickEventNow) { // Check tick event flag to prevent numeric errors. TODO: Might not be necessary.
         currentTick = lastTick;
     } else {
         uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / tickRate);
@@ -128,22 +131,25 @@ uint64_t IdealOscillator::getCurrentTick() const
     return currentTick;
 }
 
-void IdealOscillator::subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind)
+const IOscillatorTick* IdealOscillator::subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind)
 {
     Enter_Method_Silent();
 
     // Calculate current tick count
-    uint64_t currentTick = getCurrentTick();
+    uint64_t currentTick = updateAndGetCurrentTick();
 
     // Create new tick event.
-    TickEvent* tickEvent = new TickEvent(listener, currentTick + idleTicks, kind);
+    IdealOscillatorTick* tickEvent = new IdealOscillatorTick();
+    tickEvent->setListener(listener);
+    tickEvent->setTick(currentTick + idleTicks);
+    tickEvent->setKind(kind);
 
     // Find insert position of tick event with binary search.
     auto it = lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
             tickEvent,
-            [](TickEvent* left, TickEvent* right) { return *left < *right; });
+            [](IdealOscillatorTick* left, IdealOscillatorTick* right) { return *left < *right; });
 
     // Insert tick event in event queue.
     if (it == scheduledEvents.end() || **it != *tickEvent) {
@@ -151,6 +157,8 @@ void IdealOscillator::subscribeTick(IOscillatorListener* listener, uint64_t idle
     }
 
     scheduleNextTick();
+
+    return tickEvent;
 }
 
 void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener, uint64_t kind)
@@ -160,7 +168,7 @@ void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener, uint64_t k
     // Remove tick events
     bool removedFrontEvent = false;
     for (auto it = scheduledEvents.begin(); it != scheduledEvents.end(); ) {
-        if ((*it)->listener == listener && (*it)->kind == kind) {
+        if ((*it)->getListener() == listener && (*it)->getKind() == kind) {
             if (it == scheduledEvents.begin()) {
                 removedFrontEvent = true;
             }
@@ -170,30 +178,51 @@ void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener, uint64_t k
         }
     }
 
-    // If front event was removed and therefore the respective tick message
-    // was canceled we must schedule a new tick (self) message.
-    if (removedFrontEvent) {
-        cancelEvent(&tickMessage);
-        if (!scheduledEvents.empty()) {
-            TickEvent* nextTickEvent = scheduledEvents.front();
-            uint64_t currentTick = getCurrentTick();
-            if (currentTick == lastTick) {
-                scheduleAt(simTime(), &tickMessage);
-            } else {
-                scheduleAt((nextTickEvent->tick - currentTick) * tickRate, &tickMessage);
-            }
-        }
-    }
+    scheduleNextTick();
 }
 
-IdealOscillator::TickEvent::TickEvent(IOscillatorListener* listener, uint64_t tick, uint64_t kind)
-    : listener(listener)
-    , tick(tick)
-    , kind(kind)
+IdealOscillatorTick::IdealOscillatorTick()
+    : listener(nullptr)
+    , tick(0)
+    , kind(0)
 {
 }
 
-bool IdealOscillator::TickEvent::operator<(const TickEvent& tickEvent) const
+IdealOscillatorTick::~IdealOscillatorTick()
+{
+}
+
+IOscillatorListener* IdealOscillatorTick::getListener() const
+{
+    return listener;
+}
+
+void IdealOscillatorTick::setListener(IOscillatorListener* listener)
+{
+    this->listener = listener;
+}
+
+uint64_t IdealOscillatorTick::getTick() const
+{
+    return tick;
+}
+
+void IdealOscillatorTick::setTick(uint64_t tick)
+{
+    this->tick = tick;
+}
+
+uint64_t IdealOscillatorTick::getKind() const
+{
+    return kind;
+}
+
+void IdealOscillatorTick::setKind(uint64_t kind)
+{
+    this->kind = kind;
+}
+
+bool IdealOscillatorTick::operator<(const IdealOscillatorTick& tickEvent) const
 {
     if (this->tick < tickEvent.tick) {
         return true;
@@ -207,19 +236,19 @@ bool IdealOscillator::TickEvent::operator<(const TickEvent& tickEvent) const
     return false;
 }
 
-bool IdealOscillator::TickEvent::operator==(const TickEvent& tickEvent) const
+bool IdealOscillatorTick::operator==(const IdealOscillatorTick& tickEvent) const
 {
     return this->listener == tickEvent.listener
             && this->tick == tickEvent.tick
             && this->kind == tickEvent.kind;
 }
 
-bool IdealOscillator::TickEvent::operator!=(const TickEvent& tickEvent) const
+bool IdealOscillatorTick::operator!=(const IdealOscillatorTick& tickEvent) const
 {
     return !(*this == tickEvent);
 }
 
-std::ostream& operator<<(std::ostream& stream, const IdealOscillator::TickEvent* tickEvent)
+std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEvent)
 {
     stream << "TickEvent[tick=\"" << tickEvent->tick
             << "\",kind=\"" << tickEvent->kind

@@ -16,17 +16,21 @@
 #ifndef NESTING_COMMON_TIME_IOSCILLATORLISTENER_H_
 #define NESTING_COMMON_TIME_IOSCILLATORLISTENER_H_
 
+#include <cstdint>
+#include <memory>
+
 #include "nesting/common/time/IOscillator.h"
 
 namespace nesting {
 
 class IOscillator;
+class IOscillatorTick;
 
 class IOscillatorListener {
 public:
     virtual ~IOscillatorListener() {};
 
-    virtual void onTick(IOscillator* oscillator, uint64_t kind) = 0;
+    virtual void onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick) = 0;
 };
 
 } // namespace nesting

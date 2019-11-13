@@ -17,20 +17,76 @@
 #define NESTING_COMMON_TIME_IOSCILLATOR_H_
 
 #include <cstdint>
+#include <memory>
 
 #include "nesting/common/time/IOscillatorListener.h"
 
 namespace nesting {
 
+class IOscillatorTick;
+
+/** Interface for oscillator implementations. */
 class IOscillator {
 public:
     virtual ~IOscillator() {};
 
-    virtual void subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) = 0;
+    /**
+     * Subscribes a tick event for a given listener. The kind value can be used
+     * to create inverse mappings of oscillator ticks within subscribers.
+     */
+    virtual const IOscillatorTick* subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) = 0;
 
+    /**
+     * Unsubscribes a listener from a tick event.
+     */
+    virtual void unsubscribeTick(IOscillatorListener* listener, const IOscillatorTick* tick) = 0;
+
+    /**
+     * Unsubscribes a listener from all tick events of a certain kind value.
+     */
     virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) = 0;
 
-    virtual uint64_t getCurrentTick() const = 0;
+    /**
+     * Unsubscribes all ticks scheduled for a given listener.
+     */
+    virtual void unsubscribeTicks(IOscillatorListener* listener) = 0;
+
+    /**
+     * Returns true if a given tick event is scheduled for a given listener.
+     */
+    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tick) = 0;
+
+    /**
+     * Returns the frequency of the oscillator module.
+     *
+     * @return Oscillator frequency in Hz.
+     */
+    virtual double getFrequency() const = 0;
+
+    /**
+     * Adjusts the frequency of the oscillator. Calling causes a rescheduling
+     * of future tick events.
+     *
+     * @param frequency New oscillator frequency in Hz.
+     */
+    virtual void setFrequency(double frequency) = 0;
+
+    /**
+     * Updates the internal state (tick counter) and returns its value. This
+     * method can't be constant because of potential stochastic
+     * implementations.
+     */
+    virtual uint64_t updateAndGetCurrentTick() = 0;
+};
+
+/** Interface for oscillator ticks. */
+class IOscillatorTick {
+public:
+    virtual ~IOscillatorTick() {};
+
+    virtual uint64_t getTick() const = 0;
+
+    virtual uint64_t getKind() const = 0;
 };
 
 } // namespace nesting
