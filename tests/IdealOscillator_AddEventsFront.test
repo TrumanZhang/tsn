@@ -56,7 +56,7 @@ protected:
     virtual void initialize() override;
     virtual void finish() override;
 public:
-    virtual void onTick(IOscillator* oscillator, uint64_t kind) override;
+    virtual void onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick) override;
 };
 
 } // namespace @TESTNAME@
@@ -90,7 +90,7 @@ void TestIdealOscillator::finish()
 	}
 }
 
-void TestIdealOscillator::onTick(IOscillator* oscillator, uint64_t kind)
+void TestIdealOscillator::onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick)
 {
     Enter_Method("tick");
     tickCount++;
