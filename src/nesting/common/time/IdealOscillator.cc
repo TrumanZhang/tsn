@@ -145,7 +145,7 @@ const IOscillatorTick* IdealOscillator::subscribeTick(IOscillatorListener* liste
     tickEvent->setKind(kind);
 
     // Find insert position of tick event with binary search.
-    auto it = lower_bound(
+    auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
             tickEvent,
@@ -168,12 +168,18 @@ void IdealOscillator::unsubscribeTick(IOscillatorListener* listener, const IOsci
     tickEvent.setTick(tick->getTick());
     tickEvent.setKind(tick->getKind());
 
-    auto it = std::binary_search(
+    // Find tick event
+    auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
             &tickEvent,
             [](IdealOscillatorTick* left, IdealOscillatorTick* right) { return *left < *right; } // TODO move into own function and remove code duplication
     );
+
+    // Remove tick event if it's present within the event queue
+    if (it != scheduledEvents.end() && **it == tickEvent) {
+        scheduledEvents.erase(it);
+    }
 
     scheduleNextTick();
 }
@@ -183,6 +189,7 @@ void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener, uint64_t k
     Enter_Method_Silent();
 
     // Remove tick events
+    // TODO use erase-remove idiom
     for (auto it = scheduledEvents.begin(); it != scheduledEvents.end(); ) {
         if ((*it)->getListener() == listener && (*it)->getKind() == kind) {
             it = scheduledEvents.erase(it);
