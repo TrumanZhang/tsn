@@ -149,7 +149,7 @@ const IOscillatorTick* IdealOscillator::subscribeTick(IOscillatorListener* liste
             scheduledEvents.begin(),
             scheduledEvents.end(),
             tickEvent,
-            [](IdealOscillatorTick* left, IdealOscillatorTick* right) { return *left < *right; });
+            [](IdealOscillatorTick* left, IdealOscillatorTick* right) { return *left < *right; }); // TODO move into own function and remove code duplication
 
     // Insert tick event in event queue.
     if (it == scheduledEvents.end() || **it != *tickEvent) {
@@ -161,17 +161,30 @@ const IOscillatorTick* IdealOscillator::subscribeTick(IOscillatorListener* liste
     return tickEvent;
 }
 
+void IdealOscillator::unsubscribeTick(IOscillatorListener* listener, const IOscillatorTick* tick)
+{
+    IdealOscillatorTick tickEvent;
+    tickEvent.setListener(listener);
+    tickEvent.setTick(tick->getTick());
+    tickEvent.setKind(tick->getKind());
+
+    auto it = std::binary_search(
+            scheduledEvents.begin(),
+            scheduledEvents.end(),
+            &tickEvent,
+            [](IdealOscillatorTick* left, IdealOscillatorTick* right) { return *left < *right; } // TODO move into own function and remove code duplication
+    );
+
+    scheduleNextTick();
+}
+
 void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener, uint64_t kind)
 {
     Enter_Method_Silent();
 
     // Remove tick events
-    bool removedFrontEvent = false;
     for (auto it = scheduledEvents.begin(); it != scheduledEvents.end(); ) {
         if ((*it)->getListener() == listener && (*it)->getKind() == kind) {
-            if (it == scheduledEvents.begin()) {
-                removedFrontEvent = true;
-            }
             it = scheduledEvents.erase(it);
         } else {
             it++;

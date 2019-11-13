@@ -103,6 +103,8 @@ protected:
     uint64_t tick;
 
     uint64_t kind;
+
+    bool cancelled;
 public:
     IdealOscillatorTick();
 
