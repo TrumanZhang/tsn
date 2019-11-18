@@ -116,8 +116,6 @@ void IdealOscillator::scheduleNextTick() {
 
 uint64_t IdealOscillator::updateAndGetCurrentTick()
 {
-    Enter_Method_Silent();
-
     uint64_t currentTick;
     if (tickEventNow) { // Check tick event flag to prevent numeric errors. TODO: Might not be necessary. Flag can potentially be removed.
         currentTick = lastTick;
@@ -130,6 +128,17 @@ uint64_t IdealOscillator::updateAndGetCurrentTick()
     assert(currentTick >= lastTick);
 
     return currentTick;
+}
+
+uint64_t IdealOscillator::getTickCount()
+{
+    Enter_Method_Silent();
+    return updateAndGetCurrentTick();
+}
+
+uint64_t IdealOscillator::getEventCount() const {
+    // TODO not implemented yet
+    return 0;
 }
 
 std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind)

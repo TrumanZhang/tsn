@@ -78,14 +78,18 @@ public:
     /** @copydoc IOscillator::setFrequency() */
     virtual void setFrequency(double frequency) override;
 
-    /** @copydoc IOscillator::updateAndGetCurrentTick() */
-    virtual uint64_t updateAndGetCurrentTick() override;
+    /** @copydoc IOscillator::getTickCount() */
+    virtual uint64_t getTickCount() override;
+
+    virtual uint64_t getEventCount() const override;
 protected:
     virtual void initialize() override;
 
     virtual void finish() override;
 
     virtual void handleMessage(cMessage *msg) override;
+
+    virtual uint64_t updateAndGetCurrentTick();
 
     virtual simtime_t getTickInterval() const;
     /**

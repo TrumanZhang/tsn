@@ -51,7 +51,6 @@ class TestIdealOscillator : public cSimpleModule, public IOscillatorListener
 {
 protected:
     IdealOscillator* oscillator;
-    unsigned tickCount = 0;
 protected:
     virtual void initialize() override;
     virtual void finish() override;
@@ -83,7 +82,7 @@ void TestIdealOscillator::initialize()
 
 void TestIdealOscillator::finish()
 {
-	if (tickCount != 0) {
+	if (oscillator->getTickCount() != 0) {
 		throw cRuntimeError("Expected 0 ticks to be scheduled!");
 	}
 }
@@ -91,7 +90,6 @@ void TestIdealOscillator::finish()
 void TestIdealOscillator::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
     Enter_Method("tick");
-    tickCount++;
 }
 
 } // namespace @TESTNAME@

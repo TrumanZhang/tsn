@@ -30,7 +30,9 @@ class IOscillatorListener {
 public:
     virtual ~IOscillatorListener() {};
 
-    virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) = 0;
+    virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) {};
+
+    virtual void onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) {};
 };
 
 } // namespace nesting
