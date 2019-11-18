@@ -87,8 +87,6 @@ protected:
 
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual uint64_t updateAndGetCurrentTick();
-
     virtual simtime_t getTickInterval() const;
     /**
      * Schedules a self-message so the component is notified about the next

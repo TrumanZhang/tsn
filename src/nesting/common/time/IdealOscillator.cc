@@ -105,7 +105,7 @@ void IdealOscillator::scheduleNextTick() {
 
     std::shared_ptr<IdealOscillatorTick>& nextTickEvent = scheduledEvents.front();
 
-    uint64_t currentTick = updateAndGetCurrentTick();
+    uint64_t currentTick = getTickCount();
     uint64_t nextScheduledTick = nextTickEvent->getTick();
 
     // Monotonic increasing ticks
@@ -114,8 +114,10 @@ void IdealOscillator::scheduleNextTick() {
     scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * getTickInterval(), &tickMessage);
 }
 
-uint64_t IdealOscillator::updateAndGetCurrentTick()
+uint64_t IdealOscillator::getTickCount()
 {
+    Enter_Method_Silent();
+
     uint64_t currentTick;
     if (tickEventNow) { // Check tick event flag to prevent numeric errors. TODO: Might not be necessary. Flag can potentially be removed.
         currentTick = lastTick;
@@ -130,18 +132,12 @@ uint64_t IdealOscillator::updateAndGetCurrentTick()
     return currentTick;
 }
 
-uint64_t IdealOscillator::getTickCount()
-{
-    Enter_Method_Silent();
-    return updateAndGetCurrentTick();
-}
-
 std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind)
 {
     Enter_Method_Silent();
 
     // Calculate current tick count
-    uint64_t currentTick = updateAndGetCurrentTick();
+    uint64_t currentTick = getTickCount();
 
     // Create new tick event.
     std::shared_ptr<IdealOscillatorTick> tickEvent = std::make_shared<IdealOscillatorTick>(
