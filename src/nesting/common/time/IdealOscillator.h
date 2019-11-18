@@ -38,7 +38,7 @@ protected:
     bool tickEventNow;
 
     /** Tick rate of the oscillator module in seconds. */
-    simtime_t tickRate;
+    double frequency;
 
     /** Number/Index of last tick. */
     uint64_t lastTick;
@@ -69,7 +69,7 @@ public:
     virtual void unsubscribeTicks(IOscillatorListener* listener) override;
 
     /** @copydoc IOscillator::isScheduled() */
-    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tick) override;
+    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tickEvent) const override;
 
     /** @copydoc IOscillator::getFrequency() */
     virtual double getFrequency() const override;
@@ -86,6 +86,7 @@ protected:
 
     virtual void handleMessage(cMessage *msg) override;
 
+    virtual simtime_t getTickInterval() const;
     /**
      * Schedules a self-message so the component is notified about the next
      * event in the event-queue. Reschedules an already existent self-message
@@ -103,10 +104,10 @@ protected:
     uint64_t tick;
 
     uint64_t kind;
-
-    bool cancelled;
 public:
     IdealOscillatorTick();
+
+    IdealOscillatorTick(const IOscillatorTick& tickEvent);
 
     virtual ~IdealOscillatorTick();
 

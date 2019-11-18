@@ -54,7 +54,7 @@ public:
     /**
      * Returns true if a given tick event is scheduled for a given listener.
      */
-    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tick) = 0;
+    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tick) const = 0;
 
     /**
      * Returns the frequency of the oscillator module.

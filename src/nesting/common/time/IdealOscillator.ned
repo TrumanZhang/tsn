@@ -22,5 +22,5 @@ simple IdealOscillator like IOscillator
 {
     parameters:
         @display("i=block/timer");
-        int frequency @unit(Hz) = default(1MHz);
+        double frequency @unit(Hz) = default(1MHz);
 }

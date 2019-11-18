@@ -23,7 +23,7 @@ namespace nesting {
 Define_Module(IdealOscillator);
 
 IdealOscillator::IdealOscillator()
-    : tickRate(SimTime::getMaxTime())
+    : frequency(1)
     , lastTick(0)
     , timeOfLastTick(SimTime::ZERO)
     , tickEventNow(false)
@@ -37,16 +37,14 @@ IdealOscillator::~IdealOscillator()
 
 void IdealOscillator::initialize()
 {
-    int frequency = par("frequency").intValue();
+    frequency = par("frequency").doubleValue();
     if (frequency < 0) {
         throw cRuntimeError("Frequency parameter must be positive.");
     } else if (frequency == 0) {
         throw cRuntimeError("Frequency parameter must not be zero.");
     }
 
-    tickRate = simtime_t(1.0) / frequency;
-
-    WATCH(tickRate);
+    WATCH(frequency);
     WATCH(lastTick);
     WATCH(timeOfLastTick);
     WATCH_LIST(scheduledEvents);
@@ -91,6 +89,11 @@ void IdealOscillator::handleMessage(cMessage *msg)
     }
 }
 
+simtime_t IdealOscillator::getTickInterval() const
+{
+    return simtime_t(1.0) / frequency;
+}
+
 void IdealOscillator::scheduleNextTick() {
     // Cancel current self message
     if (tickMessage.isScheduled()) {
@@ -110,7 +113,7 @@ void IdealOscillator::scheduleNextTick() {
     // Monotonic increasing ticks
     assert(nextScheduledTick >= currentTick);
 
-    scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * tickRate, &tickMessage);
+    scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * getTickInterval(), &tickMessage);
 }
 
 uint64_t IdealOscillator::updateAndGetCurrentTick()
@@ -121,7 +124,7 @@ uint64_t IdealOscillator::updateAndGetCurrentTick()
     if (tickEventNow) { // Check tick event flag to prevent numeric errors. TODO: Might not be necessary.
         currentTick = lastTick;
     } else {
-        uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / tickRate);
+        uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / getTickInterval());
         currentTick = lastTick + elapsedTicks;
     }
 
@@ -188,16 +191,57 @@ void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener, uint64_t k
 {
     Enter_Method_Silent();
 
-    // Remove tick events
-    // TODO use erase-remove idiom
-    for (auto it = scheduledEvents.begin(); it != scheduledEvents.end(); ) {
-        if ((*it)->getListener() == listener && (*it)->getKind() == kind) {
-            it = scheduledEvents.erase(it);
-        } else {
-            it++;
-        }
-    }
+    scheduledEvents.erase(
+            std::remove_if(
+                    scheduledEvents.begin(),
+                    scheduledEvents.end(),
+                    [&](IdealOscillatorTick* tickEvent) {
+                        return tickEvent->getListener() == listener
+                                && tickEvent->getKind() == kind;
+                    }
+            ), scheduledEvents.end()
+    );
 
+    scheduleNextTick();
+}
+
+void IdealOscillator::unsubscribeTicks(IOscillatorListener* listener)
+{
+    Enter_Method_Silent();
+
+    scheduledEvents.erase(
+            std::remove_if(
+                    scheduledEvents.begin(),
+                    scheduledEvents.end(),
+                    [&](IdealOscillatorTick* tickEvent) { return tickEvent->getListener() == listener; }
+            ), scheduledEvents.end()
+    );
+
+    scheduleNextTick();
+}
+
+bool IdealOscillator::isScheduled(IOscillatorListener* listener, const IOscillatorTick* tickEvent) const
+{
+    IdealOscillatorTick idealOscillatorTick(*tickEvent);
+    idealOscillatorTick.setListener(listener);
+    auto it = std::lower_bound(
+            scheduledEvents.begin(),
+            scheduledEvents.end(),
+            &idealOscillatorTick,
+            [](IdealOscillatorTick* left, IdealOscillatorTick* right) { return *left < *right; } // TODO move into own function and remove code duplication
+    );
+    return it != scheduledEvents.end() && **it == idealOscillatorTick;
+}
+
+double IdealOscillator::getFrequency() const
+{
+    return frequency;
+}
+
+void IdealOscillator::setFrequency(double frequency)
+{
+    // Update frequency and reschedule next tick event.
+    this->frequency = frequency;
     scheduleNextTick();
 }
 
@@ -205,6 +249,13 @@ IdealOscillatorTick::IdealOscillatorTick()
     : listener(nullptr)
     , tick(0)
     , kind(0)
+{
+}
+
+IdealOscillatorTick::IdealOscillatorTick(const IOscillatorTick& tickEvent)
+    : listener(nullptr)
+    , tick(tickEvent.getTick())
+    , kind(tickEvent.getKind())
 {
 }
 
