@@ -1,5 +1,5 @@
 %description:
-Tests the IdealOscillator submodule
+Whenever a tick event happens, add a consecutive tick event.
 
 %file: package.ned
 package @TESTNAME@;

@@ -1,5 +1,8 @@
 %description:
-Tests the IdealOscillator submodule
+By updating the oscillator frequency, the time at which future tick events must
+be scheduled has to be updated. First we schedule two events #1 and #2 at 1s
+and 2s by setting the oscillator frequency to 1Hz. Then we update the frequency
+to 2Hz when event #1 takes place. Event #2 must be now scheduled at 1.5s.
 
 %file: package.ned
 package @TESTNAME@;

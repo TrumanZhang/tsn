@@ -1,5 +1,5 @@
 %description:
-Tests the IdealOscillator submodule
+Remove a specific tick event from an IdealOscillator module.
 
 %file: package.ned
 package @TESTNAME@;

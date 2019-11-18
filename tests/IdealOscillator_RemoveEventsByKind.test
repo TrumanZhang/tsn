@@ -1,5 +1,7 @@
 %description:
-Tests the IdealOscillator submodule
+Removes tick events from an IdealOscillator module by their kind attribute. In
+this test case we implement a Sieve of Eratosthenes to schedule ticks only at
+ticks with an index equal to a prime number.
 
 %file: package.ned
 package @TESTNAME@;

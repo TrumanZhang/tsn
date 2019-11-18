@@ -1,5 +1,6 @@
 %description:
-Tests the IdealOscillator submodule
+Remove all tick events (for a specific listener) from an IdealOscillator
+module.
 
 %file: package.ned
 package @TESTNAME@;
@@ -77,9 +78,11 @@ Define_Module(TestIdealOscillator);
 void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
+    // Subscribe 10 tick events.
 	for (int idleTicks = 9; idleTicks >= 0; idleTicks--) {
     	oscillator->subscribeTick(this, idleTicks);
     }
+    // Unsubscribe all tick events.
     oscillator->unsubscribeTicks(this);
 }
 

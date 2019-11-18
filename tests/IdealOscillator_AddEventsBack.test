@@ -1,5 +1,5 @@
 %description:
-Tests the IdealOscillator submodule
+Schedules tick events, that are added to the back of the event queue within the IdealOscillator module.
 
 %file: package.ned
 package @TESTNAME@;
