@@ -136,11 +136,6 @@ uint64_t IdealOscillator::getTickCount()
     return updateAndGetCurrentTick();
 }
 
-uint64_t IdealOscillator::getEventCount() const {
-    // TODO not implemented yet
-    return 0;
-}
-
 std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind)
 {
     Enter_Method_Silent();

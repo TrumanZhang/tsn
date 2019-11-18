@@ -78,14 +78,14 @@ void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
     
-    for (int idleTicks = 10; idleTicks >= 1; idleTicks--) {
+    for (int idleTicks = 9; idleTicks >= 0; idleTicks--) {
     	oscillator->subscribeTick(*this, idleTicks, idleTicks);
     }
 }
 
 void TestIdealOscillator::finish()
 {
-	if (oscillator->getTickCount() != 10) {
+	if (tickCount != 10) {
 		throw cRuntimeError("Expected 10 ticks to be scheduled!");
 	}
 }
@@ -93,6 +93,7 @@ void TestIdealOscillator::finish()
 void TestIdealOscillator::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
     Enter_Method("tick");
+    tickCount++;
 }
 
 } // namespace @TESTNAME@

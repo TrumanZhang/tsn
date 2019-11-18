@@ -77,7 +77,7 @@ Define_Module(TestIdealOscillator);
 void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
-	oscillator->subscribeTick(*this, 1);
+	oscillator->subscribeTick(*this, 0);
 }
 
 void TestIdealOscillator::finish()
@@ -91,7 +91,7 @@ void TestIdealOscillator::onOscillatorTick(IOscillator& oscillator, const IOscil
 {
     Enter_Method("tick");
     tickCount++;
-    if (oscillator.getTickCount() < 10) {
+    if (tickCount < 10) {
     	oscillator.subscribeTick(*this, 0);
     }
 }

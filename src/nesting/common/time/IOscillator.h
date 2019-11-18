@@ -77,8 +77,6 @@ public:
      * implementations.
      */
     virtual uint64_t getTickCount() = 0;
-
-    virtual uint64_t getEventCount() const = 0;
 };
 
 /** Interface for oscillator ticks. */

@@ -80,8 +80,6 @@ public:
 
     /** @copydoc IOscillator::getTickCount() */
     virtual uint64_t getTickCount() override;
-
-    virtual uint64_t getEventCount() const override;
 protected:
     virtual void initialize() override;
 
