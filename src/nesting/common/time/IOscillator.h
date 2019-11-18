@@ -34,27 +34,27 @@ public:
      * Subscribes a tick event for a given listener. The kind value can be used
      * to create inverse mappings of oscillator ticks within subscribers.
      */
-    virtual const IOscillatorTick* subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) = 0;
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind = 0) = 0;
 
     /**
      * Unsubscribes a listener from a tick event.
      */
-    virtual void unsubscribeTick(IOscillatorListener* listener, const IOscillatorTick* tick) = 0;
+    virtual void unsubscribeTick(IOscillatorListener& listener, const IOscillatorTick& tick) = 0;
 
     /**
      * Unsubscribes a listener from all tick events of a certain kind value.
      */
-    virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) = 0;
+    virtual void unsubscribeTicks(IOscillatorListener& listener, uint64_t kind) = 0;
 
     /**
      * Unsubscribes all ticks scheduled for a given listener.
      */
-    virtual void unsubscribeTicks(IOscillatorListener* listener) = 0;
+    virtual void unsubscribeTicks(IOscillatorListener& listener) = 0;
 
     /**
      * Returns true if a given tick event is scheduled for a given listener.
      */
-    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tick) const = 0;
+    virtual bool isScheduled(IOscillatorListener& listener, const IOscillatorTick& tick) const = 0;
 
     /**
      * Returns the frequency of the oscillator module.

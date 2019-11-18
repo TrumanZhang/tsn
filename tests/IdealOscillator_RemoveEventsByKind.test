@@ -59,7 +59,7 @@ protected:
 protected:
     virtual void initialize() override;
 public:
-    virtual void onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick) override;
+    virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
 };
 
 } // namespace @TESTNAME@
@@ -83,16 +83,16 @@ void TestIdealOscillator::initialize()
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
     
     for (int idleTicks = 2; idleTicks <= 20; idleTicks++) {
-    	oscillator->subscribeTick(this, idleTicks, idleTicks);
+    	oscillator->subscribeTick(*this, idleTicks, idleTicks);
     }
 }
 
-void TestIdealOscillator::onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick)
+void TestIdealOscillator::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
     Enter_Method("tick");
     
     // Tick should be prime number
-    uint64_t currentTick = oscillator->updateAndGetCurrentTick();
+    uint64_t currentTick = oscillator.updateAndGetCurrentTick();
     
     bool isPrime = std::find(primes.begin(), primes.end(), currentTick) != primes.end();
     if (!isPrime) {
@@ -100,7 +100,7 @@ void TestIdealOscillator::onOscillatorTick(IOscillator* oscillator, const IOscil
     }
     
     for (uint64_t tick = currentTick; tick <= 20; tick += currentTick) {
-    	oscillator->unsubscribeTicks(this, tick);
+    	oscillator.unsubscribeTicks(*this, tick);
     }
 }
 

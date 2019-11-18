@@ -56,7 +56,7 @@ protected:
     virtual void initialize() override;
     virtual void finish() override;
 public:
-    virtual void onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick) override;
+    virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
 };
 
 } // namespace @TESTNAME@
@@ -77,7 +77,7 @@ Define_Module(TestIdealOscillator);
 void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
-	oscillator->subscribeTick(this, 0);
+	oscillator->subscribeTick(*this, 0);
 }
 
 void TestIdealOscillator::finish()
@@ -87,12 +87,12 @@ void TestIdealOscillator::finish()
 	}
 }
 
-void TestIdealOscillator::onOscillatorTick(IOscillator* oscillator, const IOscillatorTick* tick)
+void TestIdealOscillator::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
     Enter_Method("tick");
     tickCount++;
     if (tickCount < 10) {
-    	oscillator->subscribeTick(this, 0);
+    	oscillator.subscribeTick(*this, 0);
     }
 }
 

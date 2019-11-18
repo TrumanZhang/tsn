@@ -21,6 +21,7 @@
 #include <list>
 #include <cstdint>
 #include <iostream>
+#include <memory>
 
 #include "nesting/common/time/IOscillator.h"
 
@@ -47,7 +48,7 @@ protected:
     simtime_t timeOfLastTick;
 
     /** Event queue that contains the scheduled tick events. */
-    std::list<IdealOscillatorTick*> scheduledEvents;
+    std::list<std::shared_ptr<IdealOscillatorTick>> scheduledEvents;
 
     /** Used as self message to notify the component of the next tick event */
     cMessage tickMessage;
@@ -57,19 +58,19 @@ public:
     virtual ~IdealOscillator();
 
     /** @copydoc IOscillator::subscribeTick() */
-    virtual const IOscillatorTick* subscribeTick(IOscillatorListener* listener, uint64_t idleTicks, uint64_t kind = 0) override;
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind = 0) override;
 
     /** @copydoc IOscillator::unsubscribeTick() */
-    virtual void unsubscribeTick(IOscillatorListener* listener, const IOscillatorTick* tick) override;
+    virtual void unsubscribeTick(IOscillatorListener& listener, const IOscillatorTick& tick) override;
 
     /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*, uint64_t) */
-    virtual void unsubscribeTicks(IOscillatorListener* listener, uint64_t kind) override;
+    virtual void unsubscribeTicks(IOscillatorListener& listener, uint64_t kind) override;
 
     /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*) */
-    virtual void unsubscribeTicks(IOscillatorListener* listener) override;
+    virtual void unsubscribeTicks(IOscillatorListener& listener) override;
 
     /** @copydoc IOscillator::isScheduled() */
-    virtual bool isScheduled(IOscillatorListener* listener, const IOscillatorTick* tickEvent) const override;
+    virtual bool isScheduled(IOscillatorListener& listener, const IOscillatorTick& tickEvent) const override;
 
     /** @copydoc IOscillator::getFrequency() */
     virtual double getFrequency() const override;
@@ -99,21 +100,21 @@ protected:
 
 class IdealOscillatorTick : public IOscillatorTick {
 protected:
-    IOscillatorListener* listener;
+    IOscillatorListener& listener;
 
     uint64_t tick;
 
     uint64_t kind;
 public:
-    IdealOscillatorTick();
+    IdealOscillatorTick(IOscillatorListener& listener, uint64_t tick, uint64_t kind);
 
-    IdealOscillatorTick(const IOscillatorTick& tickEvent);
+    IdealOscillatorTick(IOscillatorListener& listener, const IOscillatorTick& tickEvent);
 
     virtual ~IdealOscillatorTick();
 
-    virtual IOscillatorListener* getListener() const;
+    virtual IOscillatorListener& getListener() const;
 
-    virtual void setListener(IOscillatorListener* listener);
+    virtual void setListener(IOscillatorListener& listener);
 
     virtual uint64_t getTick() const override;
 
@@ -128,8 +129,6 @@ public:
     bool operator==(const IdealOscillatorTick& tickEvent) const;
 
     bool operator!=(const IdealOscillatorTick& tickEvent) const;
-
-    friend std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEvent);
 };
 
 std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEvent);
