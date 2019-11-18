@@ -21,11 +21,7 @@ namespace nesting {
 class IClock2Listener {
     virtual ~IClock2Listener() {};
 
-    virtual void onClockTimestampPass(IClock2& clock) {};
-
-    virtual void onClockRateChange(IClock2& clock, double oldClockRate, double newClockRate) {};
-
-    virtual void onClockSkewChange(IClock2& clock, double oldClockSkew, double newClockSkew) {};
+    virtual void onClockTimestamp(IClock2& clock) = 0;
 };
 
 } /* namespace nesting */
