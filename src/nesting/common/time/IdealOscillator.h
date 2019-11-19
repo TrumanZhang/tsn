@@ -58,19 +58,19 @@ public:
     virtual ~IdealOscillator();
 
     /** @copydoc IOscillator::subscribeTick() */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind = 0) override;
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind = 0) override;
 
     /** @copydoc IOscillator::unsubscribeTick() */
-    virtual void unsubscribeTick(IOscillatorListener& listener, const IOscillatorTick& tick) override;
+    virtual void unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick) override;
 
     /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*, uint64_t) */
-    virtual void unsubscribeTicks(IOscillatorListener& listener, uint64_t kind) override;
+    virtual void unsubscribeTicks(IOscillatorTickListener& listener, uint64_t kind) override;
 
     /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*) */
-    virtual void unsubscribeTicks(IOscillatorListener& listener) override;
+    virtual void unsubscribeTicks(IOscillatorTickListener& listener) override;
 
     /** @copydoc IOscillator::isScheduled() */
-    virtual bool isScheduled(IOscillatorListener& listener, const IOscillatorTick& tickEvent) const override;
+    virtual bool isTickScheduled(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent) const override;
 
     /** @copydoc IOscillator::getFrequency() */
     virtual double getFrequency() const override;
@@ -100,21 +100,21 @@ protected:
 
 class IdealOscillatorTick : public IOscillatorTick {
 protected:
-    IOscillatorListener& listener;
+    IOscillatorTickListener& listener;
 
     uint64_t tick;
 
     uint64_t kind;
 public:
-    IdealOscillatorTick(IOscillatorListener& listener, uint64_t tick, uint64_t kind);
+    IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind);
 
-    IdealOscillatorTick(IOscillatorListener& listener, const IOscillatorTick& tickEvent);
+    IdealOscillatorTick(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent);
 
     virtual ~IdealOscillatorTick();
 
-    virtual IOscillatorListener& getListener() const;
+    virtual IOscillatorTickListener& getListener() const;
 
-    virtual void setListener(IOscillatorListener& listener);
+    virtual void setListener(IOscillatorTickListener& listener);
 
     virtual uint64_t getTick() const override;
 

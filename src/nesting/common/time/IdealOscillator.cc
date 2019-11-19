@@ -132,7 +132,7 @@ uint64_t IdealOscillator::getTickCount()
     return currentTick;
 }
 
-std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorListener& listener, uint64_t idleTicks, uint64_t kind)
+std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind)
 {
     Enter_Method_Silent();
 
@@ -162,7 +162,7 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
     return tickEvent;
 }
 
-void IdealOscillator::unsubscribeTick(IOscillatorListener& listener, const IOscillatorTick& tick)
+void IdealOscillator::unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick)
 {
     std::shared_ptr<IdealOscillatorTick> tickEvent = std::make_shared<IdealOscillatorTick>(listener, tick.getTick(), tick.getKind());
 
@@ -182,7 +182,7 @@ void IdealOscillator::unsubscribeTick(IOscillatorListener& listener, const IOsci
     scheduleNextTick();
 }
 
-void IdealOscillator::unsubscribeTicks(IOscillatorListener& listener, uint64_t kind)
+void IdealOscillator::unsubscribeTicks(IOscillatorTickListener& listener, uint64_t kind)
 {
     Enter_Method_Silent();
 
@@ -200,7 +200,7 @@ void IdealOscillator::unsubscribeTicks(IOscillatorListener& listener, uint64_t k
     scheduleNextTick();
 }
 
-void IdealOscillator::unsubscribeTicks(IOscillatorListener& listener)
+void IdealOscillator::unsubscribeTicks(IOscillatorTickListener& listener)
 {
     Enter_Method_Silent();
 
@@ -215,7 +215,7 @@ void IdealOscillator::unsubscribeTicks(IOscillatorListener& listener)
     scheduleNextTick();
 }
 
-bool IdealOscillator::isScheduled(IOscillatorListener& listener, const IOscillatorTick& tickEvent) const
+bool IdealOscillator::isTickScheduled(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent) const
 {
     std::shared_ptr<IdealOscillatorTick> idealOscillatorTick = std::make_shared<IdealOscillatorTick>(listener, tickEvent);
     auto it = std::lower_bound(
@@ -239,14 +239,14 @@ void IdealOscillator::setFrequency(double frequency)
     scheduleNextTick();
 }
 
-IdealOscillatorTick::IdealOscillatorTick(IOscillatorListener& listener, uint64_t tick, uint64_t kind)
+IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind)
     : listener(listener)
     , tick(tick)
     , kind(kind)
 {
 }
 
-IdealOscillatorTick::IdealOscillatorTick(IOscillatorListener& listener, const IOscillatorTick& tickEvent)
+IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent)
     : listener(listener)
     , tick(tickEvent.getTick())
     , kind(tickEvent.getKind())
@@ -257,12 +257,12 @@ IdealOscillatorTick::~IdealOscillatorTick()
 {
 }
 
-IOscillatorListener& IdealOscillatorTick::getListener() const
+IOscillatorTickListener& IdealOscillatorTick::getListener() const
 {
     return listener;
 }
 
-void IdealOscillatorTick::setListener(IOscillatorListener& listener)
+void IdealOscillatorTick::setListener(IOscillatorTickListener& listener)
 {
     this->listener = listener;
 }

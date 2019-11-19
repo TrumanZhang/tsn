@@ -42,7 +42,7 @@ simple TestIdealOscillator
 #include <omnetpp.h>
 
 #include "nesting/common/time/IOscillator.h"
-#include "nesting/common/time/IOscillatorListener.h"
+#include "nesting/common/time/IOscillatorTickListener.h"
 #include "nesting/common/time/IdealOscillator.h"
 
 using namespace omnetpp;
@@ -50,7 +50,7 @@ using namespace nesting;
 
 namespace @TESTNAME@ {
 
-class TestIdealOscillator : public cSimpleModule, public IOscillatorListener
+class TestIdealOscillator : public cSimpleModule, public IOscillatorTickListener
 {
 protected:
     IdealOscillator* oscillator;

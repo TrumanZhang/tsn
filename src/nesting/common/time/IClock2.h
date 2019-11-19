@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "nesting/common/time/IClock2Listener.h"
+#include "IClock2TimestampListener.h"
 #include "nesting/common/time/IOscillator.h"
 
 namespace nesting {
@@ -29,9 +29,9 @@ class IClock2 {
 public:
     virtual ~IClock2() {};
 
-    virtual void subscribeDelta(IClock2Listener& listener, simtime_t delta) = 0;
+    virtual void subscribeDelta(IClock2TimestampListener& listener, simtime_t delta) = 0;
 
-    virtual void subscribeTimestamp(IClock2Listener& listener, simtime_t timestamp) = 0;
+    virtual void subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp) = 0;
 
     virtual simtime_t getTime() = 0;
 
