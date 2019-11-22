@@ -19,9 +19,10 @@
 #include <omnetpp.h>
 
 #include <memory>
+#include <cstdint>
 
-#include "IClock2TimestampListener.h"
-#include "nesting/common/time/IOscillator.h"
+#include "nesting/common/time/IClock2TimestampListener.h"
+#include "nesting/common/time/IClock2ConfigListener.h"
 
 namespace nesting {
 
@@ -29,9 +30,13 @@ class IClock2 {
 public:
     virtual ~IClock2() {};
 
-    virtual void subscribeDelta(IClock2TimestampListener& listener, simtime_t delta) = 0;
+    virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) = 0;
 
-    virtual void subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp) = 0;
+    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind = 0) = 0;
+
+    virtual void subscribeConfigChanges(IClock2ConfigListener& listener) = 0;
+
+    virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) = 0;
 
     virtual simtime_t getTime() = 0;
 
@@ -48,8 +53,10 @@ public:
     virtual void setSkew(double skew) = 0;
 };
 
-class IClock2Event {
+class IClock2Timestamp {
+    virtual simtime_t getTimestamp() = 0;
 
+    virtual uint64_t getKind() = 0;
 };
 
 } /* namespace nesting */

@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "nesting/common/time/IOscillatorTickListener.h"
+#include "nesting/common/time/IOscillatorConfigListener.h"
 
 namespace nesting {
 
@@ -50,6 +51,10 @@ public:
      * Unsubscribes all ticks scheduled for a given listener.
      */
     virtual void unsubscribeTicks(IOscillatorTickListener& listener) = 0;
+
+    virtual void subscribeConfigChanges(IOscillatorConfigListener& listener) = 0;
+
+    virtual void unsubscribeConfigChanges(IOscillatorConfigListener& listener) = 0;
 
     /**
      * Returns true if a given tick event is scheduled for a given listener.

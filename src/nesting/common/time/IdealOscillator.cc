@@ -239,6 +239,21 @@ void IdealOscillator::setFrequency(double frequency)
     scheduleNextTick();
 }
 
+void IdealOscillator::subscribeConfigChanges(IOscillatorConfigListener& listener)
+{
+    auto it = std::lower_bound(
+            configListeners.begin(),
+            configListeners.end(),
+            listener,
+            [](IOscillatorConfigListener& left, IOscillatorConfigListener& right) { return &left < &right; } // TODO move into own function and remove code duplication
+    );
+}
+
+void IdealOscillator::unsubscribeConfigChanges(IOscillatorConfigListener& listener)
+{
+    // TODO not implemented yet
+}
+
 IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind)
     : listener(listener)
     , tick(tick)

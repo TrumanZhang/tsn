@@ -22,6 +22,8 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <vector>
+#include <functional>
 
 #include "nesting/common/time/IOscillator.h"
 
@@ -50,8 +52,14 @@ protected:
     /** Event queue that contains the scheduled tick events. */
     std::list<std::shared_ptr<IdealOscillatorTick>> scheduledEvents;
 
+    std::vector<IOscillatorConfigListener&> configListeners;
+
     /** Used as self message to notify the component of the next tick event */
     cMessage tickMessage;
+
+    std::function cmpIdealOscillatorTickPtrs<bool(std::shared_ptr<IdealOscillatorTick>, std::shared_ptr<IdealOscillatorTick>)>;
+
+    std::function cmpConfigListenerRefs<bool(IOscillatorConfigListener&, IOscillatorConfigListener&)>;
 public:
     IdealOscillator();
 
@@ -80,6 +88,12 @@ public:
 
     /** @copydoc IOscillator::getTickCount() */
     virtual uint64_t getTickCount() override;
+
+    /** @copydoc IOscillator::subscribeConfigChanges() */
+    void subscribeConfigChanges(IOscillatorConfigListener& listener) override;
+
+    /** @copydoc IOscillator::unsubscribeConfigChanges() */
+    void unsubscribeConfigChanges(IOscillatorConfigListener& listener) override;
 protected:
     virtual void initialize() override;
 
