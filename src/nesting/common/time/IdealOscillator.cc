@@ -232,11 +232,19 @@ double IdealOscillator::getFrequency() const
     return frequency;
 }
 
-void IdealOscillator::setFrequency(double frequency)
+void IdealOscillator::setFrequency(double newFrequency)
 {
-    // Update frequency and reschedule next tick event.
-    this->frequency = frequency;
+    // Update frequency
+    double oldFrequency = this->frequency;
+    this->frequency = newFrequency;
+
+    // Reschedule next tick
     scheduleNextTick();
+
+    // Notify config subscribers
+    for (IOscillatorConfigListener* listener : configListeners) {
+        listener->onOscillatorFrequencyChange(*this, oldFrequency, newFrequency);
+    }
 }
 
 void IdealOscillator::subscribeConfigChanges(IOscillatorConfigListener& listener)
@@ -244,14 +252,25 @@ void IdealOscillator::subscribeConfigChanges(IOscillatorConfigListener& listener
     auto it = std::lower_bound(
             configListeners.begin(),
             configListeners.end(),
-            listener,
-            [](IOscillatorConfigListener& left, IOscillatorConfigListener& right) { return &left < &right; } // TODO move into own function and remove code duplication
+            &listener,
+            [](IOscillatorConfigListener* left, IOscillatorConfigListener* right) { return left < right; } // TODO move into own function and remove code duplication
     );
+    if (it == configListeners.end()) {
+        configListeners.insert(it, &listener);
+    }
 }
 
 void IdealOscillator::unsubscribeConfigChanges(IOscillatorConfigListener& listener)
 {
-    // TODO not implemented yet
+    auto it = std::lower_bound(
+            configListeners.begin(),
+            configListeners.end(),
+            &listener,
+            [](IOscillatorConfigListener* left, IOscillatorConfigListener* right) { return left < right; } // TODO move into own function and remove code duplication
+    );
+    if (it != configListeners.end() && *it == &listener) {
+        configListeners.erase(it);
+    }
 }
 
 IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind)

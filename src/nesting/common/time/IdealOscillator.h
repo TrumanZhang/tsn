@@ -26,6 +26,8 @@
 #include <functional>
 
 #include "nesting/common/time/IOscillator.h"
+#include "nesting/common/time/IOscillatorTickListener.h"
+#include "nesting/common/time/IOscillatorConfigListener.h"
 
 using namespace omnetpp;
 
@@ -52,14 +54,14 @@ protected:
     /** Event queue that contains the scheduled tick events. */
     std::list<std::shared_ptr<IdealOscillatorTick>> scheduledEvents;
 
-    std::vector<IOscillatorConfigListener&> configListeners;
+    std::vector<IOscillatorConfigListener*> configListeners;
 
     /** Used as self message to notify the component of the next tick event */
     cMessage tickMessage;
 
-    std::function cmpIdealOscillatorTickPtrs<bool(std::shared_ptr<IdealOscillatorTick>, std::shared_ptr<IdealOscillatorTick>)>;
+    std::function<bool(std::shared_ptr<IdealOscillatorTick>, std::shared_ptr<IdealOscillatorTick>)> cmpIdealOscillatorTickPtrs;
 
-    std::function cmpConfigListenerRefs<bool(IOscillatorConfigListener&, IOscillatorConfigListener&)>;
+    std::function<bool(IOscillatorConfigListener&, IOscillatorConfigListener&)> cmpConfigListenerRefs;
 public:
     IdealOscillator();
 
