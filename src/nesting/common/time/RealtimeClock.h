@@ -18,6 +18,10 @@
 
 #include <omnetpp.h>
 
+#include "nesting/common/time/IClock2.h"
+#include "nesting/common/time/IClock2TimestampListener.h"
+#include "nesting/common/time/IClock2ConfigListener.h"
+
 using namespace omnetpp;
 
 namespace nesting {
@@ -25,11 +29,22 @@ namespace nesting {
 /**
  * TODO - Generated class
  */
-class RealtimeClock : public cSimpleModule
+class RealtimeClock : public cSimpleModule, public IClock2
 {
-  protected:
+protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+public:
+    virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) override;
+    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind = 0) override;
+    virtual void subscribeConfigChanges(IClock2ConfigListener& listener) override;
+    virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
+    virtual simtime_t getTime() override;
+    virtual void setTime(simtime_t time) override;
+    virtual double getClockRate() const override;
+    virtual double setClockRate(double clockRate) override;
+    virtual double getSkew() const override;
+    virtual void setSkew(double skew) override;
 };
 
 } //namespace

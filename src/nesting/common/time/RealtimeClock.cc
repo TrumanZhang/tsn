@@ -29,4 +29,60 @@ void RealtimeClock::handleMessage(cMessage *msg)
     // TODO - Generated method body
 }
 
+std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
+{
+    // TODO
+    return nullptr;
+}
+
+std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind)
+{
+    // TODO
+    return nullptr;
+}
+
+void RealtimeClock::subscribeConfigChanges(IClock2ConfigListener& listener)
+{
+    // TODO
+}
+
+void RealtimeClock::unsubscribeConfigChanges(IClock2ConfigListener& listener)
+{
+    // TODO
+}
+
+simtime_t RealtimeClock::getTime()
+{
+    // TODO
+    return SimTime::ZERO;
+}
+
+void RealtimeClock::setTime(simtime_t time)
+{
+    // TODO
+}
+
+double RealtimeClock::getClockRate() const
+{
+    // TODO
+    return 0.0;
+}
+
+double RealtimeClock::setClockRate(double clockRate)
+{
+    // TODO
+    return 0.0;
+}
+
+double RealtimeClock::getSkew() const
+{
+    // TODO
+    return 0.0;
+}
+
+void RealtimeClock::setSkew(double skew)
+{
+    // TODO
+}
+
 } //namespace

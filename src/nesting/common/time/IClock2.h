@@ -24,7 +24,11 @@
 #include "nesting/common/time/IClock2TimestampListener.h"
 #include "nesting/common/time/IClock2ConfigListener.h"
 
+using namespace omnetpp;
+
 namespace nesting {
+
+class IClock2Timestamp;
 
 class IClock2 {
 public:
@@ -41,8 +45,6 @@ public:
     virtual simtime_t getTime() = 0;
 
     virtual void setTime(simtime_t time) = 0;
-
-    virtual uint64_t getEventCount() const = 0;
 
     virtual double getClockRate() const = 0;
 

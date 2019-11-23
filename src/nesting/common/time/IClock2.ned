@@ -13,21 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef NESTING_COMMON_TIME_ICLOCK2TIMESTAMPLISTENER_H_
-#define NESTING_COMMON_TIME_ICLOCK2TIMESTAMPLISTENER_H_
+package nesting.common.time;
 
-#include "nesting/common/time/IClock2.h"
-
-namespace nesting {
-
-class IClock2;
-
-class IClock2TimestampListener {
-    virtual ~IClock2TimestampListener() {};
-
-    virtual void onClock2Timestamp(IClock2& clock) = 0;
-};
-
-} /* namespace nesting */
-
-#endif /* NESTING_COMMON_TIME_ICLOCK2TIMESTAMPLISTENER_H_ */
+//
+// TODO auto-generated module
+//
+moduleinterface IClock2
+{
+    parameters:
+        @display("i=block/timer");
+        string oscillatorModule; // path to oscillator module implementing the IOscillator interface
+}
