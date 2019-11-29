@@ -36,15 +36,15 @@ public:
 
     virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) = 0;
 
-    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind = 0) = 0;
+    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t time, uint64_t kind = 0) = 0;
 
     virtual void subscribeConfigChanges(IClock2ConfigListener& listener) = 0;
 
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) = 0;
 
-    virtual simtime_t getTime() = 0;
+    virtual simtime_t getLocalTime() = 0;
 
-    virtual void setTime(simtime_t time) = 0;
+    virtual void setLocalTime(simtime_t time) = 0;
 
     virtual double getClockResolution() const = 0;
 
@@ -56,7 +56,8 @@ public:
 };
 
 class IClock2Timestamp {
-    virtual simtime_t getTimestamp() const = 0;
+    /* The local time when the event is triggered respective to the clock module that generated the event. */
+    virtual simtime_t getLocalTime() const = 0;
 
     virtual uint64_t getKind() const = 0;
 };

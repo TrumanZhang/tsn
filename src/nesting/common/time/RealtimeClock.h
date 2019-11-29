@@ -18,19 +18,30 @@
 
 #include <omnetpp.h>
 
+#include <vector>
+#include <set>
+
 #include "nesting/common/time/IClock2.h"
 #include "nesting/common/time/IClock2TimestampListener.h"
 #include "nesting/common/time/IClock2ConfigListener.h"
+#include "nesting/common/time/IOscillatorTickListener.h"
+#include "nesting/common/time/IOscillatorConfigListener.h"
 
 using namespace omnetpp;
 
 namespace nesting {
 
+class RealtimeClockTimestamp;
+
 /**
  * TODO - Generated class
  */
-class RealtimeClock : public cSimpleModule, public IClock2
+class RealtimeClock : public cSimpleModule, public IClock2, public IOscillatorTickListener, public IOscillatorConfigListener
 {
+protected:
+    simtime_t localTime;
+    std::set<IClock2ConfigListener*> configListeners;
+    std::vector<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
 protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -39,23 +50,25 @@ public:
     virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind = 0) override;
     virtual void subscribeConfigChanges(IClock2ConfigListener& listener) override;
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
-    virtual simtime_t getTime() override;
-    virtual void setTime(simtime_t time) override;
+    virtual simtime_t getLocalTime() override;
+    virtual void setLocalTime(simtime_t time) override;
     virtual double getClockResolution() const override;
     virtual double setClockResolution(double clockResolution) override;
     virtual double getDrift() const override;
     virtual void setDrift(double drift) override;
+    virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
+    virtual void onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) override;
 };
 
 class RealtimeClockTimestamp : public IClock2Timestamp
 {
 protected:
-    simtime_t timestamp;
+    simtime_t localTime;
     uint64_t kind;
     IClock2TimestampListener& listener;
 public:
     RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind);
-    virtual simtime_t getTimestamp() const override;
+    virtual simtime_t getLocalTime() const override;
     virtual uint64_t getKind() const override;
     virtual IClock2TimestampListener& getListener();
 };

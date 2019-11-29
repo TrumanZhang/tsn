@@ -51,13 +51,13 @@ void RealtimeClock::unsubscribeConfigChanges(IClock2ConfigListener& listener)
     // TODO
 }
 
-simtime_t RealtimeClock::getTime()
+simtime_t RealtimeClock::getLocalTime()
 {
     // TODO
     return SimTime::ZERO;
 }
 
-void RealtimeClock::setTime(simtime_t time)
+void RealtimeClock::setLocalTime(simtime_t time)
 {
     // TODO
 }
@@ -85,16 +85,26 @@ void RealtimeClock::setDrift(double drift)
     // TODO
 }
 
-RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind)
+void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
+{
+    // TODO
+}
+
+void RealtimeClock::onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)
+{
+    // TODO
+}
+
+RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind)
     : listener(listener)
-    , timestamp(timestamp)
+    , localTime(localTime)
     , kind(kind)
 {
 }
 
-simtime_t RealtimeClockTimestamp::getTimestamp() const
+simtime_t RealtimeClockTimestamp::getLocalTime() const
 {
-    return timestamp;
+    return localTime;
 }
 
 uint64_t RealtimeClockTimestamp::getKind() const
