@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include <vector>
+#include <set>
 #include <functional>
 
 #include "nesting/common/time/IOscillator.h"
@@ -51,17 +51,16 @@ protected:
     /** Global simulation time when the last tick event was scheduled. */
     simtime_t timeOfLastTick;
 
-    /** Event queue that contains the scheduled tick events. */
+    /**
+     * Event queue that contains the scheduled tick events. Events are kept in
+     * order to allow the use of binary search for fast lookups.
+     */
     std::list<std::shared_ptr<IdealOscillatorTick>> scheduledEvents;
 
-    std::vector<IOscillatorConfigListener*> configListeners;
+    std::set<IOscillatorConfigListener*> configListeners;
 
     /** Used as self message to notify the component of the next tick event */
     cMessage tickMessage;
-
-    std::function<bool(std::shared_ptr<IdealOscillatorTick>, std::shared_ptr<IdealOscillatorTick>)> cmpIdealOscillatorTickPtrs;
-
-    std::function<bool(IOscillatorConfigListener&, IOscillatorConfigListener&)> cmpConfigListenerRefs;
 public:
     IdealOscillator();
 
@@ -141,7 +140,11 @@ public:
     bool operator!=(const IdealOscillatorTick& tickEvent) const;
 };
 
+// Useful for logging oscillator ticks
 std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEvent);
+
+// Used to keep oscillator ticks sorted
+bool operator<(std::shared_ptr<IdealOscillatorTick> left, std::shared_ptr<IdealOscillatorTick> right);
 
 } //namespace nesting
 

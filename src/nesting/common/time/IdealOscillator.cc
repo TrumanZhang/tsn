@@ -149,8 +149,7 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
     auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
-            tickEvent,
-            [](std::shared_ptr<IdealOscillatorTick> left, std::shared_ptr<IdealOscillatorTick> right) { return *left < *right; }); // TODO move into own function and remove code duplication
+            tickEvent);
 
     // Insert tick event in event queue.
     if (it == scheduledEvents.end() || **it != *tickEvent) {
@@ -170,9 +169,7 @@ void IdealOscillator::unsubscribeTick(IOscillatorTickListener& listener, const I
     auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
-            tickEvent,
-            [](std::shared_ptr<IdealOscillatorTick> left, std::shared_ptr<IdealOscillatorTick> right) { return *left < *right; } // TODO move into own function and remove code duplication
-    );
+            std::make_shared<IdealOscillatorTick>(listener, tick.getTick(), tick.getKind()));
 
     // Remove tick event if it's present within the event queue
     if (it != scheduledEvents.end() && **it == *tickEvent) {
@@ -221,9 +218,7 @@ bool IdealOscillator::isTickScheduled(IOscillatorTickListener& listener, const I
     auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
-            idealOscillatorTick,
-            [](std::shared_ptr<IdealOscillatorTick> left, std::shared_ptr<IdealOscillatorTick> right) { return *left < *right; } // TODO move into own function and remove code duplication
-    );
+            idealOscillatorTick);
     return it != scheduledEvents.end() && **it == *idealOscillatorTick;
 }
 
@@ -249,28 +244,12 @@ void IdealOscillator::setFrequency(double newFrequency)
 
 void IdealOscillator::subscribeConfigChanges(IOscillatorConfigListener& listener)
 {
-    auto it = std::lower_bound(
-            configListeners.begin(),
-            configListeners.end(),
-            &listener,
-            [](IOscillatorConfigListener* left, IOscillatorConfigListener* right) { return left < right; } // TODO move into own function and remove code duplication
-    );
-    if (it == configListeners.end()) {
-        configListeners.insert(it, &listener);
-    }
+    configListeners.insert(&listener);
 }
 
 void IdealOscillator::unsubscribeConfigChanges(IOscillatorConfigListener& listener)
 {
-    auto it = std::lower_bound(
-            configListeners.begin(),
-            configListeners.end(),
-            &listener,
-            [](IOscillatorConfigListener* left, IOscillatorConfigListener* right) { return left < right; } // TODO move into own function and remove code duplication
-    );
-    if (it != configListeners.end() && *it == &listener) {
-        configListeners.erase(it);
-    }
+    configListeners.erase(&listener);
 }
 
 IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind)
@@ -338,6 +317,11 @@ std::ostream& operator<<(std::ostream& stream, const IdealOscillatorTick* tickEv
             << "\",kind=\"" << tickEvent->getKind()
             << "\",listener=\"" << &(tickEvent->getListener()) << "\"]";
     return stream;
+}
+
+bool operator<(std::shared_ptr<IdealOscillatorTick> left, std::shared_ptr<IdealOscillatorTick> right)
+{
+    return *left < *right;
 }
 
 } //namespace
