@@ -23,7 +23,7 @@ namespace nesting {
 Define_Module(IdealOscillator);
 
 IdealOscillator::IdealOscillator()
-    : frequency(1)
+    : frequency(1.0)
     , lastTick(0)
     , timeOfLastTick(SimTime::ZERO)
     , tickEventNow(false)
@@ -89,7 +89,7 @@ void IdealOscillator::handleMessage(cMessage *msg)
 
 simtime_t IdealOscillator::getTickInterval() const
 {
-    return simtime_t(1.0) / frequency;
+    return SimTime(1, SIMTIME_S) / frequency;
 }
 
 void IdealOscillator::scheduleNextTick() {
@@ -98,20 +98,18 @@ void IdealOscillator::scheduleNextTick() {
         cancelEvent(&tickMessage);
     }
 
-    // We don't have to do anything if there are no future events.
-    if (scheduledEvents.empty()) {
-        return;
+    // We only have to schedule the next tick if there exists a future event.
+    if (!scheduledEvents.empty()) {
+        std::shared_ptr<IdealOscillatorTick>& nextTickEvent = scheduledEvents.front();
+
+        uint64_t currentTick = getTickCount();
+        uint64_t nextScheduledTick = nextTickEvent->getTick();
+
+        // Monotonic increasing ticks
+        assert(nextScheduledTick >= currentTick);
+
+        scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * getTickInterval(), &tickMessage);
     }
-
-    std::shared_ptr<IdealOscillatorTick>& nextTickEvent = scheduledEvents.front();
-
-    uint64_t currentTick = getTickCount();
-    uint64_t nextScheduledTick = nextTickEvent->getTick();
-
-    // Monotonic increasing ticks
-    assert(nextScheduledTick >= currentTick);
-
-    scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * getTickInterval(), &tickMessage);
 }
 
 uint64_t IdealOscillator::getTickCount()
