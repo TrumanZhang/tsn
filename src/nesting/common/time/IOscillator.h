@@ -25,6 +25,8 @@
 namespace nesting {
 
 class IOscillatorTick;
+class IOscillatorTickListener;
+class IOscillatorTickConfig;
 
 /** Interface for oscillator implementations. */
 class IOscillator {
