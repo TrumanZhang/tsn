@@ -85,4 +85,26 @@ void RealtimeClock::setDrift(double drift)
     // TODO
 }
 
+RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind)
+    : listener(listener)
+    , timestamp(timestamp)
+    , kind(kind)
+{
+}
+
+simtime_t RealtimeClockTimestamp::getTimestamp() const
+{
+    return timestamp;
+}
+
+uint64_t RealtimeClockTimestamp::getKind() const
+{
+    return kind;
+}
+
+IClock2TimestampListener& RealtimeClockTimestamp::getListener()
+{
+    return listener;
+}
+
 } //namespace

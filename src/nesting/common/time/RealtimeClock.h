@@ -47,6 +47,19 @@ public:
     virtual void setDrift(double drift) override;
 };
 
+class RealtimeClockTimestamp : public IClock2Timestamp
+{
+protected:
+    simtime_t timestamp;
+    uint64_t kind;
+    IClock2TimestampListener& listener;
+public:
+    RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind);
+    virtual simtime_t getTimestamp() const override;
+    virtual uint64_t getKind() const override;
+    virtual IClock2TimestampListener& getListener();
+};
+
 } //namespace
 
 #endif

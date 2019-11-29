@@ -56,9 +56,9 @@ public:
 };
 
 class IClock2Timestamp {
-    virtual simtime_t getTimestamp() = 0;
+    virtual simtime_t getTimestamp() const = 0;
 
-    virtual uint64_t getKind() = 0;
+    virtual uint64_t getKind() const = 0;
 };
 
 } /* namespace nesting */
