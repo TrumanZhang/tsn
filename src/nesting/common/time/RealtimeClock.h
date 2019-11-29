@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 
-#include <vector>
+#include <list>
 #include <set>
 
 #include "inet/common/ModuleAccess.h"
@@ -47,11 +47,10 @@ protected:
     simtime_t localTime;
     double driftRate;
     std::set<IClock2ConfigListener*> configListeners;
-    std::vector<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
+    std::list<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
     std::shared_ptr<const IOscillatorTick> nextTick;
 protected:
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
     virtual void scheduleNextTimestamp();
     virtual simtime_t timeIncrementPerTick() const;
 public:
@@ -75,11 +74,13 @@ class RealtimeClockTimestamp : public IClock2Timestamp
 {
 protected:
     simtime_t localTime;
+    simtime_t localSchedulingTime;
     uint64_t kind;
     IClock2TimestampListener& listener;
 public:
-    RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind);
+    RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, simtime_t localSchedulingTime, uint64_t kind);
     virtual simtime_t getLocalTime() const override;
+    virtual simtime_t getLocalSchedulingTime() const;
     virtual uint64_t getKind() const override;
     virtual IClock2TimestampListener& getListener();
 };

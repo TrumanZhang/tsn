@@ -39,11 +39,6 @@ void RealtimeClock::initialize()
     oscillator->subscribeConfigChanges(*this);
 }
 
-void RealtimeClock::handleMessage(cMessage *msg)
-{
-    // TODO - Generated method body
-}
-
 void RealtimeClock::scheduleNextTimestamp()
 {
     // Cancel next tick.
@@ -125,7 +120,21 @@ void RealtimeClock::setDriftRate(double drift)
 void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
     Enter_Method("oscillatorTick");
-    // TODO
+
+    // Precondition: There should be at least one scheduled event. Otherwise
+    // this method shouldn't have been triggered.
+    assert(!scheduledEvents.empty());
+
+    // Pop next event from queue
+    std::shared_ptr<const RealtimeClockTimestamp> currentEvent = scheduledEvents.front();
+    scheduledEvents.pop_front();
+
+    // Invariant: There must not be any timestamp event scheduled with
+    // timestamp in the past.
+    assert(localTime <= currentEvent->getLocalSchedulingTime());
+
+    // Update local time
+    localTime = currentEvent->getLocalSchedulingTime();
 }
 
 void RealtimeClock::onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)
@@ -137,9 +146,10 @@ void RealtimeClock::onOscillatorFrequencyChange(IOscillator& oscillator, double 
     }
 }
 
-RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind)
+RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, simtime_t localSchedulingTime, uint64_t kind)
     : listener(listener)
     , localTime(localTime)
+    , localSchedulingTime(localSchedulingTime)
     , kind(kind)
 {
 }
@@ -147,6 +157,11 @@ RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listene
 simtime_t RealtimeClockTimestamp::getLocalTime() const
 {
     return localTime;
+}
+
+simtime_t RealtimeClockTimestamp::getLocalSchedulingTime() const
+{
+    return localSchedulingTime;
 }
 
 uint64_t RealtimeClockTimestamp::getKind() const
