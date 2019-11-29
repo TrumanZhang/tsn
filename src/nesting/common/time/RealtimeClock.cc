@@ -15,6 +15,8 @@
 
 #include "RealtimeClock.h"
 
+#include <cmath>
+
 namespace nesting {
 
 Define_Module(RealtimeClock);
@@ -22,7 +24,8 @@ Define_Module(RealtimeClock);
 RealtimeClock::RealtimeClock()
     : oscillator(nullptr)
     , localTime(SimTime(0.0))
-    , nextOscillatorTick(nullptr)
+    , nextTick(nullptr)
+    , driftRate(0.0)
 {
 }
 
@@ -41,9 +44,27 @@ void RealtimeClock::handleMessage(cMessage *msg)
     // TODO - Generated method body
 }
 
-void RealtimeClock::scheduleNextOscillatorTick()
+void RealtimeClock::scheduleNextTimestamp()
 {
-    // TODO
+    // Cancel next tick.
+    if (nextTick != nullptr) {
+        oscillator->unsubscribeTick(*this, *nextTick);
+        nextTick = nullptr;
+    }
+
+    // We only have to schedule the next timestamp if the event queue isn't empty
+    if (!scheduledEvents.empty()) {
+        std::shared_ptr<RealtimeClockTimestamp>& nextTimestamp = scheduledEvents.front();
+        simtime_t idleTime = nextTimestamp->getLocalTime() - getLocalTime();
+        // We have to round up to the next highest tick
+        uint64_t idleTicks = static_cast<uint64_t>(ceil(idleTime / timeIncrementPerTick()));
+        oscillator->subscribeTick(*this, idleTicks);
+    }
+}
+
+simtime_t RealtimeClock::timeIncrementPerTick() const
+{
+    return SimTime(1, SIMTIME_S) / (oscillator->getFrequency() + driftRate);
 }
 
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
@@ -91,25 +112,29 @@ double RealtimeClock::setClockResolution(double clockResolution)
     return 0.0;
 }
 
-double RealtimeClock::getDrift() const
+double RealtimeClock::getDriftRate() const
 {
-    // TODO
-    return 0.0;
+    return driftRate;
 }
 
-void RealtimeClock::setDrift(double drift)
+void RealtimeClock::setDriftRate(double drift)
 {
     // TODO
 }
 
 void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
+    Enter_Method("oscillatorTick");
     // TODO
 }
 
 void RealtimeClock::onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)
 {
-    // TODO
+    Enter_Method_Silent();
+
+    for (auto listener : configListeners) {
+        listener->onClockResolutionChange(*this, oldFrequency, newFrequency);
+    }
 }
 
 RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind)

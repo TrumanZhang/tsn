@@ -21,6 +21,8 @@
 #include <vector>
 #include <set>
 
+#include "inet/common/ModuleAccess.h"
+
 #include "nesting/common/time/IClock2.h"
 #include "nesting/common/time/IClock2TimestampListener.h"
 #include "nesting/common/time/IClock2ConfigListener.h"
@@ -29,6 +31,7 @@
 #include "nesting/common/time/IOscillatorConfigListener.h"
 
 using namespace omnetpp;
+using namespace inet;
 
 namespace nesting {
 
@@ -42,26 +45,28 @@ class RealtimeClock : public cSimpleModule, public IClock2, public IOscillatorTi
 protected:
     IOscillator* oscillator;
     simtime_t localTime;
+    double driftRate;
     std::set<IClock2ConfigListener*> configListeners;
     std::vector<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
-    std::shared_ptr<const IOscillatorTick> nextOscillatorTick;
+    std::shared_ptr<const IOscillatorTick> nextTick;
 protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void scheduleNextOscillatorTick();
+    virtual void scheduleNextTimestamp();
+    virtual simtime_t timeIncrementPerTick() const;
 public:
     RealtimeClock();
     virtual ~RealtimeClock();
     virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) override;
-    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind = 0) override;
+    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t time, uint64_t kind = 0) override;
     virtual void subscribeConfigChanges(IClock2ConfigListener& listener) override;
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
     virtual simtime_t getLocalTime() override;
     virtual void setLocalTime(simtime_t time) override;
     virtual double getClockResolution() const override;
     virtual double setClockResolution(double clockResolution) override;
-    virtual double getDrift() const override;
-    virtual void setDrift(double drift) override;
+    virtual double getDriftRate() const override;
+    virtual void setDriftRate(double drift) override;
     virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
     virtual void onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) override;
 };

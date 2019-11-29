@@ -26,9 +26,9 @@ class IClock2ConfigListener {
 public:
     virtual ~IClock2ConfigListener() {};
 
-    virtual void onClockRateChange(IClock2& clock, double oldClockRate, double newClockRate) = 0;
+    virtual void onClockResolutionChange(IClock2& clock, double oldClockResolution, double newClockResolution) = 0;
 
-    virtual void OnClockSkewChange(IClock2& clock, double oldClockSkew, double newClockSkew) = 0;
+    virtual void OnClockDriftChange(IClock2& clock, double oldClockDrift, double newClockDrift) = 0;
 };
 
 } // namespace nesting

@@ -50,9 +50,9 @@ public:
 
     virtual double setClockResolution(double clockResolution) = 0;
 
-    virtual double getDrift() const = 0;
+    virtual double getDriftRate() const = 0;
 
-    virtual void setDrift(double drift) = 0;
+    virtual void setDriftRate(double drift) = 0;
 };
 
 class IClock2Timestamp {
