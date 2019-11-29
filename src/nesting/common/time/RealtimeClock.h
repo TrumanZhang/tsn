@@ -24,6 +24,7 @@
 #include "nesting/common/time/IClock2.h"
 #include "nesting/common/time/IClock2TimestampListener.h"
 #include "nesting/common/time/IClock2ConfigListener.h"
+#include "nesting/common/time/IOscillator.h"
 #include "nesting/common/time/IOscillatorTickListener.h"
 #include "nesting/common/time/IOscillatorConfigListener.h"
 
@@ -39,13 +40,18 @@ class RealtimeClockTimestamp;
 class RealtimeClock : public cSimpleModule, public IClock2, public IOscillatorTickListener, public IOscillatorConfigListener
 {
 protected:
+    IOscillator* oscillator;
     simtime_t localTime;
     std::set<IClock2ConfigListener*> configListeners;
     std::vector<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
+    std::shared_ptr<const IOscillatorTick> nextOscillatorTick;
 protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
+    virtual void scheduleNextOscillatorTick();
 public:
+    RealtimeClock();
+    virtual ~RealtimeClock();
     virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) override;
     virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind = 0) override;
     virtual void subscribeConfigChanges(IClock2ConfigListener& listener) override;

@@ -19,14 +19,31 @@ namespace nesting {
 
 Define_Module(RealtimeClock);
 
+RealtimeClock::RealtimeClock()
+    : oscillator(nullptr)
+    , localTime(SimTime(0.0))
+    , nextOscillatorTick(nullptr)
+{
+}
+
+RealtimeClock::~RealtimeClock()
+{
+}
+
 void RealtimeClock::initialize()
 {
-    // TODO - Generated method body
+    oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
+    oscillator->subscribeConfigChanges(*this);
 }
 
 void RealtimeClock::handleMessage(cMessage *msg)
 {
     // TODO - Generated method body
+}
+
+void RealtimeClock::scheduleNextOscillatorTick()
+{
+    // TODO
 }
 
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
@@ -43,12 +60,12 @@ std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock
 
 void RealtimeClock::subscribeConfigChanges(IClock2ConfigListener& listener)
 {
-    // TODO
+    configListeners.insert(&listener);
 }
 
 void RealtimeClock::unsubscribeConfigChanges(IClock2ConfigListener& listener)
 {
-    // TODO
+    configListeners.erase(&listener);
 }
 
 simtime_t RealtimeClock::getLocalTime()

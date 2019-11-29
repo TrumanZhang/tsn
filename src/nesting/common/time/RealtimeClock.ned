@@ -20,4 +20,6 @@ package nesting.common.time;
 //
 simple RealtimeClock
 {
+    parameters:
+        string oscillatorModule;
 }
