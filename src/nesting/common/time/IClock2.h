@@ -46,11 +46,11 @@ public:
 
     virtual void setTime(simtime_t time) = 0;
 
-    virtual double getClockRate() const = 0;
+    virtual double getClockRate() const = 0; // Clock resolution
 
     virtual double setClockRate(double clockRate) = 0;
 
-    virtual double getSkew() const = 0;
+    virtual double getSkew() const = 0; // Drift
 
     virtual void setSkew(double skew) = 0;
 };
