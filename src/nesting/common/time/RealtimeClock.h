@@ -41,10 +41,10 @@ public:
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
     virtual simtime_t getTime() override;
     virtual void setTime(simtime_t time) override;
-    virtual double getClockRate() const override;
-    virtual double setClockRate(double clockRate) override;
-    virtual double getSkew() const override;
-    virtual void setSkew(double skew) override;
+    virtual double getClockResolution() const override;
+    virtual double setClockResolution(double clockResolution) override;
+    virtual double getDrift() const override;
+    virtual void setDrift(double drift) override;
 };
 
 } //namespace

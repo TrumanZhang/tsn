@@ -62,25 +62,25 @@ void RealtimeClock::setTime(simtime_t time)
     // TODO
 }
 
-double RealtimeClock::getClockRate() const
+double RealtimeClock::getClockResolution() const
 {
     // TODO
     return 0.0;
 }
 
-double RealtimeClock::setClockRate(double clockRate)
+double RealtimeClock::setClockResolution(double clockResolution)
 {
     // TODO
     return 0.0;
 }
 
-double RealtimeClock::getSkew() const
+double RealtimeClock::getDrift() const
 {
     // TODO
     return 0.0;
 }
 
-void RealtimeClock::setSkew(double skew)
+void RealtimeClock::setDrift(double drift)
 {
     // TODO
 }

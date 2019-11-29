@@ -46,13 +46,13 @@ public:
 
     virtual void setTime(simtime_t time) = 0;
 
-    virtual double getClockRate() const = 0; // Clock resolution
+    virtual double getClockResolution() const = 0;
 
-    virtual double setClockRate(double clockRate) = 0;
+    virtual double setClockResolution(double clockResolution) = 0;
 
-    virtual double getSkew() const = 0; // Drift
+    virtual double getDrift() const = 0;
 
-    virtual void setSkew(double skew) = 0;
+    virtual void setDrift(double drift) = 0;
 };
 
 class IClock2Timestamp {
