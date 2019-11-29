@@ -296,29 +296,14 @@ IOscillatorTickListener& IdealOscillatorTick::getListener() const
     return listener;
 }
 
-void IdealOscillatorTick::setListener(IOscillatorTickListener& listener)
-{
-    this->listener = listener;
-}
-
 uint64_t IdealOscillatorTick::getTick() const
 {
     return tick;
 }
 
-void IdealOscillatorTick::setTick(uint64_t tick)
-{
-    this->tick = tick;
-}
-
 uint64_t IdealOscillatorTick::getKind() const
 {
     return kind;
-}
-
-void IdealOscillatorTick::setKind(uint64_t kind)
-{
-    this->kind = kind;
 }
 
 bool IdealOscillatorTick::operator<(const IdealOscillatorTick& tickEvent) const

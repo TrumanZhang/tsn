@@ -130,15 +130,9 @@ public:
 
     virtual IOscillatorTickListener& getListener() const;
 
-    virtual void setListener(IOscillatorTickListener& listener);
-
     virtual uint64_t getTick() const override;
 
-    virtual void setTick(uint64_t tick);
-
     virtual uint64_t getKind() const override;
-
-    virtual void setKind(uint64_t kind);
 
     bool operator<(const IdealOscillatorTick& tickEvent) const;
 
