@@ -48,11 +48,14 @@ public:
 
     virtual double getClockResolution() const = 0;
 
-    virtual double setClockResolution(double clockResolution) = 0;
-
     virtual double getDriftRate() const = 0;
 
-    virtual void setDriftRate(double drift) = 0;
+    /**
+     * Updates the clock resolution and drift.
+     *
+     * @throw std::invalid_argument if clockResolution - drift <= 0.0
+     */
+    virtual void updateConfig(double clockResolution, double drift) = 0;
 };
 
 class IClock2Timestamp {
