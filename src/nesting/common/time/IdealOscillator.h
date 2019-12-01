@@ -163,7 +163,7 @@ public:
     /** @copydoc IOscillatorTick::isCancelled() */
     virtual bool isCancelled() const override;
 
-    virtual void setCancelled(bool cancelled);
+    virtual void setCancelled(bool cancelled); // TODO cancel tick events instead of deleting them
 
     bool operator<(const IdealOscillatorTick& tickEvent) const;
 
