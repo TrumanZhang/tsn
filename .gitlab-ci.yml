@@ -27,7 +27,7 @@ build:
 test_release:
     stage: test
     script:
-        - bash $NESTING/tests/run_tests.sh
+        - bash $NESTING/scripts/run_tests.sh
     artifacts:
         paths:
             - work
@@ -35,7 +35,7 @@ test_release:
 test_dbg:
     stage: test
     script:
-        - MODE=debug bash $NESTING/tests/run_tests.sh
+        - MODE=debug bash $NESTING/scripts/run_tests.sh
     artifacts:
         paths:
             - work
@@ -43,7 +43,7 @@ test_dbg:
 code_quality:
     stage: analysis
     script:
-        - python3 $NESTING/tests/run_cppcheck.py gl-code-quality-report.json
+        - python3 $NESTING/scripts/run_cppcheck.py gl-code-quality-report.json
     artifacts:
         reports:
             codequality: gl-code-quality-report.json

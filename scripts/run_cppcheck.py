@@ -70,3 +70,5 @@ print('Cppcheck found {} issues.'.format(id - 1))
 # Write report to file
 with open(cppcheck_report_path, 'w') as f:
     f.write(json.dumps(cppcheck_report, indent=4))
+
+print('Wrote report to {}'.format(cppcheck_report_path))
