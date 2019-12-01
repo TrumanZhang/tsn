@@ -161,9 +161,9 @@ bool RealtimeClock::isStopped()
     return oscillator->getFrequency() + driftRate < minEffectiveClockRate;
 }
 
-void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
+void RealtimeClock::onTick(IOscillator& oscillator, const IOscillatorTick& tick)
 {
-    Enter_Method("oscillatorTick");
+    Enter_Method("tick");
 
     // Precondition: There should be at least one scheduled event. Otherwise
     // this method shouldn't have been triggered.
@@ -188,7 +188,7 @@ void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorT
     currentEvent->getListener().onTimestamp(*this, *currentEvent);
 }
 
-void RealtimeClock::onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)
+void RealtimeClock::onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)
 {
     Enter_Method_Silent();
     

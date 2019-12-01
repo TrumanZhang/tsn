@@ -79,7 +79,7 @@ void IdealOscillator::handleMessage(cMessage *msg)
         }
 
         // Notify listener
-        tickEvent->getListener().onOscillatorTick(*this, *tickEvent);
+        tickEvent->getListener().onTick(*this, *tickEvent);
 
         scheduleNextTick();
 
@@ -266,7 +266,7 @@ void IdealOscillator::setFrequency(double newFrequency)
 
     // Notify config subscribers
     for (IOscillatorConfigListener* listener : configListeners) {
-        listener->onOscillatorFrequencyChange(*this, oldFrequency, newFrequency);
+        listener->onFrequencyChange(*this, oldFrequency, newFrequency);
     }
 }
 

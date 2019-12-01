@@ -72,8 +72,8 @@ public:
     virtual void setClockRate(double clockRate) override;
     virtual double getDriftRate() const override;
     virtual void setDriftRate(double driftRate) override;
-    virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
-    virtual void onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) override;
+    virtual void onTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
+    virtual void onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) override;
     virtual bool isStopped();
 };
 

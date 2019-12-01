@@ -26,7 +26,7 @@ class IOscillatorConfigListener {
 public:
     virtual ~IOscillatorConfigListener() {};
 
-    virtual void onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) = 0;
+    virtual void onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) = 0;
 };
 
 } // namespace nesting
