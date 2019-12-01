@@ -19,8 +19,12 @@
 #include <cstdint>
 #include <memory>
 
+#include <omnetpp.h>
+
 #include "nesting/common/time/IOscillatorTickListener.h"
 #include "nesting/common/time/IOscillatorConfigListener.h"
+
+using namespace omnetpp;
 
 namespace nesting {
 
@@ -94,6 +98,12 @@ public:
     virtual uint64_t getTick() const = 0;
 
     virtual uint64_t getKind() const = 0;
+
+    /** Global simulation time when the tick event will be scheduled. */
+    virtual simtime_t getGlobalSchedulingTime() const = 0;
+
+    /** True if the tick event was cancelled. */
+    virtual bool isCancelled() const = 0;
 };
 
 } // namespace nesting

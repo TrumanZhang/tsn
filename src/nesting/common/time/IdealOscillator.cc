@@ -141,7 +141,8 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
     std::shared_ptr<IdealOscillatorTick> tickEvent = std::make_shared<IdealOscillatorTick>(
             listener,
             currentTick + idleTicks,
-            kind);
+            kind,
+            SimTime::ZERO);
 
     // Find insert position of tick event with binary search.
     auto it = std::lower_bound(
@@ -161,13 +162,19 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
 
 void IdealOscillator::unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick)
 {
-    std::shared_ptr<IdealOscillatorTick> tickEvent = std::make_shared<IdealOscillatorTick>(listener, tick.getTick(), tick.getKind());
+    Enter_Method_Silent();
+
+    std::shared_ptr<IdealOscillatorTick> tickEvent = std::make_shared<IdealOscillatorTick>(
+        listener, 
+        tick.getTick(), 
+        tick.getKind(), 
+        SimTime::ZERO);
 
     // Find tick event
     auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
-            std::make_shared<IdealOscillatorTick>(listener, tick.getTick(), tick.getKind()));
+            tickEvent);
 
     // Remove tick event if it's present within the event queue
     if (it != scheduledEvents.end() && **it == *tickEvent) {
@@ -250,10 +257,12 @@ void IdealOscillator::unsubscribeConfigChanges(IOscillatorConfigListener& listen
     configListeners.erase(&listener);
 }
 
-IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind)
+IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime)
     : listener(listener)
     , tick(tick)
     , kind(kind)
+    , globalSchedulingTime(globalSchedulingTime)
+    , cancelled(false)
 {
 }
 
@@ -261,6 +270,8 @@ IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, cons
     : listener(listener)
     , tick(tickEvent.getTick())
     , kind(tickEvent.getKind())
+    , globalSchedulingTime(tickEvent.getGlobalSchedulingTime())
+    , cancelled(false)
 {
 }
 
@@ -273,9 +284,19 @@ IOscillatorTickListener& IdealOscillatorTick::getListener() const
     return listener;
 }
 
+void IdealOscillatorTick::setListener(IOscillatorTickListener& listener)
+{
+    this->listener = listener;
+}
+
 uint64_t IdealOscillatorTick::getTick() const
 {
     return tick;
+}
+
+void IdealOscillatorTick::setTick(uint64_t tick)
+{
+    this->tick = tick;
 }
 
 uint64_t IdealOscillatorTick::getKind() const
@@ -283,15 +304,40 @@ uint64_t IdealOscillatorTick::getKind() const
     return kind;
 }
 
+void IdealOscillatorTick::setKind(uint64_t kind)
+{
+    this->kind = kind;
+}
+
+simtime_t IdealOscillatorTick::getGlobalSchedulingTime() const
+{
+    return globalSchedulingTime;
+}
+
+void IdealOscillatorTick::setGlobalSchedulingTime(simtime_t globalSchedulingTime)
+{
+    this->globalSchedulingTime = globalSchedulingTime;
+}
+
+bool IdealOscillatorTick::isCancelled() const
+{
+    return cancelled;
+}
+
+void IdealOscillatorTick::setCancelled(bool cancelled)
+{
+    this->cancelled = cancelled;
+}
+
 bool IdealOscillatorTick::operator<(const IdealOscillatorTick& tickEvent) const
 {
-    if (this->tick < tickEvent.tick) {
+    if (this->tick < tickEvent.getTick()) {
         return true;
-    } else if (this->tick == tickEvent.tick) {
-        if (this->kind < tickEvent.kind) {
+    } else if (this->tick == tickEvent.getTick()) {
+        if (this->kind < tickEvent.getKind()) {
             return true;
-        } else if (this->kind == tickEvent.kind) {
-            return &(this->listener) < &(tickEvent.listener);
+        } else if (this->kind == tickEvent.getKind()) {
+            return &(this->listener) < &(tickEvent.getListener());
         }
     }
     return false;

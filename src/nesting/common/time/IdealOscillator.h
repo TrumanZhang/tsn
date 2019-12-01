@@ -120,20 +120,45 @@ protected:
     uint64_t tick;
 
     uint64_t kind;
+
+    simtime_t globalSchedulingTime;
+
+    bool cancelled;
 public:
-    IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind);
+    IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime);
 
     IdealOscillatorTick(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent);
 
     virtual ~IdealOscillatorTick();
 
+    /** @copydoc IOscillatorTick::getListener() */
     virtual IOscillatorTickListener& getListener() const;
 
+    virtual void setListener(IOscillatorTickListener& listener);
+
+    /** @copydoc IOscillatorTick::getTick() */
     virtual uint64_t getTick() const override;
 
+    virtual void setTick(uint64_t tick);
+
+    /** @copydoc IOscillatorTick::getKind() */
     virtual uint64_t getKind() const override;
 
+    virtual void setKind(uint64_t kind);
+
+    /** @copydoc IOscillatorTick::getGlobalSchedulingTime() */
+    virtual simtime_t getGlobalSchedulingTime() const override;
+
+    virtual void setGlobalSchedulingTime(simtime_t globalSchedulingTime);
+
+    /** @copydoc IOscillatorTick::isCancelled() */
+    virtual bool isCancelled() const override;
+
+    virtual void setCancelled(bool cancelled);
+
     bool operator<(const IdealOscillatorTick& tickEvent) const;
+
+    //bool operator<(const IOscillatorTick& tickEvent) const;
 
     bool operator==(const IdealOscillatorTick& tickEvent) const;
 
