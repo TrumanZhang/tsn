@@ -87,7 +87,7 @@ void IdealOscillator::handleMessage(cMessage *msg)
     }
 }
 
-simtime_t IdealOscillator::getTickInterval() const
+simtime_t IdealOscillator::tickInterval() const
 {
     return SimTime(1, SIMTIME_S) / frequency;
 }
@@ -108,8 +108,14 @@ void IdealOscillator::scheduleNextTick() {
         // Monotonic increasing ticks
         assert(nextScheduledTick >= currentTick);
 
-        scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * getTickInterval(), &tickMessage);
+        scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * tickInterval(), &tickMessage);
     }
+}
+
+simtime_t IdealOscillator::globalSchedulingTimeForTick(const IdealOscillatorTick& tick) const
+{
+    // TODO not implemented yet
+    return SimTime::ZERO;
 }
 
 uint64_t IdealOscillator::getTickCount()
@@ -120,7 +126,7 @@ uint64_t IdealOscillator::getTickCount()
     if (tickEventNow) { // Check tick event flag to prevent numeric errors. TODO: Might not be necessary. Flag can potentially be removed.
         currentTick = lastTick;
     } else {
-        uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / getTickInterval());
+        uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / tickInterval());
         currentTick = lastTick + elapsedTicks;
     }
 
@@ -158,6 +164,23 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
     scheduleNextTick();
 
     return tickEvent;
+}
+
+std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks)
+{
+    return subscribeTick(listener, idleTicks, 0);
+}
+
+std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind)
+{
+    // TODO not implemented yet
+    return nullptr;
+}
+
+std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound)
+{
+    // TODO not implemented yet
+    return nullptr;
 }
 
 void IdealOscillator::unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick)

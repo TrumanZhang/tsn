@@ -66,8 +66,14 @@ public:
 
     virtual ~IdealOscillator();
 
-    /** @copydoc IOscillator::subscribeTick() */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind = 0) override;
+    /** @copydoc IOscillator::subscribeTick(IOscillatorTickListener&, uint64_t, uint64_t) */
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind) override;
+
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks) override;
+
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind) override;
+
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound) override;
 
     /** @copydoc IOscillator::unsubscribeTick() */
     virtual void unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick) override;
@@ -102,7 +108,8 @@ protected:
 
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual simtime_t getTickInterval() const;
+    virtual simtime_t tickInterval() const;
+
     /**
      * Schedules a self-message so the component is notified about the next
      * event in the event-queue. Reschedules an already existent self-message
@@ -111,6 +118,8 @@ protected:
      * This method should be called after every update to the event queue.
      */
     virtual void scheduleNextTick();
+
+    virtual simtime_t globalSchedulingTimeForTick(const IdealOscillatorTick& tick) const;
 };
 
 class IdealOscillatorTick : public IOscillatorTick {

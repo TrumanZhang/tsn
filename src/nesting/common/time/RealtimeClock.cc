@@ -16,6 +16,7 @@
 #include "RealtimeClock.h"
 
 #include <cmath>
+#include <algorithm>
 
 namespace nesting {
 
@@ -26,6 +27,7 @@ RealtimeClock::RealtimeClock()
     , localTime(SimTime(0.0))
     , nextTick(nullptr)
     , driftRate(0.0)
+    , lastTick(0)
 {
 }
 
@@ -37,6 +39,7 @@ void RealtimeClock::initialize()
 {
     oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
     oscillator->subscribeConfigChanges(*this);
+    lastTick = oscillator->getTickCount();
 }
 
 void RealtimeClock::scheduleNextTimestamp()
@@ -48,12 +51,12 @@ void RealtimeClock::scheduleNextTimestamp()
     }
 
     // We only have to schedule the next timestamp if the event queue isn't empty
-    if (!scheduledEvents.empty()) {
+    if (!scheduledEvents.empty() && !isStopped()) {
         std::shared_ptr<RealtimeClockTimestamp>& nextTimestamp = scheduledEvents.front();
         simtime_t idleTime = nextTimestamp->getLocalTime() - getLocalTime();
         // We have to round up to the next highest tick
         uint64_t idleTicks = static_cast<uint64_t>(ceil(idleTime / timeIncrementPerTick()));
-        oscillator->subscribeTick(*this, idleTicks);
+        oscillator->subscribeTick(*this, idleTicks); // TODO use new subscribeTick method
     }
 }
 
@@ -86,25 +89,51 @@ void RealtimeClock::unsubscribeConfigChanges(IClock2ConfigListener& listener)
 
 simtime_t RealtimeClock::getLocalTime()
 {
-    // TODO
-    return SimTime::ZERO;
+    uint64_t elapsedTicks = oscillator->getTickCount() - lastTick;
+    localTime += elapsedTicks * timeIncrementPerTick();
+    lastTick += elapsedTicks;
+    return localTime;
 }
 
-void RealtimeClock::setLocalTime(simtime_t time)
+void RealtimeClock::setLocalTime(simtime_t newTime)
 {
-    // TODO
+    // Update time
+    simtime_t oldTime = localTime;
+    localTime = newTime;
+
+    // If the new local time is in the future, then we have to fast forward all
+    // events that are scheduled before the new time value.
+    if (oldTime < localTime) {
+        auto bound = std::upper_bound(
+                scheduledEvents.begin(), 
+                scheduledEvents.end(), 
+                localTime,
+                [](simtime_t time, std::shared_ptr<RealtimeClockTimestamp> event) {
+                    return time < event->getLocalSchedulingTime();
+                });
+        // Notify listeners
+        for (auto it = scheduledEvents.begin(); it != bound; it++) {
+            std::shared_ptr<RealtimeClockTimestamp> event = *it;
+            event->getListener().onTimestamp(*this, *event);
+        }
+        // Remove events
+        scheduledEvents.erase(scheduledEvents.begin(), bound);
+    }
+
+    // Notify config listeners
+    for (IClock2ConfigListener* listener : configListeners) {
+        listener->onPhaseJump(*this, oldTime, newTime);
+    }
 }
 
-double RealtimeClock::getClockResolution() const
+double RealtimeClock::getClockRate() const
 {
-    // TODO
-    return 0.0;
+    return oscillator->getFrequency();
 }
 
-double RealtimeClock::setClockResolution(double clockResolution)
+void RealtimeClock::setClockRate(double clockRate)
 {
-    // TODO
-    return 0.0;
+    oscillator->setFrequency(clockRate);
 }
 
 double RealtimeClock::getDriftRate() const
@@ -112,9 +141,24 @@ double RealtimeClock::getDriftRate() const
     return driftRate;
 }
 
-void RealtimeClock::setDriftRate(double drift)
+void RealtimeClock::setDriftRate(double driftRate)
 {
-    // TODO
+    // Update drift rate
+    double oldDriftRate = this->driftRate;
+    this->driftRate = driftRate;
+
+    // Reschedule next event
+    scheduleNextTimestamp();
+
+    // Notify listeners
+    for (IClock2ConfigListener* listener : configListeners) {
+        listener->onDriftRateChange(*this, oldDriftRate, driftRate);
+    }
+}
+
+bool RealtimeClock::isStopped()
+{
+    return oscillator->getFrequency() + driftRate < minEffectiveClockRate;
 }
 
 void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick)
@@ -125,8 +169,11 @@ void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorT
     // this method shouldn't have been triggered.
     assert(!scheduledEvents.empty());
 
+    // Invariant
+    assert(&oscillator == this->oscillator);
+
     // Pop next event from queue
-    std::shared_ptr<const RealtimeClockTimestamp> currentEvent = scheduledEvents.front();
+    std::shared_ptr<RealtimeClockTimestamp> currentEvent = scheduledEvents.front();
     scheduledEvents.pop_front();
 
     // Invariant: There must not be any timestamp event scheduled with
@@ -135,14 +182,22 @@ void RealtimeClock::onOscillatorTick(IOscillator& oscillator, const IOscillatorT
 
     // Update local time
     localTime = currentEvent->getLocalSchedulingTime();
+    lastTick = this->oscillator->getTickCount();
+
+    // Notify listener
+    currentEvent->getListener().onTimestamp(*this, *currentEvent);
 }
 
 void RealtimeClock::onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)
 {
     Enter_Method_Silent();
+    
+    // Reschedule next event
+    scheduleNextTimestamp();
 
-    for (auto listener : configListeners) {
-        listener->onClockResolutionChange(*this, oldFrequency, newFrequency);
+    // Notify listeners
+    for (IClock2ConfigListener* listener : configListeners) {
+        listener->onClockRateChange(*this, oldFrequency, newFrequency);
     }
 }
 

@@ -45,10 +45,16 @@ class RealtimeClock : public cSimpleModule, public IClock2, public IOscillatorTi
 protected:
     IOscillator* oscillator;
     simtime_t localTime;
+    uint64_t lastTick;
     double driftRate;
     std::set<IClock2ConfigListener*> configListeners;
     std::list<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
-    std::shared_ptr<const IOscillatorTick> nextTick;
+    std::shared_ptr<IOscillatorTick> nextTick;
+    /** 
+     * If the clockRate + driftRate is smaller than this threshold, the clock
+     * is stopped instead of running really slow to prevent numeric errors.
+     */
+    const double minEffectiveClockRate = 1e-12;
 protected:
     virtual void initialize();
     virtual void scheduleNextTimestamp();
@@ -62,12 +68,13 @@ public:
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
     virtual simtime_t getLocalTime() override;
     virtual void setLocalTime(simtime_t time) override;
-    virtual double getClockResolution() const override;
-    virtual double setClockResolution(double clockResolution) override;
+    virtual double getClockRate() const override;
+    virtual void setClockRate(double clockRate) override;
     virtual double getDriftRate() const override;
-    virtual void setDriftRate(double drift) override;
+    virtual void setDriftRate(double driftRate) override;
     virtual void onOscillatorTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
     virtual void onOscillatorFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) override;
+    virtual bool isStopped();
 };
 
 class RealtimeClockTimestamp : public IClock2Timestamp
@@ -80,7 +87,7 @@ protected:
 public:
     RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, simtime_t localSchedulingTime, uint64_t kind);
     virtual simtime_t getLocalTime() const override;
-    virtual simtime_t getLocalSchedulingTime() const;
+    virtual simtime_t getLocalSchedulingTime() const override;
     virtual uint64_t getKind() const override;
     virtual IClock2TimestampListener& getListener();
 };

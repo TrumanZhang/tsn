@@ -46,21 +46,21 @@ public:
 
     virtual void setLocalTime(simtime_t time) = 0;
 
-    virtual double getClockResolution() const = 0;
+    virtual double getClockRate() const = 0;
+
+    virtual void setClockRate(double clockRate) = 0;
 
     virtual double getDriftRate() const = 0;
 
-    /**
-     * Updates the clock resolution and drift.
-     *
-     * @throw std::invalid_argument if clockResolution - drift <= 0.0
-     */
-    virtual void updateConfig(double clockResolution, double drift) = 0;
+    virtual void setDriftRate(double driftRate) = 0;
 };
 
 class IClock2Timestamp {
-    /* The local time when the event is triggered respective to the clock module that generated the event. */
+    /** TODO write doc */
     virtual simtime_t getLocalTime() const = 0;
+
+    /** TODO write doc */
+    virtual simtime_t getLocalSchedulingTime() const = 0;
 
     virtual uint64_t getKind() const = 0;
 };

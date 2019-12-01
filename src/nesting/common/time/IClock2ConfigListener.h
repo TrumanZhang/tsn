@@ -16,7 +16,11 @@
 #ifndef NESTING_COMMON_TIME_ICLOCK2CONFIGLISTENER_H_
 #define NESTING_COMMON_TIME_ICLOCK2CONFIGLISTENER_H_
 
+#include <omnetpp.h>
+
 #include "nesting/common/time/IClock2.h"
+
+using namespace omnetpp;
 
 namespace nesting {
 
@@ -26,9 +30,11 @@ class IClock2ConfigListener {
 public:
     virtual ~IClock2ConfigListener() {};
 
-    virtual void onClockResolutionChange(IClock2& clock, double oldClockResolution, double newClockResolution) = 0;
+    virtual void onClockRateChange(IClock2& clock, double oldClockRate, double newClockRate) = 0;
 
-    virtual void OnClockDriftChange(IClock2& clock, double oldClockDrift, double newClockDrift) = 0;
+    virtual void onDriftRateChange(IClock2& clock, double oldDriftRate, double newDriftRate) = 0;
+
+    virtual void onPhaseJump(IClock2& clock, simtime_t oldTime, simtime_t newTime) = 0;
 };
 
 } // namespace nesting

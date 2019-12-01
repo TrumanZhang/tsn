@@ -21,11 +21,13 @@
 namespace nesting {
 
 class IClock2;
+class IClock2Timestamp;
 
 class IClock2TimestampListener {
+public:
     virtual ~IClock2TimestampListener() {};
 
-    virtual void onClock2Timestamp(IClock2& clock) = 0;
+    virtual void onTimestamp(IClock2& clock, const IClock2Timestamp& timestamp) = 0;
 };
 
 } /* namespace nesting */

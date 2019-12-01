@@ -41,7 +41,31 @@ public:
      * Subscribes a tick event for a given listener. The kind value can be used
      * to create inverse mappings of oscillator ticks within subscribers.
      */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind = 0) = 0;
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind) = 0;
+
+    /**
+     * Same as IOscillator::subscribeTick(IOscillatorTickListener&, uint64_t,
+     * uint64_t) except that the kind value is set to 0.
+     */
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks) = 0;
+
+    /**
+     * Subscribes to the first tick event, that happens before upperBound.
+     * 
+     * Because this method only works with the global simulation time for a lot
+     * of use cases implementations of the IClock2 interfaces are better
+     * suited because they provide an additional layer of abstraction.
+     * 
+     * @param upperBound Global simulation time used to determine the tick
+     *                   event that happens immediately before.
+     */
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind) = 0;
+
+    /**
+     * Same as IOscillator::subscribeTick(IOscillatorTickListener&, simtime_t,
+     * uint64_t) except that the kind value is set to 0.
+     */
+    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound) = 0;
 
     /**
      * Unsubscribes a listener from a tick event.
