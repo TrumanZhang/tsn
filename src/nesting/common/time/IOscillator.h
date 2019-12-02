@@ -111,7 +111,7 @@ public:
      * method can't be constant because of potential stochastic
      * implementations.
      */
-    virtual uint64_t getTickCount() = 0;
+    virtual uint64_t updateAndGetTickCount() = 0;
 };
 
 /** Interface for oscillator ticks. */

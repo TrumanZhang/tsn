@@ -93,8 +93,8 @@ public:
     /** @copydoc IOscillator::setFrequency() */
     virtual void setFrequency(double frequency) override;
 
-    /** @copydoc IOscillator::getTickCount() */
-    virtual uint64_t getTickCount() override;
+    /** @copydoc IOscillator::updateAndGetTickCount() */
+    virtual uint64_t updateAndGetTickCount() override;
 
     /** @copydoc IOscillator::subscribeConfigChanges() */
     void subscribeConfigChanges(IOscillatorConfigListener& listener) override;
@@ -119,7 +119,9 @@ protected:
      */
     virtual void scheduleNextTick();
 
-    virtual simtime_t globalSchedulingTimeForTick(const IdealOscillatorTick& tick) const;
+    virtual simtime_t globalSchedulingTimeForTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind);
+
+    virtual simtime_t globalSchedulingTimeForTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind);
 };
 
 class IdealOscillatorTick : public IOscillatorTick {

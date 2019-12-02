@@ -92,7 +92,7 @@ void TestIdealOscillator::onTick(IOscillator& oscillator, const IOscillatorTick&
     Enter_Method("tick");
     
     // Tick should be prime number
-    uint64_t currentTick = oscillator.getTickCount();
+    uint64_t currentTick = oscillator.updateAndGetTickCount();
     
     bool isPrime = std::find(primes.begin(), primes.end(), currentTick) != primes.end();
     if (!isPrime) {

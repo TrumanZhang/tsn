@@ -39,7 +39,7 @@ void RealtimeClock::initialize()
 {
     oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
     oscillator->subscribeConfigChanges(*this);
-    lastTick = oscillator->getTickCount();
+    lastTick = oscillator->updateAndGetTickCount();
 }
 
 void RealtimeClock::scheduleNextTimestamp()
@@ -89,7 +89,7 @@ void RealtimeClock::unsubscribeConfigChanges(IClock2ConfigListener& listener)
 
 simtime_t RealtimeClock::getLocalTime()
 {
-    uint64_t elapsedTicks = oscillator->getTickCount() - lastTick;
+    uint64_t elapsedTicks = oscillator->updateAndGetTickCount() - lastTick;
     localTime += elapsedTicks * timeIncrementPerTick();
     lastTick += elapsedTicks;
     return localTime;
@@ -182,7 +182,7 @@ void RealtimeClock::onTick(IOscillator& oscillator, const IOscillatorTick& tick)
 
     // Update local time
     localTime = currentEvent->getLocalSchedulingTime();
-    lastTick = this->oscillator->getTickCount();
+    lastTick = this->oscillator->updateAndGetTickCount();
 
     // Notify listener
     currentEvent->getListener().onTimestamp(*this, *currentEvent);
