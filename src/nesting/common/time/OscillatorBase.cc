@@ -321,16 +321,13 @@ void OscillatorBaseTick::setGlobalSchedulingTime(simtime_t globalSchedulingTime)
 
 bool OscillatorBaseTick::operator<(const OscillatorBaseTick& tickEvent) const
 {
-    if (this->tick < tickEvent.getTick()) {
-        return true;
-    } else if (this->tick == tickEvent.getTick()) {
-        if (this->kind < tickEvent.getKind()) {
-            return true;
-        } else if (this->kind == tickEvent.getKind()) {
-            return &(this->listener) < &(tickEvent.getListener());
-        }
-    }
-    return false;
+    if (this->tick > tickEvent.getTick())
+        return false;
+    if (this->kind > tickEvent.kind)
+        return false;
+    if (&(this->listener) > &(tickEvent.listener))
+        return false;
+    return true;
 }
 
 bool OscillatorBaseTick::operator==(const OscillatorBaseTick& tickEvent) const
