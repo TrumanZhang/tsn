@@ -71,10 +71,6 @@ public:
 
     virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks) override;
 
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind) override;
-
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound) override;
-
     /** @copydoc IOscillator::unsubscribeTick() */
     virtual void unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick) override;
 
@@ -119,9 +115,7 @@ protected:
      */
     virtual void scheduleNextTick();
 
-    virtual simtime_t globalSchedulingTimeForTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind);
-
-    virtual simtime_t globalSchedulingTimeForTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind);
+    virtual simtime_t globalSchedulingTimeForTick(uint64_t idleTicks);
 };
 
 class IdealOscillatorTick : public IOscillatorTick {
@@ -133,8 +127,6 @@ protected:
     uint64_t kind;
 
     simtime_t globalSchedulingTime;
-
-    bool cancelled;
 public:
     IdealOscillatorTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime);
 
@@ -162,14 +154,7 @@ public:
 
     virtual void setGlobalSchedulingTime(simtime_t globalSchedulingTime);
 
-    /** @copydoc IOscillatorTick::isCancelled() */
-    virtual bool isCancelled() const override;
-
-    virtual void setCancelled(bool cancelled); // TODO cancel tick events instead of deleting them
-
     bool operator<(const IdealOscillatorTick& tickEvent) const;
-
-    //bool operator<(const IOscillatorTick& tickEvent) const;
 
     bool operator==(const IdealOscillatorTick& tickEvent) const;
 

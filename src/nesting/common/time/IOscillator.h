@@ -50,24 +50,6 @@ public:
     virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks) = 0;
 
     /**
-     * Subscribes to the first tick event, that happens before upperBound.
-     * 
-     * Because this method only works with the global simulation time for a lot
-     * of use cases implementations of the IClock2 interfaces are better
-     * suited because they provide an additional layer of abstraction.
-     * 
-     * @param upperBound Global simulation time used to determine the tick
-     *                   event that happens immediately before.
-     */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind) = 0;
-
-    /**
-     * Same as IOscillator::subscribeTick(IOscillatorTickListener&, simtime_t,
-     * uint64_t) except that the kind value is set to 0.
-     */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound) = 0;
-
-    /**
      * Unsubscribes a listener from a tick event.
      */
     virtual void unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick) = 0;
@@ -125,9 +107,6 @@ public:
 
     /** Global simulation time when the tick event will be scheduled. */
     virtual simtime_t getGlobalSchedulingTime() const = 0;
-
-    /** True if the tick event was cancelled. */
-    virtual bool isCancelled() const = 0;
 };
 
 } // namespace nesting

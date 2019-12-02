@@ -108,22 +108,19 @@ void IdealOscillator::scheduleNextTick() {
         // Monotonic increasing ticks
         assert(nextScheduledTick >= currentTick);
 
-        scheduleAt(timeOfLastTick + (nextScheduledTick - currentTick) * tickInterval(), &tickMessage);
+        scheduleAt(nextTickEvent->getGlobalSchedulingTime(), &tickMessage);
     }
 }
 
-simtime_t IdealOscillator::globalSchedulingTimeForTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind)
+simtime_t IdealOscillator::globalSchedulingTimeForTick(uint64_t tick)
 {
     uint64_t currentTick = updateAndGetTickCount();
 
-    // TODO not implemented yet
-    return SimTime::ZERO;
-}
+    // Invariant: We only consider future ticks
+    assert(currentTick <= tick);
 
-simtime_t IdealOscillator::globalSchedulingTimeForTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind)
-{
-    // TODO not implemented yet
-    return SimTime::ZERO;
+    uint64_t deltaTick = tick - currentTick;
+    return timeOfLastTick + deltaTick * tickInterval();
 }
 
 uint64_t IdealOscillator::updateAndGetTickCount()
@@ -152,11 +149,12 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
     uint64_t currentTick = updateAndGetTickCount();
 
     // Create new tick event.
+    uint64_t tick = currentTick + idleTicks;
     std::shared_ptr<IdealOscillatorTick> tickEvent = std::make_shared<IdealOscillatorTick>(
             listener,
-            currentTick + idleTicks,
+            tick,
             kind,
-            SimTime::ZERO);
+            globalSchedulingTimeForTick(tick));
 
     // Find insert position of tick event with binary search.
     auto it = std::lower_bound(
@@ -177,18 +175,6 @@ std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillato
 std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks)
 {
     return subscribeTick(listener, idleTicks, 0);
-}
-
-std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound, uint64_t kind)
-{
-    // TODO not implemented yet
-    return nullptr;
-}
-
-std::shared_ptr<const IOscillatorTick> IdealOscillator::subscribeTick(IOscillatorTickListener& listener, simtime_t upperBound)
-{
-    // TODO not implemented yet
-    return nullptr;
 }
 
 void IdealOscillator::unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick)
@@ -218,33 +204,25 @@ void IdealOscillator::unsubscribeTick(IOscillatorTickListener& listener, const I
 void IdealOscillator::unsubscribeTicks(IOscillatorTickListener& listener, uint64_t kind)
 {
     Enter_Method_Silent();
-
+    auto removeCondition = [&](std::shared_ptr<IdealOscillatorTick> tickEvent) {
+        return &(tickEvent->getListener()) == &listener
+                && tickEvent->getKind() == kind;
+    };
     scheduledEvents.erase(
-            std::remove_if(
-                    scheduledEvents.begin(),
-                    scheduledEvents.end(),
-                    [&](std::shared_ptr<IdealOscillatorTick> tickEvent) {
-                        return &(tickEvent->getListener()) == &listener
-                                && tickEvent->getKind() == kind;
-                    }
-            ), scheduledEvents.end()
-    );
-
+            std::remove_if(scheduledEvents.begin(), scheduledEvents.end(), removeCondition), 
+            scheduledEvents.end());
     scheduleNextTick();
 }
 
 void IdealOscillator::unsubscribeTicks(IOscillatorTickListener& listener)
 {
     Enter_Method_Silent();
-
+    auto removeCondition = [&](std::shared_ptr<IdealOscillatorTick> tickEvent) {
+        return &(tickEvent->getListener()) == &listener;
+    };
     scheduledEvents.erase(
-            std::remove_if(
-                    scheduledEvents.begin(),
-                    scheduledEvents.end(),
-                    [&](std::shared_ptr<IdealOscillatorTick> tickEvent) { return &(tickEvent->getListener()) == &listener; }
-            ), scheduledEvents.end()
-    );
-
+            std::remove_if(scheduledEvents.begin(), scheduledEvents.end(), removeCondition), 
+            scheduledEvents.end());
     scheduleNextTick();
 }
 
@@ -263,7 +241,7 @@ double IdealOscillator::getFrequency() const
     return frequency;
 }
 
-void IdealOscillator::setFrequency(double newFrequency)
+void IdealOscillator::setFrequency(double newFrequency) // TODO when changing the frequency, all globalSchedulingTimes for every tick have to be recalculated.
 {
     // Update frequency
     double oldFrequency = this->frequency;
@@ -293,7 +271,6 @@ IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, uint
     , tick(tick)
     , kind(kind)
     , globalSchedulingTime(globalSchedulingTime)
-    , cancelled(false)
 {
 }
 
@@ -302,7 +279,6 @@ IdealOscillatorTick::IdealOscillatorTick(IOscillatorTickListener& listener, cons
     , tick(tickEvent.getTick())
     , kind(tickEvent.getKind())
     , globalSchedulingTime(tickEvent.getGlobalSchedulingTime())
-    , cancelled(false)
 {
 }
 
@@ -348,16 +324,6 @@ simtime_t IdealOscillatorTick::getGlobalSchedulingTime() const
 void IdealOscillatorTick::setGlobalSchedulingTime(simtime_t globalSchedulingTime)
 {
     this->globalSchedulingTime = globalSchedulingTime;
-}
-
-bool IdealOscillatorTick::isCancelled() const
-{
-    return cancelled;
-}
-
-void IdealOscillatorTick::setCancelled(bool cancelled)
-{
-    this->cancelled = cancelled;
 }
 
 bool IdealOscillatorTick::operator<(const IdealOscillatorTick& tickEvent) const
