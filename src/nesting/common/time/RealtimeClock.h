@@ -66,7 +66,7 @@ public:
     virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t time, uint64_t kind = 0) override;
     virtual void subscribeConfigChanges(IClock2ConfigListener& listener) override;
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
-    virtual simtime_t getLocalTime() override;
+    virtual simtime_t updateAndGetLocalTime() override;
     virtual void setLocalTime(simtime_t time) override;
     virtual double getClockRate() const override;
     virtual void setClockRate(double clockRate) override;

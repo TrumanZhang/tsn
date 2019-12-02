@@ -42,7 +42,7 @@ public:
 
     virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) = 0;
 
-    virtual simtime_t getLocalTime() = 0;
+    virtual simtime_t updateAndGetLocalTime() = 0;
 
     virtual void setLocalTime(simtime_t time) = 0;
 

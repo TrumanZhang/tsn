@@ -53,7 +53,7 @@ void RealtimeClock::scheduleNextTimestamp()
     // We only have to schedule the next timestamp if the event queue isn't empty
     if (!scheduledEvents.empty() && !isStopped()) {
         std::shared_ptr<RealtimeClockTimestamp>& nextTimestamp = scheduledEvents.front();
-        simtime_t idleTime = nextTimestamp->getLocalTime() - getLocalTime();
+        simtime_t idleTime = nextTimestamp->getLocalTime() - updateAndGetLocalTime();
         // We have to round up to the next highest tick
         uint64_t idleTicks = static_cast<uint64_t>(ceil(idleTime / timeIncrementPerTick()));
         oscillator->subscribeTick(*this, idleTicks); // TODO use new subscribeTick method
@@ -87,7 +87,7 @@ void RealtimeClock::unsubscribeConfigChanges(IClock2ConfigListener& listener)
     configListeners.erase(&listener);
 }
 
-simtime_t RealtimeClock::getLocalTime()
+simtime_t RealtimeClock::updateAndGetLocalTime()
 {
     uint64_t elapsedTicks = oscillator->updateAndGetTickCount() - lastTick;
     localTime += elapsedTicks * timeIncrementPerTick();
