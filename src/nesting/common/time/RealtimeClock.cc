@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "RealtimeClock.h"
+#include "nesting/common/time/RealtimeClock.h"
 
 #include <cmath>
 #include <algorithm>
@@ -67,6 +67,17 @@ simtime_t RealtimeClock::timeIncrementPerTick() const
 
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
 {
+    uint64_t idleTicks = std::ceil(delta / timeIncrementPerTick());
+    simtime_t currentTime = updateAndGetLocalTime();
+    simtime_t eventTime = currentTime + delta;
+
+    std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
+
+    auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
+    if (it != scheduledEvents.end() && **it != *event) {
+        scheduledEvents.insert(it, event);
+    }
+
     // TODO
     return nullptr;
 }
@@ -109,7 +120,7 @@ void RealtimeClock::setLocalTime(simtime_t newTime)
                 scheduledEvents.end(), 
                 localTime,
                 [](simtime_t time, std::shared_ptr<RealtimeClockTimestamp> event) {
-                    return time < event->getLocalSchedulingTime();
+                    return time < event->getLocalTime();
                 });
         // Notify listeners
         for (auto it = scheduledEvents.begin(); it != bound; it++) {
@@ -178,10 +189,10 @@ void RealtimeClock::onTick(IOscillator& oscillator, const IOscillatorTick& tick)
 
     // Invariant: There must not be any timestamp event scheduled with
     // timestamp in the past.
-    assert(localTime <= currentEvent->getLocalSchedulingTime());
+    assert(localTime <= currentEvent->getLocalTime());
 
     // Update local time
-    localTime = currentEvent->getLocalSchedulingTime();
+    localTime = currentEvent->getLocalTime();
     lastTick = this->oscillator->updateAndGetTickCount();
 
     // Notify listener
@@ -201,10 +212,9 @@ void RealtimeClock::onFrequencyChange(IOscillator& oscillator, double oldFrequen
     }
 }
 
-RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, simtime_t localSchedulingTime, uint64_t kind)
+RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind)
     : listener(listener)
     , localTime(localTime)
-    , localSchedulingTime(localSchedulingTime)
     , kind(kind)
 {
 }
@@ -212,11 +222,6 @@ RealtimeClockTimestamp::RealtimeClockTimestamp(IClock2TimestampListener& listene
 simtime_t RealtimeClockTimestamp::getLocalTime() const
 {
     return localTime;
-}
-
-simtime_t RealtimeClockTimestamp::getLocalSchedulingTime() const
-{
-    return localSchedulingTime;
 }
 
 uint64_t RealtimeClockTimestamp::getKind() const
@@ -227,6 +232,29 @@ uint64_t RealtimeClockTimestamp::getKind() const
 IClock2TimestampListener& RealtimeClockTimestamp::getListener()
 {
     return listener;
+}
+
+bool RealtimeClockTimestamp::operator==(const RealtimeClockTimestamp& other)
+{
+    return this->localTime == other.localTime
+            && this->kind == other.kind
+            && &(this->listener) == &(other.listener);
+}
+
+bool RealtimeClockTimestamp::operator!=(const RealtimeClockTimestamp& other)
+{
+    return !(*this == other);
+}
+
+bool RealtimeClockTimestamp::operator<(const RealtimeClockTimestamp& other)
+{
+    if (this->localTime > other.localTime) 
+        return false;
+    if (this->kind > other.kind)
+        return false;
+    if (&(this->listener) > &(other.listener))
+        return false;
+    return true;
 }
 
 } //namespace

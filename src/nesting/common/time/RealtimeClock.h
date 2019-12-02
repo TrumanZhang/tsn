@@ -81,15 +81,16 @@ class RealtimeClockTimestamp : public IClock2Timestamp
 {
 protected:
     simtime_t localTime;
-    simtime_t localSchedulingTime;
     uint64_t kind;
     IClock2TimestampListener& listener;
 public:
-    RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, simtime_t localSchedulingTime, uint64_t kind);
+    RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind);
     virtual simtime_t getLocalTime() const override;
-    virtual simtime_t getLocalSchedulingTime() const override;
     virtual uint64_t getKind() const override;
     virtual IClock2TimestampListener& getListener();
+    bool operator==(const RealtimeClockTimestamp& other);
+    bool operator!=(const RealtimeClockTimestamp& other);
+    bool operator<(const RealtimeClockTimestamp& other);
 };
 
 } //namespace
