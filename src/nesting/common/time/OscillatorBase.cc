@@ -50,6 +50,7 @@ void OscillatorBase::initialize()
 
 void OscillatorBase::finish()
 {
+    cancelEvent(&tickMessage);
 }
 
 void OscillatorBase::handleMessage(cMessage *msg)
