@@ -87,10 +87,10 @@ public:
     RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind);
     virtual simtime_t getLocalTime() const override;
     virtual uint64_t getKind() const override;
-    virtual IClock2TimestampListener& getListener();
-    bool operator==(const RealtimeClockTimestamp& other);
-    bool operator!=(const RealtimeClockTimestamp& other);
-    bool operator<(const RealtimeClockTimestamp& other);
+    virtual IClock2TimestampListener& getListener() const;
+    bool operator==(const RealtimeClockTimestamp& other) const;
+    bool operator!=(const RealtimeClockTimestamp& other) const;
+    bool operator<(const RealtimeClockTimestamp& other) const;
 };
 
 } //namespace

@@ -231,24 +231,24 @@ uint64_t RealtimeClockTimestamp::getKind() const
     return kind;
 }
 
-IClock2TimestampListener& RealtimeClockTimestamp::getListener()
+IClock2TimestampListener& RealtimeClockTimestamp::getListener() const
 {
     return listener;
 }
 
-bool RealtimeClockTimestamp::operator==(const RealtimeClockTimestamp& other)
+bool RealtimeClockTimestamp::operator==(const RealtimeClockTimestamp& other) const
 {
     return this->localTime == other.localTime
             && this->kind == other.kind
             && &(this->listener) == &(other.listener);
 }
 
-bool RealtimeClockTimestamp::operator!=(const RealtimeClockTimestamp& other)
+bool RealtimeClockTimestamp::operator!=(const RealtimeClockTimestamp& other) const
 {
     return !(*this == other);
 }
 
-bool RealtimeClockTimestamp::operator<(const RealtimeClockTimestamp& other)
+bool RealtimeClockTimestamp::operator<(const RealtimeClockTimestamp& other) const
 {
     if (this->localTime < other.localTime) {
         return true;
