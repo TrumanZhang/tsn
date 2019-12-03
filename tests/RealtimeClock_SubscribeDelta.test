@@ -82,13 +82,15 @@ Define_Module(TestRealtimeClock);
 void TestRealtimeClock::initialize()
 {
     clock = check_and_cast<IClock2*>(getModuleByPath(par("clockModule")));
-    clock->subscribeDelta(*this, SimTime(1, SIMTIME_US)); 
+    clock->subscribeDelta(*this, SimTime(1.5, SIMTIME_US));
+    clock->subscribeDelta(*this, SimTime(5.3, SIMTIME_US));
+    clock->subscribeDelta(*this, SimTime(7.1, SIMTIME_US));  
 }
 
 void TestRealtimeClock::finish()
 {
-	if (subscribedTimestampCount != 1) {
-		throw cRuntimeError("Expected 1 timestamp to be scheduled!");
+	if (subscribedTimestampCount != 3) {
+		throw cRuntimeError("Expected 3 timestamp to be scheduled!");
 	}
 }
 
@@ -96,6 +98,8 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
 {
     Enter_Method("timestamp");
     subscribedTimestampCount++;
+
+    EV_INFO << "OnTimestamp: " << timestamp.getLocalTime() << std::endl;
 }
 
 } // namespace @TESTNAME@
