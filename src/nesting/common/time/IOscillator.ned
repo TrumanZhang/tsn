@@ -23,4 +23,5 @@ moduleinterface IOscillator
 {
     parameters:
         @display("i=block/timer");
+        double frequency @unit(Hz);
 }
