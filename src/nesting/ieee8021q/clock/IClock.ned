@@ -19,6 +19,9 @@ package nesting.ieee8021q.clock;
 // This module interface is used to provide a stub for clock components with a
 // configurable clock rate.
 //
+// This module is deprecated, use the ~IClock2 or ~IOscillator module
+// interfaces instead.
+//
 moduleinterface IClock {
     parameters:
         @display("i=block/timer");

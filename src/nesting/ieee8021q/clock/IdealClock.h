@@ -27,6 +27,8 @@ namespace nesting {
 
 /**
  * See the NED file for a detailed description
+ * 
+ * @deprecated Use nesting::RealtimeClock instead
  */
 class IdealClock: public ClockBase {
 protected:

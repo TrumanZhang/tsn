@@ -36,6 +36,8 @@ namespace nesting {
  * the subscribed ones. Therefore the clock also uses the global simulation
  * time to calculate e.g. how many discrete ticks have elapsed since the last
  * simulated tick.
+ * 
+ * @deprecated Use nesting::RealtimeClock instead
  */
 class ClockBase: public IClock, public cSimpleModule {
 public:

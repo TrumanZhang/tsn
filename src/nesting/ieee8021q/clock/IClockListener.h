@@ -27,6 +27,7 @@ class IClock;
  * ticks by the the IClockInterface.
  *
  * @see IClock
+ * @deprecated Use the nesting::IClock2 and nesting::IClock2Listener interfaces instead
  */
 class IClockListener {
 public:

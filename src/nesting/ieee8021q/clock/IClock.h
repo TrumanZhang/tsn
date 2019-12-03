@@ -31,6 +31,7 @@ class IClockListener;
  * value. The time can be read or time changes can be subscribed.
  *
  * @see IClockListener
+ * @deprecated Use the nesting::IClock2 module instead
  */
 class IClock {
 public:
