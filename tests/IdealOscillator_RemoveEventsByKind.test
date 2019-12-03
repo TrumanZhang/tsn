@@ -59,7 +59,7 @@ protected:
 protected:
     virtual void initialize() override;
 public:
-    virtual void onTick(IOscillator& oscillator, const IOscillatorTick& tick) override;
+    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick) override;
 };
 
 } // namespace @TESTNAME@
@@ -87,7 +87,7 @@ void TestIdealOscillator::initialize()
     }
 }
 
-void TestIdealOscillator::onTick(IOscillator& oscillator, const IOscillatorTick& tick)
+void TestIdealOscillator::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick)
 {
     Enter_Method("tick");
     
