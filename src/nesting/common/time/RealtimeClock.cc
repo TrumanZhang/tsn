@@ -60,8 +60,8 @@ void RealtimeClock::scheduleNextTimestamp()
         std::shared_ptr<RealtimeClockTimestamp>& nextTimestamp = scheduledEvents.front();
         simtime_t idleTime = nextTimestamp->getLocalTime() - updateAndGetLocalTime();
         // We have to round up to the next highest tick
-        uint64_t idleTicks = static_cast<uint64_t>(ceil(idleTime / timeIncrementPerTick()));
-        oscillator->subscribeTick(*this, idleTicks); // TODO use new subscribeTick method
+        uint64_t idleTicks = static_cast<uint64_t>(std::ceil(idleTime / timeIncrementPerTick()));
+        oscillator->subscribeTick(*this, idleTicks);
     }
 }
 
@@ -72,6 +72,7 @@ simtime_t RealtimeClock::timeIncrementPerTick() const
 
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
 {
+    Enter_Method_Silent();
     simtime_t currentTime = updateAndGetLocalTime();
     simtime_t eventTime = currentTime + delta;
     return subscribeTimestamp(listener, eventTime, kind);
@@ -79,15 +80,13 @@ std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2Tim
 
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock2TimestampListener& listener, simtime_t eventTime, uint64_t kind)
 {
+    Enter_Method_Silent();
     std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
-    
     auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
     if (it == scheduledEvents.end() || **it != *event) {
         scheduledEvents.insert(it, event);
     }
-
     scheduleNextTimestamp();
-
     return event;
 }
 
