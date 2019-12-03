@@ -20,6 +20,7 @@
 
 #include <list>
 #include <set>
+#include <iostream>
 
 #include "inet/common/ModuleAccess.h"
 
@@ -92,6 +93,12 @@ public:
     bool operator!=(const RealtimeClockTimestamp& other) const;
     bool operator<(const RealtimeClockTimestamp& other) const;
 };
+
+// Useful for debugging
+std::ostream& operator<<(std::ostream& stream, const RealtimeClockTimestamp* timestamp);
+
+// Required to sort timestamp events
+bool operator<(std::shared_ptr<RealtimeClockTimestamp> left, std::shared_ptr<RealtimeClockTimestamp> right);
 
 } //namespace
 

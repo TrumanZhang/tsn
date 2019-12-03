@@ -82,7 +82,7 @@ std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock
 {
     Enter_Method_Silent();
     std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
-    auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
+    std::list<std::shared_ptr<RealtimeClockTimestamp>>::iterator it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
     if (it == scheduledEvents.end() || **it != *event) {
         scheduledEvents.insert(it, event);
     }
@@ -260,6 +260,18 @@ bool RealtimeClockTimestamp::operator<(const RealtimeClockTimestamp& other) cons
         }
     }
     return false;
+}
+
+std::ostream& operator<<(std::ostream& stream, const RealtimeClockTimestamp* timestamp)
+{
+    return stream << "Timestamp[localTime=" << timestamp->getLocalTime() 
+            << ", kind=" << timestamp->getKind() 
+            << ", listener=" << &(timestamp->getListener()) << "]";
+}
+
+bool operator<(std::shared_ptr<RealtimeClockTimestamp> left, std::shared_ptr<RealtimeClockTimestamp> right)
+{
+    return *left < *right;
 }
 
 } //namespace
