@@ -56,6 +56,7 @@ public:
 };
 
 class IClock2Timestamp {
+public:
     /** TODO write doc */
     virtual simtime_t getLocalTime() const = 0;
 
