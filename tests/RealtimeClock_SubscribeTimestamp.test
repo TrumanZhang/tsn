@@ -83,14 +83,15 @@ Define_Module(TestRealtimeClock);
 void TestRealtimeClock::initialize()
 {
     clock = check_and_cast<IClock2*>(getModuleByPath(par("clockModule")));
-    clock->subscribeTimestamp(*this, SimTime(1, SIMTIME_US));  
-    
+    clock->subscribeTimestamp(*this, SimTime(7100, SIMTIME_NS));  
+    clock->subscribeTimestamp(*this, SimTime(1500, SIMTIME_NS));
+    clock->subscribeTimestamp(*this, SimTime(5300, SIMTIME_NS));
 }
 
 void TestRealtimeClock::finish()
 {
-	if (subscribedTimestampCount != 4) {
-		throw cRuntimeError("Expected 4 timestamp to be scheduled!");
+	if (subscribedTimestampCount != 3) {
+		throw cRuntimeError("Expected 3 timestamp to be scheduled!");
 	}
 }
 
@@ -98,14 +99,8 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
 {
     Enter_Method("timestamp");
 
-    if (subscribedTimestampCount == 0) {
-        this->clock->subscribeDelta(*this, SimTime(6100, SIMTIME_NS));  
-        this->clock->subscribeDelta(*this, SimTime(500, SIMTIME_NS));
-        this->clock->subscribeDelta(*this, SimTime(4300, SIMTIME_NS));
-    }
-
     // Check conditions for first subscribed timestamp
-    if (subscribedTimestampCount == 1) {
+    if (subscribedTimestampCount == 0) {
         if (timestamp.getLocalTime() != SimTime(1500, SIMTIME_NS)) {
             throw cRuntimeError("Expected timestamp #1 to be scheduled for 1500ns of local clock time.");
         } else if (clock.updateAndGetLocalTime() != SimTime(2, SIMTIME_US)) {
@@ -116,7 +111,7 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
     }
     
     // Check conditions for #2 subscribed timestamp
-    if (subscribedTimestampCount == 2) {
+    if (subscribedTimestampCount == 1) {
         if (timestamp.getLocalTime() != SimTime(5300, SIMTIME_NS)) {
             throw cRuntimeError("Expected timestamp #2 to be scheduled for 5300ns of local clock time.");
         } else if (clock.updateAndGetLocalTime() != SimTime(6, SIMTIME_US)) {
@@ -127,7 +122,7 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
     }
     
     // Check conditions for #3 subscribed timestamp
-    if (subscribedTimestampCount == 3) {
+    if (subscribedTimestampCount == 2) {
         if (timestamp.getLocalTime() != SimTime(7100, SIMTIME_NS)) {
             throw cRuntimeError("Expected timestamp #3 to be scheduled for 7100ns of local clock time.");
         } else if (clock.updateAndGetLocalTime() != SimTime(8, SIMTIME_US)) {
