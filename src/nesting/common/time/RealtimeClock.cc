@@ -127,7 +127,7 @@ void RealtimeClock::setLocalTime(simtime_t newTime)
         // Notify listeners
         for (auto it = scheduledEvents.begin(); it != bound; it++) {
             std::shared_ptr<RealtimeClockTimestamp> event = *it;
-            event->getListener().onTimestamp(*this, *event);
+            event->getListener().onTimestamp(*this, event);
         }
         // Remove events
         scheduledEvents.erase(scheduledEvents.begin(), bound);
@@ -199,7 +199,7 @@ void RealtimeClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscil
     scheduleNextTimestamp();
 
     // Notify listener
-    currentEvent->getListener().onTimestamp(*this, *currentEvent);
+    currentEvent->getListener().onTimestamp(*this, currentEvent);
 }
 
 void RealtimeClock::onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)

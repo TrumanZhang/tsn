@@ -62,7 +62,7 @@ protected:
     virtual void initialize() override;
     virtual void finish() override;
 public:
-    virtual void onTimestamp(IClock2& clock, const IClock2Timestamp& timestamp) override;
+    virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2Timestamp> timestamp) override;
 };
 
 } // namespace @TESTNAME@
@@ -94,7 +94,7 @@ void TestRealtimeClock::finish()
 	}
 }
 
-void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& timestamp)
+void TestRealtimeClock::onTimestamp(IClock2& clock, std::shared_ptr<const IClock2Timestamp> timestamp)
 {
     Enter_Method("timestamp");
 
@@ -106,7 +106,7 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
 
     // Check conditions for first subscribed timestamp
     if (subscribedTimestampCount == 1) {
-        if (timestamp.getLocalTime() != SimTime(1500, SIMTIME_NS)) {
+        if (timestamp->getLocalTime() != SimTime(1500, SIMTIME_NS)) {
             throw cRuntimeError("Expected timestamp #1 to be scheduled for 1500ns of local clock time.");
         } else if (clock.updateAndGetLocalTime() != SimTime(2, SIMTIME_US)) {
             throw cRuntimeError("Expected timestamp #1 to be scheduled at 2us of local clock time.");
@@ -117,7 +117,7 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
     
     // Check conditions for #2 subscribed timestamp
     if (subscribedTimestampCount == 2) {
-        if (timestamp.getLocalTime() != SimTime(5300, SIMTIME_NS)) {
+        if (timestamp->getLocalTime() != SimTime(5300, SIMTIME_NS)) {
             throw cRuntimeError("Expected timestamp #2 to be scheduled for 5300ns of local clock time.");
         } else if (clock.updateAndGetLocalTime() != SimTime(6, SIMTIME_US)) {
             throw cRuntimeError("Expected timestamp #2 to be scheduled at 6us of local clock time.");
@@ -128,7 +128,7 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
     
     // Check conditions for #3 subscribed timestamp
     if (subscribedTimestampCount == 3) {
-        if (timestamp.getLocalTime() != SimTime(7100, SIMTIME_NS)) {
+        if (timestamp->getLocalTime() != SimTime(7100, SIMTIME_NS)) {
             throw cRuntimeError("Expected timestamp #3 to be scheduled for 7100ns of local clock time.");
         } else if (clock.updateAndGetLocalTime() != SimTime(8, SIMTIME_US)) {
             throw cRuntimeError("Expected timestamp #3 to be scheduled at 8us of local clock time.");
@@ -139,7 +139,7 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
 
     subscribedTimestampCount++;
 
-    EV_INFO << "Subscribed time: " << timestamp.getLocalTime()
+    EV_INFO << "Subscribed time: " << timestamp->getLocalTime()
             << ", Clock time: " << clock.updateAndGetLocalTime()
             << ", Simulation time: " << simTime() << std::endl;
 }

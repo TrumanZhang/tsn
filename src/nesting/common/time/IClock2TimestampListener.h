@@ -27,7 +27,7 @@ class IClock2TimestampListener {
 public:
     virtual ~IClock2TimestampListener() {};
 
-    virtual void onTimestamp(IClock2& clock, const IClock2Timestamp& timestamp) = 0;
+    virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2Timestamp>) = 0;
 };
 
 } /* namespace nesting */
