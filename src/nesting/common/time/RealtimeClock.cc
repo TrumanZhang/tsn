@@ -81,6 +81,9 @@ std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2Tim
 
     std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
     addEvent(event);
+
+    scheduleNextTimestamp();
+
     return event;
 }
 
@@ -92,6 +95,9 @@ std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock
 
     std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
     addEvent(event);
+
+    scheduleNextTimestamp();
+
     return event;
 }
 
