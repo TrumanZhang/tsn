@@ -94,7 +94,7 @@ void TestRealtimeClock::finish()
 
 void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& timestamp)
 {
-    Enter_Method("tick");
+    Enter_Method("timestamp");
     subscribedTimestampCount++;
 }
 
