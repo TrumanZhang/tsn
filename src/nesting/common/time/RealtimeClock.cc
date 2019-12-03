@@ -70,36 +70,21 @@ simtime_t RealtimeClock::timeIncrementPerTick() const
     return SimTime(1, SIMTIME_S) / (oscillator->getFrequency() + driftRate);
 }
 
-void RealtimeClock::addEvent(std::shared_ptr<RealtimeClockTimestamp> event)
-{
-    auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
-    if (it == scheduledEvents.end() || **it != *event) {
-        scheduledEvents.insert(it, event);
-    }
-}
-
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
 {
-    uint64_t idleTicks = std::ceil(delta / timeIncrementPerTick());
     simtime_t currentTime = updateAndGetLocalTime();
     simtime_t eventTime = currentTime + delta;
-
-    std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
-    addEvent(event);
-
-    scheduleNextTimestamp();
-
-    return event;
+    return subscribeTimestamp(listener, eventTime, kind);
 }
 
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock2TimestampListener& listener, simtime_t eventTime, uint64_t kind)
 {
-    simtime_t currentTime = updateAndGetLocalTime();
-    simtime_t delta = eventTime - currentTime;
-    uint64_t idleTicks = std::ceil(delta / timeIncrementPerTick());
-
     std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
-    addEvent(event);
+    
+    auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
+    if (it == scheduledEvents.end() || **it != *event) {
+        scheduledEvents.insert(it, event);
+    }
 
     scheduleNextTimestamp();
 
