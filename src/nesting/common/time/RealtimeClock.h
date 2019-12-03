@@ -59,6 +59,7 @@ protected:
     virtual void initialize();
     virtual void scheduleNextTimestamp();
     virtual simtime_t timeIncrementPerTick() const;
+    virtual void addEvent(std::shared_ptr<RealtimeClockTimestamp> event);
 public:
     RealtimeClock();
     virtual ~RealtimeClock();

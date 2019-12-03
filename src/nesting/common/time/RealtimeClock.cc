@@ -65,6 +65,14 @@ simtime_t RealtimeClock::timeIncrementPerTick() const
     return SimTime(1, SIMTIME_S) / (oscillator->getFrequency() + driftRate);
 }
 
+void RealtimeClock::addEvent(std::shared_ptr<RealtimeClockTimestamp> event)
+{
+    auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
+    if (it != scheduledEvents.end() && **it != *event) {
+        scheduledEvents.insert(it, event);
+    }
+}
+
 std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind)
 {
     uint64_t idleTicks = std::ceil(delta / timeIncrementPerTick());
@@ -72,20 +80,19 @@ std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeDelta(IClock2Tim
     simtime_t eventTime = currentTime + delta;
 
     std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
-
-    auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
-    if (it != scheduledEvents.end() && **it != *event) {
-        scheduledEvents.insert(it, event);
-    }
-
-    // TODO
-    return nullptr;
+    addEvent(event);
+    return event;
 }
 
-std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock2TimestampListener& listener, simtime_t timestamp, uint64_t kind)
+std::shared_ptr<const IClock2Timestamp> RealtimeClock::subscribeTimestamp(IClock2TimestampListener& listener, simtime_t eventTime, uint64_t kind)
 {
-    // TODO
-    return nullptr;
+    simtime_t currentTime = updateAndGetLocalTime();
+    simtime_t delta = eventTime - currentTime;
+    uint64_t idleTicks = std::ceil(delta / timeIncrementPerTick());
+
+    std::shared_ptr<RealtimeClockTimestamp> event = std::make_shared<RealtimeClockTimestamp>(listener, eventTime, kind);
+    addEvent(event);
+    return event;
 }
 
 void RealtimeClock::subscribeConfigChanges(IClock2ConfigListener& listener)
@@ -248,13 +255,16 @@ bool RealtimeClockTimestamp::operator!=(const RealtimeClockTimestamp& other)
 
 bool RealtimeClockTimestamp::operator<(const RealtimeClockTimestamp& other)
 {
-    if (this->localTime > other.localTime) 
-        return false;
-    if (this->kind > other.kind)
-        return false;
-    if (&(this->listener) > &(other.listener))
-        return false;
-    return true;
+    if (this->localTime < other.localTime) {
+        return true;
+    } else if (this->localTime == other.localTime) {
+        if (this->kind < other.kind) {
+            return true;
+        } else if (this->kind == other.kind) {
+            return &(this->listener) < &(other.listener);
+        }
+    }
+    return false;
 }
 
 } //namespace
