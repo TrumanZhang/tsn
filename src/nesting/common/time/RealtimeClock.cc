@@ -40,6 +40,11 @@ void RealtimeClock::initialize()
     oscillator = getModuleFromPar<IOscillator>(par("oscillatorModule"), this);
     oscillator->subscribeConfigChanges(*this);
     lastTick = oscillator->updateAndGetTickCount();
+
+    WATCH(localTime);
+    WATCH(driftRate);
+    WATCH(lastTick);
+    WATCH_LIST(scheduledEvents);
 }
 
 void RealtimeClock::scheduleNextTimestamp()
@@ -68,7 +73,7 @@ simtime_t RealtimeClock::timeIncrementPerTick() const
 void RealtimeClock::addEvent(std::shared_ptr<RealtimeClockTimestamp> event)
 {
     auto it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
-    if (it != scheduledEvents.end() && **it != *event) {
+    if (it == scheduledEvents.end() || **it != *event) {
         scheduledEvents.insert(it, event);
     }
 }
