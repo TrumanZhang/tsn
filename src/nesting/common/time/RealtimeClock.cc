@@ -194,8 +194,9 @@ void RealtimeClock::onTick(IOscillator& oscillator, const IOscillatorTick& tick)
     assert(localTime <= currentEvent->getLocalTime());
 
     // Update local time
-    localTime = currentEvent->getLocalTime();
-    lastTick = this->oscillator->updateAndGetTickCount();
+    updateAndGetLocalTime();
+
+    scheduleNextTimestamp();
 
     // Notify listener
     currentEvent->getListener().onTimestamp(*this, *currentEvent);
