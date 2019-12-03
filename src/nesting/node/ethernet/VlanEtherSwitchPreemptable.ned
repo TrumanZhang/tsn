@@ -23,6 +23,7 @@ import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.FilteringDatabase;
 import nesting.linklayer.ethernet.VlanEthernetInterfaceSwitchPreemptable;
+import nesting.common.time.IOscillator;
 
 
 //
@@ -36,6 +37,8 @@ module VlanEtherSwitchPreemptable
         *.vlanTagType = default("c");
         *.interfaceTableModule = absPath(".interfaceTable");
         *.filteringDatabaseModule = absPath(".filteringDatabase");
+        **.clockModule = default(absPath(".legacyClock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
     gates:
         inout ethg[];
     submodules:
@@ -45,7 +48,7 @@ module VlanEtherSwitchPreemptable
             mac.promiscuous = true;
             mac.interfaceTableModule = "^.interfaceTable";
             queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
-            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac"; 
+            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
             encapE.typename = "EtherEncapDummy";
             encapP.typename = "EtherEncapDummy";
             @display("p=249,480,r,150");
@@ -58,8 +61,11 @@ module VlanEtherSwitchPreemptable
             @display("p=925,264,r,200;i=block/delay");
             delay = default(4us);
         }
-        clock: <default("IdealClock")> like IClock {
-            @display("p=182,31;is=s");
+        oscillator: <default("IdealOscillator")> like IOscillator {
+            @display("p=181.88078,30.313463;is=s");
+        }
+        legacyClock: <default("IdealClock")> like IClock {
+            @display("p=290.73367,30.313463;is=s");
         }
         filteringDatabase: FilteringDatabase {
             @display("p=60,105;is=s");

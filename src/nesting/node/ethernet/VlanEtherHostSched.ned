@@ -15,14 +15,13 @@
 
 package nesting.node.ethernet;
 
-import inet.linklayer.ethernet.EtherMacFullDuplex;
-import inet.linklayer.ethernet.IEtherEncap;
-import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGenSched;
+import nesting.common.time.IOscillator;
 import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
-import nesting.linklayer.ethernet.VLANEncap;
+
 
 //
 // Simple Host with the capability to send out frames according to a given schedule
@@ -37,6 +36,8 @@ module VlanEtherHostSched
         @labels(node,ethernet-node);
         @display("i=device/pc2;bgb=385,371");
         *.fcsMode = fcsMode;
+        **.clockModule = default(absPath(".legacyClock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -47,8 +48,11 @@ module VlanEtherHostSched
             parameters:
                 @display("p=330,215;is=s");
         }
-        clock: <default("IdealClock")> like IClock {
-            @display("p=330,69");
+        oscillator: <default("IdealOscillator")> like IOscillator {
+            @display("p=181.88078,30.313463;is=s");
+        }
+        legacyClock: <default("IdealClock")> like IClock {
+            @display("p=290.73367,30.313463;is=s");
         }
         scheduleSwap: ScheduleSwap {
             usedInHost = true;

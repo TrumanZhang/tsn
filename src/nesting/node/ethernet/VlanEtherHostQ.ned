@@ -18,6 +18,7 @@ package nesting.node.ethernet;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGen;
+import nesting.common.time.IOscillator;
 import nesting.ieee8021q.clock.IClock;
 
 
@@ -33,14 +34,19 @@ module VlanEtherHostQ
         @display("i=device/pc2;bgb=381,407");
         @networkNode();
         @labels(node,ethernet-node);
+        **.clockModule = default(absPath(".legacyClock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
         trafGenApp: VlanEtherTrafGen {
             @display("p=232,70");
         }
-        clock: <default("IdealClock")> like IClock {
-            @display("p=64,39;is=s");
+        oscillator: <default("IdealOscillator")> like IOscillator {
+            @display("p=53,31;is=s");
+        }
+        legacyClock: <default("IdealClock")> like IClock {
+            @display("p=141,31;is=s");
         }
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
@@ -49,7 +55,7 @@ module VlanEtherHostQ
                 mac.mtu = 1500B;
         }
         interfaceTable: InterfaceTable {
-            @display("p=64,101;is=s");
+            @display("p=53,94;is=s");
         }
     connections:
         eth.upperLayerIn <-- trafGenApp.out;
