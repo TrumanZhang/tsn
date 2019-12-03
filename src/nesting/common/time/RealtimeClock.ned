@@ -21,5 +21,6 @@ package nesting.common.time;
 simple RealtimeClock
 {
     parameters:
+        @display("i=block/timer");
         string oscillatorModule;
 }
