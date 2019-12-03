@@ -42,22 +42,22 @@ module VlanEtherHostSched
         inout ethg @labels(EtherFrame-conn);
     submodules:
         trafGenSchedApp: VlanEtherTrafGenSched {
-            @display("p=212.768,69.296005");
+            @display("p=138,126");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=330,215;is=s");
+                @display("p=311,211;is=s");
         }
         oscillator: <default("IdealOscillator")> like IOscillator {
-            @display("p=181.88078,30.313463;is=s");
+            @display("p=311,40;is=s");
         }
         legacyClock: <default("IdealClock")> like IClock {
-            @display("p=290.73367,30.313463;is=s");
+            @display("p=311,96;is=s");
         }
         scheduleSwap: ScheduleSwap {
             usedInHost = true;
 
-            @display("p=330,149;b=29,25");
+            @display("p=310,153;b=29,25;is=s");
         }
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:

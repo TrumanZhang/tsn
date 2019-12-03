@@ -62,19 +62,19 @@ module VlanEtherSwitchPreemptable
             delay = default(4us);
         }
         oscillator: <default("IdealOscillator")> like IOscillator {
-            @display("p=181.88078,30.313463;is=s");
+            @display("p=90.94039,312.77982;is=s");
         }
         legacyClock: <default("IdealClock")> like IClock {
-            @display("p=290.73367,30.313463;is=s");
+            @display("p=90.94039,409.23175;is=s");
         }
         filteringDatabase: FilteringDatabase {
-            @display("p=60,105;is=s");
+            @display("p=90.94039,133.65482;is=s");
         }
         scheduleSwap: ScheduleSwap {
-            @display("p=182,105;i=block/switch;is=s");
+            @display("p=90.94039,224.5952;i=block/switch;is=s");
         }
         interfaceTable: InterfaceTable {
-            @display("p=60,31;is=s");
+            @display("p=90.94039,59.24904;is=s");
         }
         up: MessageDispatcher {
             parameters:

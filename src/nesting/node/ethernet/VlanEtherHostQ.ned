@@ -43,10 +43,10 @@ module VlanEtherHostQ
             @display("p=232,70");
         }
         oscillator: <default("IdealOscillator")> like IOscillator {
-            @display("p=53,31;is=s");
+            @display("p=53,101;is=s");
         }
         legacyClock: <default("IdealClock")> like IClock {
-            @display("p=141,31;is=s");
+            @display("p=53,39;is=s");
         }
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
@@ -55,7 +55,7 @@ module VlanEtherHostQ
                 mac.mtu = 1500B;
         }
         interfaceTable: InterfaceTable {
-            @display("p=53,94;is=s");
+            @display("p=53,164;is=s");
         }
     connections:
         eth.upperLayerIn <-- trafGenApp.out;
