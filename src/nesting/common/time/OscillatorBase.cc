@@ -68,8 +68,6 @@ void OscillatorBase::handleMessage(cMessage *msg)
         // Invariant: Monotonic increasing tick count
         assert(lastTick <= tickEvent->getTick());
         assert(timeOfLastTick <= simTime());
-        // Invariant: (LastTick == CurrentTick) <=> (TimeOfLastTick == CurrentTime)
-        assert((lastTick != tickEvent->getTick()) == (timeOfLastTick == simTime()));
 
         // Update last tick
         if (lastTick < tickEvent->getTick()) {
