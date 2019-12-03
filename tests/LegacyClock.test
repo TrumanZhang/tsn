@@ -9,13 +9,16 @@ package @TESTNAME@;
 package @TESTNAME@;
 
 import nesting.ieee8021q.clock.IClock;
+import nesting.common.time.IOscillator;
 
 network Test
 {
     @display("bgb=280,213");
     submodules:
+        oscillator: <"IdealOscillator"> like IOscillator;
         clock: <"IdealClock"> like IClock {
             @display("p=87,103");
+            oscillatorModule = "^.oscillator";
         }
         testClock: TestClock {
             @display("p=182.70667,102.24");
