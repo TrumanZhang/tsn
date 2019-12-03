@@ -174,7 +174,7 @@ bool RealtimeClock::isStopped()
     return oscillator->getFrequency() + driftRate < minEffectiveClockRate;
 }
 
-void RealtimeClock::onTick(IOscillator& oscillator, const IOscillatorTick& tick)
+void RealtimeClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick)
 {
     Enter_Method("tick");
 

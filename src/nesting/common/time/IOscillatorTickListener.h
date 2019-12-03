@@ -30,7 +30,7 @@ class IOscillatorTickListener {
 public:
     virtual ~IOscillatorTickListener() {};
 
-    virtual void onTick(IOscillator& oscillator, const IOscillatorTick& tick) = 0;
+    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick) = 0;
 };
 
 } // namespace nesting

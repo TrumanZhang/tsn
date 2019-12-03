@@ -78,7 +78,7 @@ void OscillatorBase::handleMessage(cMessage *msg)
         }
 
         // Notify listener
-        tickEvent->getListener().onTick(*this, *tickEvent);
+        tickEvent->getListener().onTick(*this, tickEvent);
 
         scheduleNextTick();
 
