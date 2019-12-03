@@ -19,16 +19,51 @@ namespace nesting {
 
 Define_Module(IdealClock);
 
-ClockBase::ScheduledTick IdealClock::lastTick() {
-    ScheduledTick result;
-    simtime_t elapsedTime = simTime() - lastGlobalTickTimestamp;
-    result.ticks = elapsedTime.raw() / clockRate.raw();
-    result.timestamp = lastGlobalTickTimestamp + result.ticks * clockRate;
-    return result;
+IdealClock::IdealClock()
+    : oscillator(nullptr)
+    , lastTick(0)
+    , time(SimTime::ZERO)
+{
 }
 
-simtime_t IdealClock::scheduleTick(unsigned idleTicks) {
-    return lastGlobalTickTimestamp + clockRate * idleTicks;
+void IdealClock::initialize()
+{
+    oscillator = getModuleFromPar<IdealOscillator>(par("oscillatorModule"), this);
+}
+
+simtime_t IdealClock::getTime()
+{
+    uint64_t idleTicks = oscillator->updateAndGetTickCount() - lastTick;
+    time += idleTicks * getClockRate();
+    return time;
+}
+
+simtime_t IdealClock::getClockRate()
+{
+    return SimTime(1, SIMTIME_S) / oscillator->getFrequency();
+}
+
+void IdealClock::subscribeTick(IClockListener* listener, unsigned idleTicks, short kind)
+{
+    auto tick = oscillator->subscribeTick(*this, idleTicks, kind);
+    tickToListenerTable[tick] = listener;
+}
+
+void IdealClock::unsubscribeTicks(IClockListener* listener)
+{
+    for (auto it = tickToListenerTable.begin(); it != tickToListenerTable.end(); it++) {
+        if (it->second == listener) {
+            oscillator->unsubscribeTick(*this, *(it->first));
+            it = tickToListenerTable.erase(it);
+        }
+    }
+}
+
+void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick)
+{
+    IClockListener* listener = tickToListenerTable[tick];
+    listener->tick(this, tick->getKind());
+    tickToListenerTable.erase(tick);
 }
 
 } // namespace nesting

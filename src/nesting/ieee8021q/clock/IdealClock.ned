@@ -28,6 +28,5 @@ simple IdealClock like IClock {
     parameters:
         @display("i=block/timer");
         @class(IdealClock);
-        string clockRate = default("1us");
-        bool verbose = default(false);
+        string oscillatorModule;
 }

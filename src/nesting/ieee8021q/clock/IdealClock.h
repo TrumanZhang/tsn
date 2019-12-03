@@ -17,11 +17,17 @@
 #define __MAIN_IDEALCLOCK_H_
 
 #include <omnetpp.h>
-#include <tuple>
 
-#include "nesting/ieee8021q/clock/ClockBase.h"
+#include <map>
+
+#include "inet/common/ModuleAccess.h"
+
+#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/common/time/IdealOscillator.h"
+#include "nesting/common/time/IOscillatorTickListener.h"
 
 using namespace omnetpp;
+using namespace inet;
 
 namespace nesting {
 
@@ -30,15 +36,31 @@ namespace nesting {
  * 
  * @deprecated Use nesting::RealtimeClock instead
  */
-class IdealClock: public ClockBase {
+class IdealClock: public cSimpleModule, public IClock, public IOscillatorTickListener {
 protected:
-    /** @copydoc ScheduleTick ClockBase::lastTick() */
-    virtual ScheduledTick lastTick() override;
+    IdealOscillator* oscillator;
 
-    /** @copydoc simtime_t ClockBase::scheduleTick(unsigned int) */
-    virtual simtime_t scheduleTick(unsigned idleTicks) override;
+    uint64_t lastTick;
+
+    simtime_t time;
+
+    std::map<std::shared_ptr<const IOscillatorTick>, IClockListener*> tickToListenerTable;
+protected:
+    virtual void initialize() override;
 public:
+    IdealClock();
+
     virtual ~IdealClock() {};
+
+    virtual simtime_t getTime() override;
+
+    virtual simtime_t getClockRate() override;
+
+    virtual void subscribeTick(IClockListener* listener, unsigned idleTicks, short kind = 0) override;
+
+    virtual void unsubscribeTicks(IClockListener* listener) override;
+
+    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick) override;
 };
 
 } // namespace nesting

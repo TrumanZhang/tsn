@@ -25,6 +25,5 @@ package nesting.ieee8021q.clock;
 moduleinterface IClock {
     parameters:
         @display("i=block/timer");
-        string clockRate;
-        bool verbose;
+        string oscillatorModule;
 }
