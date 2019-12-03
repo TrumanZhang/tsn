@@ -13,16 +13,17 @@ import nesting.common.time.RealtimeClock;
 
 network Test
 {
-    @display("bgb=280,213");
+    @display("bgb=376.77332,118.33333");
     submodules:
         oscillator: IdealOscillator {
-            @display("p=87,103");
+            @display("p=61.53333,50.173332");
         }
         clock: RealtimeClock {
+            @display("p=169.45332,50.173332");
             oscillatorModule = "^.oscillator";
         }
         testRealtimeClock: TestRealtimeClock {
-            @display("p=182.70667,102.24");
+            @display("p=284.94666,50.173332");
         }
 }
 
@@ -102,6 +103,6 @@ void TestRealtimeClock::onTimestamp(IClock2& clock, const IClock2Timestamp& time
 %inifile: omnetpp.ini
 [General]
 network = Test
-sim-time-limit = 1ms
+sim-time-limit = 1s
 
 %exitcode: 0
