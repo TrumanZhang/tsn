@@ -33,14 +33,19 @@ template<typename T>
 class Schedule {
 protected:
     std::vector<std::tuple<simtime_t, T>> controlList;
-    simtime_t baseTime = SimTime::ZERO;
-    simtime_t cycleTime = SimTime::ZERO;
-    simtime_t cycleTimeExtension = SimTime::ZERO;
-    simtime_t sumTimeIntervals = SimTime::ZERO;
+    simtime_t baseTime;
+    simtime_t cycleTime;
+    simtime_t cycleTimeExtension;
+    simtime_t sumTimeIntervals;
 public:
-    Schedule() {}
-
     virtual ~Schedule() {}
+
+    Schedule()
+        : baseTime(SimTime::ZERO)
+        , cycleTime(SimTime::ZERO)
+        , cycleTimeExtension(SimTime::ZERO)
+        , sumTimeIntervals(SimTime::ZERO)
+    {}
 
     virtual void setBaseTime(simtime_t baseTime) {
         this->baseTime = baseTime;
