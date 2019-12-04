@@ -31,7 +31,6 @@ module VlanEtherHost
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2;bgb=483,473");
-        *.interfaceTableModule = default("");
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -41,6 +40,7 @@ module VlanEtherHost
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=142,283,row,150;q=txQueue");
+                interfaceTableModule = "^.interfaceTable";
         }
     connections:
         eth.upperLayerIn <-- trafGenApp.out;

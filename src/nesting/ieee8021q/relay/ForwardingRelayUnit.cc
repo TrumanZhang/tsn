@@ -13,52 +13,74 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ForwardingRelayUnit.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
+#include "nesting/ieee8021q/relay/ForwardingRelayUnit.h"
+
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
 
 namespace nesting {
 
 Define_Module(ForwardingRelayUnit);
 
-void ForwardingRelayUnit::initialize() {
-    fdb = getModuleFromPar<FilteringDatabase>(par("filteringDatabaseModule"),
-            this);
-    numberOfPorts = par("numberOfPorts");
+void ForwardingRelayUnit::initialize(int stage) {
+    if (stage == INITSTAGE_LOCAL) {
+        fdb = getModuleFromPar<FilteringDatabase>(par("filteringDatabaseModule"), this);
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        numberOfPorts = par("numberOfPorts");
+    } else if (stage == INITSTAGE_LINK_LAYER) {
+        registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
+    }
 }
 
 void ForwardingRelayUnit::handleMessage(cMessage *msg) {
     Packet* packet = check_and_cast<Packet*>(msg);
-    auto macTag = packet->getTag<MacAddressInd>();
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
+    int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+
+    // Remove old service indications but keep packet protocol tag and add VLAN request
+    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
+    auto vlanInd = packet->removeTag<VlanInd>();
+    packet->clearTags();
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    auto vlanReq = packet->addTag<VlanReq>();
+    vlanReq->setVlanId(vlanInd->getVlanId());
+    delete oldPacketProtocolTag;
+
+    packet->trim();
 
     // Distinguish between broadcast-, multicast- and unicast-ethernet frames
-    if (macTag->getDestAddress().isBroadcast()) {
-        processBroadcast(packet);
-    } else if (macTag->getDestAddress().isMulticast()) {
-        processMulticast(packet);
+    if (frame->getDest().isBroadcast()) {
+        processBroadcast(packet, arrivalInterfaceId);
+    } else if (frame->getDest().isMulticast()) {
+        processMulticast(packet, arrivalInterfaceId);
     } else {
-        processUnicast(packet);
+        processUnicast(packet, arrivalInterfaceId);
     }
 }
 
-void ForwardingRelayUnit::processBroadcast(Packet* packet) {
-    // Flood packets everywhere except of ingress port
-    // TODO this is just a temporary solution not sure how correct that is
-    for (int portId = 0; portId < gateSize("out"); portId++) {
-        cGate *outputGate = gate("out", portId);
-        if (!packet->arrivedOn("in", portId)) {
+void ForwardingRelayUnit::processBroadcast(Packet* packet, int arrivalInterfaceId) {
+    for (int interfacePos = 0; interfacePos < ifTable->getNumInterfaces(); interfacePos++) {
+        InterfaceEntry* destInterface = ifTable->getInterface(interfacePos);
+        int destInterfaceId = destInterface->getInterfaceId();
+        if (destInterfaceId != arrivalInterfaceId) {
             Packet* dupPacket = packet->dup();
-            send(dupPacket, outputGate);
+            dupPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterfaceId);
+            send(dupPacket, gate("ifOut"));
         }
     }
     delete packet;
 }
 
-void ForwardingRelayUnit::processMulticast(Packet* packet) {
-    auto macTag = packet->getTag<MacAddressInd>();
+void ForwardingRelayUnit::processMulticast(Packet* packet, int arrivalInterfaceId) {
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalGate = packet->getArrivalGate()->getIndex();
 
-    std::vector<int> forwardingPorts = fdb->getPorts(macTag->getDestAddress(),
-            simTime());
+    std::vector<int> forwardingPorts = fdb->getDestInterfaceIds(frame->getDest(), simTime());
 
     if (forwardingPorts.at(0) == -1) {
         throw cRuntimeError(
@@ -75,36 +97,32 @@ void ForwardingRelayUnit::processMulticast(Packet* packet) {
             forwardingPortsString = forwardingPortsString.append(
                     std::to_string(forwardingPort));
         }
-        EV_INFO << getFullPath() << ": Forwarding multicast packet `" << packet
-                       << "` to ports " << forwardingPortsString << endl;
+        EV_INFO << getFullPath() << ": Forwarding multicast packet `" << packet << "` to ports "
+                << forwardingPortsString << endl;
     }
     delete packet;
 }
 
-void ForwardingRelayUnit::processUnicast(Packet* packet) {
-    // Control info is needed to retrieve destination MAC address
-    auto macTag = packet->getTag<MacAddressInd>();
-
+void ForwardingRelayUnit::processUnicast(Packet* packet, int arrivalInterfaceId) {
     //Learning MAC port mappings
-    fdb->insert(macTag->getSrcAddress(), simTime(),
-            packet->getArrivalGate()->getIndex());
-    int forwardingPort = fdb->getPort(macTag->getDestAddress(), simTime());
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
+    learn(frame->getSrc(), arrivalInterfaceId);
+    int destInterfaceId = fdb->getDestInterfaceId(frame->getDest(), simTime());
 
-    Packet* dupPacket;
     //Routing entry available?
-    if (forwardingPort == -1) {
-        dupPacket = packet->dup();
-        processBroadcast(dupPacket);
-        EV_INFO << getFullPath() << ": Broadcasting packets `" << packet
-                       << "` to all ports" << endl;
-    } else {
-        dupPacket = packet->dup();
-        EV_INFO << getFullPath() << ": Forwarding packet `" << packet
-                       << "` to port " << forwardingPort << endl;
-        send(dupPacket, gate("out", forwardingPort));
+    if (destInterfaceId == -1) {
+        EV_INFO << getFullPath() << ": Broadcasting packet `" << packet << "` to all ports" << endl;
+        processBroadcast(packet, arrivalInterfaceId);
+    } else {;
+        EV_INFO << getFullPath() << ": Forwarding packet `" << packet << "` to port " << destInterfaceId << endl;
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterfaceId);
+        send(packet, gate("ifOut"));
     }
+}
 
-    delete packet;
+void ForwardingRelayUnit::learn(MacAddress srcAddr, int arrivalInterfaceId)
+{
+    fdb->insert(srcAddr, simTime(), arrivalInterfaceId);
 }
 
 } // namespace nesting

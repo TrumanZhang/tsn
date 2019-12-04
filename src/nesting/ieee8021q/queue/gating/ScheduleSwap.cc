@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../../queue/gating/ScheduleSwap.h"
+#include "nesting/ieee8021q/queue/gating/ScheduleSwap.h"
 
 namespace nesting {
 
@@ -45,7 +45,7 @@ int ScheduleSwap::numInitStages() const {
     return INITSTAGE_LINK_LAYER + 1;
 }
 
-void ScheduleSwap::tick(IClock *clock) {
+void ScheduleSwap::tick(IClock *clock, short kind) {
     Enter_Method("tick()");
 
     //only act if there are entries and the index points to an entry in range

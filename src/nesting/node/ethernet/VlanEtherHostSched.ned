@@ -15,14 +15,13 @@
 
 package nesting.node.ethernet;
 
-import inet.linklayer.ethernet.EtherMacFullDuplex;
-import inet.linklayer.ethernet.IEtherEncap;
-import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGenSched;
+import nesting.common.time.IOscillator;
 import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
-import nesting.linklayer.ethernet.VLANEncap;
+
 
 //
 // Simple Host with the capability to send out frames according to a given schedule
@@ -36,29 +35,34 @@ module VlanEtherHostSched
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2;bgb=385,371");
-        *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
+        **.clockModule = default(absPath(".legacyClock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
         trafGenSchedApp: VlanEtherTrafGenSched {
-            @display("p=212.768,69.296005");
+            @display("p=138,126");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=330,215;is=s");
+                @display("p=311,211;is=s");
         }
-        clock: <default("IdealClock")> like IClock {
-            @display("p=330,69");
+        oscillator: <default("IdealOscillator")> like IOscillator {
+            @display("p=311,40;is=s");
+        }
+        legacyClock: <default("IdealClock")> like IClock {
+            @display("p=311,96;is=s");
         }
         scheduleSwap: ScheduleSwap {
             usedInHost = true;
 
-            @display("p=330,149;b=29,25");
+            @display("p=310,153;b=29,25;is=s");
         }
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=138,271,row,150;q=txQueue");
+                interfaceTableModule = "^.interfaceTable";
         }
     connections:
         trafGenSchedApp.out --> eth.upperLayerIn;

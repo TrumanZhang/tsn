@@ -13,9 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../../queue/gating/TransmissionGate.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
-
+#include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {

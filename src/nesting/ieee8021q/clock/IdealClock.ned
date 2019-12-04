@@ -19,12 +19,14 @@ package nesting.ieee8021q.clock;
 // This ideal clock implementation provides the ability to subscribe to clock
 // ticks and has no clock drift or any failure.
 //
+// This module is deprecated. Use instances of the ~IClock2 or ~IOscillator
+// modules instead.
+//
 // @see ~IClock
 //
 simple IdealClock like IClock {
     parameters:
         @display("i=block/timer");
         @class(IdealClock);
-        string clockRate = default("1us");
-        bool verbose = default(false);
+        string oscillatorModule;
 }

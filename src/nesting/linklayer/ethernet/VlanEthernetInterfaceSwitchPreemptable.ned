@@ -15,15 +15,15 @@
 
 package nesting.linklayer.ethernet;
 
-@namespace();
-
-import nesting.ieee8021q.queue.Queuing;
-import nesting.linklayer.ethernet.VLANEncap;
-import nesting.linklayer.framePreemption.FrameForward;
-import nesting.linklayer.framePreemption.EtherMACFullDuplexPreemptable;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.InterfaceEntry;
+import nesting.ieee8021q.queue.Queuing;
+import nesting.linklayer.framePreemption.EtherMACFullDuplexPreemptable;
+import nesting.linklayer.framePreemption.FrameForward;
+
+@namespace();
 
 //
 // This module implements an ethernet interface that supports frame preemption.
@@ -31,14 +31,13 @@ import inet.networklayer.common.InterfaceEntry;
 module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEthernetInterface
 {
     parameters:
+        @display("i=block/ifcard;bgl=2");
         @class(inet::InterfaceEntry);
-        string interfaceTableModule;
         string address = default("auto"); // MAC address
         string fcsMode @enum("declared","computed") = default("declared");
-        @display("i=block/ifcard;bgl=2");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
         bool framePreemptionDisabled = default(true);
+        string interfaceTableModule;
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -52,19 +51,20 @@ module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEther
             parameters:
                 @display("p=202,61;q=l2queue");
         }
-        vlanEncapE: VLANEncap {
-            @display("p=90,333");
-        }
-        etherEncapE: <default("EtherEncap")> like IEtherEncap {
+        encapE: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=90,185");
+                @display("p=90,202");
         }
-        vlanEncapP: VLANEncap {
+        encapP: <default("EtherEncap")> like IEtherEncap {
+            parameters:
+                @display("p=202,202");
+        }
+        qEncapE: <default("Ieee8021qEncap")> like IIeee8021qEncap {
+            parameters:
+                @display("p=90,333");
+        }
+        qEncapP: <default("Ieee8021qEncap")> like IIeee8021qEncap {
             @display("p=202,333");
-        }
-        etherEncapP: <default("EtherEncap")> like IEtherEncap {
-            parameters:
-                @display("p=202,185");
         }
         frameForward: FrameForward {
             @display("p=90,61");
@@ -73,23 +73,23 @@ module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEther
         upperLayerIn --> queuing.in;
         frameForward.upperLayerOut --> upperLayerOut;
 
-        etherEncapE.upperLayerOut --> frameForward.lowerLayerInE;
-        etherEncapP.upperLayerOut --> frameForward.lowerLayerInP;
+        encapE.upperLayerOut --> frameForward.lowerLayerInE;
+        encapP.upperLayerOut --> frameForward.lowerLayerInP;
 
-        queuing.eOut --> etherEncapE.upperLayerIn;
-        queuing.pOut --> etherEncapP.upperLayerIn;
+        queuing.eOut --> encapE.upperLayerIn;
+        queuing.pOut --> encapP.upperLayerIn;
 
-        vlanEncapE.lowerLayerOut --> mac.upperLayerIn;
-        mac.upperLayerOut --> vlanEncapE.lowerLayerIn;
+        qEncapE.lowerLayerOut --> mac.upperLayerIn;
+        mac.upperLayerOut --> qEncapE.lowerLayerIn;
 
-        vlanEncapP.lowerLayerOut --> mac.upperLayerPreemptableIn;
-        mac.upperLayerPreemptableOut --> vlanEncapP.lowerLayerIn;
+        qEncapP.lowerLayerOut --> mac.upperLayerPreemptableIn;
+        mac.upperLayerPreemptableOut --> qEncapP.lowerLayerIn;
 
-        etherEncapE.lowerLayerOut --> vlanEncapE.upperLayerIn;
-        vlanEncapE.upperLayerOut --> etherEncapE.lowerLayerIn;
+        encapE.lowerLayerOut --> qEncapE.upperLayerIn;
+        qEncapE.upperLayerOut --> encapE.lowerLayerIn;
 
-        etherEncapP.lowerLayerOut --> vlanEncapP.upperLayerIn;
-        vlanEncapP.upperLayerOut --> etherEncapP.lowerLayerIn;
+        encapP.lowerLayerOut --> qEncapP.upperLayerIn;
+        qEncapP.upperLayerOut --> encapP.lowerLayerIn;
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 }

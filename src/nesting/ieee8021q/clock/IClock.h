@@ -18,7 +18,7 @@
 
 #include <omnetpp.h>
 
-#include "IClockListener.h"
+#include "nesting/ieee8021q/clock/IClockListener.h"
 
 using namespace omnetpp;
 
@@ -31,12 +31,11 @@ class IClockListener;
  * value. The time can be read or time changes can be subscribed.
  *
  * @see IClockListener
+ * @deprecated Use the nesting::IClock2 module instead
  */
 class IClock {
 public:
-    virtual ~IClock() {
-    }
-    ;
+    virtual ~IClock() {};
 
     /** Returns the clock's local time. */
     virtual simtime_t getTime() = 0;
@@ -44,8 +43,11 @@ public:
     /** Return clockrate as a simtime object. */
     virtual simtime_t getClockRate() = 0;
 
-    virtual void subscribeTick(IClockListener* listener,
-            unsigned int idleTicks) = 0;
+    /**
+     * Subscribe clock event. Calling this method is idempotent for the same
+     * kind value.
+     */
+    virtual void subscribeTick(IClockListener* listener, unsigned idleTicks, short kind = 0) = 0;
 
     virtual void unsubscribeTicks(IClockListener* listener) = 0;
 };

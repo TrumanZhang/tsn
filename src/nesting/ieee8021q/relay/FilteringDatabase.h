@@ -21,7 +21,9 @@
 #include <unordered_map>
 
 #include "inet/linklayer/common/MacAddress.h"
-#include "../clock/IClockListener.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+
+#include "nesting/ieee8021q/clock/IClockListener.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -59,8 +61,7 @@ private:
     bool agingActive = false;
     simtime_t agingThreshold;
 
-    void parseEntries(cXMLElement* xml);
-    void clearAdminFdb();
+    IInterfaceTable* ifTable;
 
 protected:
     virtual void initialize(int stage) override;
@@ -69,21 +70,25 @@ protected:
 
     virtual int numInitStages() const override;
 
+    void parseEntries(cXMLElement* xml);
+
+    void clearAdminFdb();
+
 public:
     FilteringDatabase(bool agingActive, simtime_t agingTreshold);
     FilteringDatabase();
     virtual ~FilteringDatabase();
 
     /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 
     virtual void loadDatabase(cXMLElement* fdb, simtime_t cycle);
 
-    virtual int getPort(MacAddress macAddress, simtime_t curTS);
+    virtual int getDestInterfaceId(MacAddress macAddress, simtime_t curTS);
 
-    virtual std::vector<int> getPorts(MacAddress macAddress, simtime_t curTS);
+    virtual std::vector<int> getDestInterfaceIds(MacAddress macAddress, simtime_t curTS);
 
-    void insert(MacAddress macAddress, simtime_t curTS, int port);
+    void insert(MacAddress macAddress, simtime_t curTS, int interfaceId);
 };
 
 } // namespace nesting

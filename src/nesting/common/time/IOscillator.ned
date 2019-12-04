@@ -13,33 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-cplusplus{{
-#include "inet/common/TagBase_m.h"
-}}
+package nesting.common.time;
 
-class noncobject inet::TagBase;
-
-namespace nesting;
-
-class VLANTagBase extends inet::TagBase
+//
+// This module interface is used to provide a stub for oscillator components with a
+// configurable clock rate.
+//
+moduleinterface IOscillator
 {
-    uint8_t pcp;    
-    bool de;        
-    short VID=0;
-}
-
-//
-// Determines VLAN 802.1Q parameters for an outgoing packet.
-//
-class VLANTagReq extends VLANTagBase
-{
-    
-}
-
-//
-// Specifies VLAN 802.1Q parameters for an incoming packet.
-//
-class VLANTagInd extends VLANTagBase
-{
-    
+    parameters:
+        @display("i=block/timer");
+        double frequency @unit(Hz);
 }

@@ -25,8 +25,9 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/Message_m.h"
-#include "../common/VLANTag_m.h"
-#include "../../ieee8021q/Ieee8021q.h"
+
+#include "nesting/linklayer/common/VLANTagDeprecated_m.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
 
 using namespace omnetpp;
 

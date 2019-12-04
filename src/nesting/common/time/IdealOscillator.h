@@ -13,24 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.relay;
+#ifndef __NESTINGNG_IDEALOSCILLATOR_H_
+#define __NESTINGNG_IDEALOSCILLATOR_H_
 
-//
-// Whenever this implementation of a ~RelayUnit receives a packet on an in-
-// port, it sends out duplicated packets on every out-port except the one
-// with equal index to the in-port.
-//
-// @see ~RelayUnit
-//
-simple FloodingRelayUnit like RelayUnit {
-    parameters:
-        @display("i=block/switch");
-        @class(FloodingRelayUnit);
-        int numberOfPorts;
-        bool verbose = default(false);
-    gates:
-        input in[numberOfPorts];
-        output out[numberOfPorts];
-        input managementIn[];
-        output managementOut[];
-}
+#include <omnetpp.h>
+
+#include "nesting/common/time/OscillatorBase.h"
+
+namespace nesting {
+
+class IdealOscillator : public OscillatorBase {
+    virtual simtime_t globalSchedulingTimeForTick(uint64_t idleTicks) override;
+};
+
+} // namespace nesting
+
+#endif

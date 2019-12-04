@@ -3,8 +3,10 @@ image: niessan/omnetpp-inet:latest
 stages:
     - build
     - test
+    - analysis
 
 before_script:
+    - export OMNETPP=/root/omnetpp
     - export NESTING=$(pwd)
     - export INET=/root/models/inet
 
@@ -12,17 +14,41 @@ build:
     stage: build
     script:
         - make INET=$INET makefiles
-        - make INET=$INET -j$(grep -c proc /proc/cpuinfo)
+        - make INET=$INET MODE=debug -j$(grep -c proc /proc/cpuinfo)
+        - make INET=$INET MODE=release -j$(grep -c proc /proc/cpuinfo)
         - test -f src/libnesting.so
+        - test -f src/libnesting_dbg.so
     artifacts:
         paths:
             - src/libnesting.so
+            - src/libnesting_dbg.so
             - out/
 
-test:
+test_release:
     stage: test
     script:
-        - bash $NESTING/tests/test.sh
+        - bash $NESTING/scripts/run_tests.sh
     artifacts:
         paths:
             - work
+
+test_dbg:
+    stage: test
+    script:
+        - MODE=debug bash $NESTING/scripts/run_tests.sh
+    artifacts:
+        paths:
+            - work
+
+code_quality:
+    stage: analysis
+    script:
+        - python3 $NESTING/scripts/run_cppcheck.py gl-code-quality-report.json
+    artifacts:
+        reports:
+            codequality: gl-code-quality-report.json
+        paths:
+            - gl-code-quality-report.json
+    only:
+        - master
+        - develop

@@ -15,6 +15,9 @@
 
 package nesting.ieee8021q.relay;
 
+import inet.linklayer.contract.IMacRelayUnit;
+
+
 //
 // This implementation of the ~RelayUnit interface provides forwarding or
 // filtering of frames according to provided information by a
@@ -22,16 +25,19 @@ package nesting.ieee8021q.relay;
 //
 // @see ~RelayUnit, ~FilteringDatabase
 //
-simple ForwardingRelayUnit like RelayUnit {
+simple ForwardingRelayUnit like IMacRelayUnit
+{
     parameters:
         @display("i=block/switch");
         @class(ForwardingRelayUnit);
         int numberOfPorts;
         string filteringDatabaseModule = default("^.filteringDatabase"); // Path to the ~FilteringDatabase module
+        string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
+        string vlanTagType @enum("c","s") = default("c");
         bool verbose = default(false);
-    gates:
-        input in[numberOfPorts];
-        output out[numberOfPorts];
-        input managementIn[];
-        output managementOut[];
+	gates:
+   		input ifIn @labels(EtherFrame);
+        output ifOut @labels(EtherFrame);
+        input upperLayerIn;
+        output upperLayerOut;
 }

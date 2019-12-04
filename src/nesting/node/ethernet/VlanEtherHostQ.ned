@@ -15,10 +15,12 @@
 
 package nesting.node.ethernet;
 
-import inet.linklayer.ethernet.EtherMacFullDuplex;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGen;
+import nesting.common.time.IOscillator;
 import nesting.ieee8021q.clock.IClock;
+
 
 //
 // Simple Host with the capability to create and receive VLAN tagged ethernet
@@ -29,27 +31,31 @@ import nesting.ieee8021q.clock.IClock;
 module VlanEtherHostQ
 {
     parameters:
-        @display("i=device/pc2;bgb=483,473");
+        @display("i=device/pc2;bgb=381,407");
         @networkNode();
         @labels(node,ethernet-node);
-        *.interfaceTableModule = default("");
-        eth.typename = "VlanEthernetInterfaceSwitchPreemptable";
-        eth.mac.queueModule = "^.^.eth[0].queuing.transmissionSelection";
-        eth.mac.mtu = 1500B;
-        eth.queuing.tsAlgorithms[*].macModule = "^.^.^.eth[0].mac";
-        eth.queuing.gateController.macModule = "^.^.^.eth[0].mac";
+        **.clockModule = default(absPath(".legacyClock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
         trafGenApp: VlanEtherTrafGen {
-            @display("p=142,70");
+            @display("p=232,70");
         }
-        clock: <default("IdealClock")> like IClock {
-            @display("p=26,28;is=s");
+        oscillator: <default("IdealOscillator")> like IOscillator {
+            @display("p=53,101;is=s");
+        }
+        legacyClock: <default("IdealClock")> like IClock {
+            @display("p=53,39;is=s");
         }
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=142,283,row,150;q=txQueue");
+                @display("p=232,283,row,150;q=txQueue");
+                interfaceTableModule = "^.interfaceTable";
+                mac.mtu = 1500B;
+        }
+        interfaceTable: InterfaceTable {
+            @display("p=53,164;is=s");
         }
     connections:
         eth.upperLayerIn <-- trafGenApp.out;

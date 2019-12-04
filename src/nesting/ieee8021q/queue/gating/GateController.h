@@ -25,14 +25,14 @@
 #include "inet/common/InitStages.h"
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
-#include "../TransmissionSelection.h"
-#include "../../clock/IClock.h"
-#include "../../../common/schedule/Schedule.h"
-#include "../../clock/IClockListener.h"
-#include "../../Ieee8021q.h"
-#include "TransmissionGate.h"
-#include "../../../common/schedule/ScheduleBuilder.h"
-#include "../../../linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
+#include "nesting/linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
+#include "nesting/common/schedule/Schedule.h"
+#include "nesting/common/schedule/ScheduleBuilder.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
+#include "nesting/ieee8021q/queue/TransmissionSelection.h"
+#include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
+#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/ieee8021q/clock/IClockListener.h"
 
 using namespace omnetpp;
 
@@ -99,7 +99,7 @@ public:
     virtual ~GateController();
 
     /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock) override;
+    virtual void tick(IClock *clock, short kind) override;
 
     /** Calculate the maximum bit size that can be transmitted until the next gate state change.
      *  Returns an unsigned integer value.

@@ -13,8 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../queue/QueuingFrames.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
+#include "nesting/ieee8021q/queue/QueuingFrames.h"
+
+#include <string>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace nesting {
 
@@ -33,41 +37,25 @@ void QueuingFrames::initialize() {
                 "Invalid assignment of numberOfQueues. Number of queues should not "
                         "be bigger than the number of all possible pcp values!");
     }
+
+    if (par("vlanTagType").stdstringValue() == "c") {
+        vlanTagType = C_TAG;
+    } else {
+        assert(par("vlanTagType").stdstringValue() == "s");
+        vlanTagType = S_TAG;
+    }
 }
 
 void QueuingFrames::handleMessage(cMessage *msg) {
-    if (dynamic_cast<inet::Request*>(msg)) {
-        delete msg;
-        return;
-    }
-
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
+    const auto& frame = packet->peekAtFront<inet::EthernetMacHeader>();
 
-    // switch ingoing VLAN Tag to outgoing Tag
-    auto vlanTagIn = packet->removeTag<VLANTagInd>();
-    int pcpValue = vlanTagIn->getPcp();
-    auto vlanTagOut = packet->addTag<VLANTagReq>();
-    vlanTagOut->setPcp(pcpValue);
-    vlanTagOut->setDe(vlanTagIn->getDe());
-    vlanTagOut->setVID(vlanTagIn->getVID());
-
-    // switch ingoing MAC Tag to outgoing MAC Tag
-    auto macTagIn = packet->removeTag<inet::MacAddressInd>();
-    auto macTagOut = packet->addTag<inet::MacAddressReq>();
-    macTagOut->setDestAddress(macTagIn->getDestAddress());
-    macTagOut->setSrcAddress(macTagIn->getSrcAddress());
-
-    // switch ingoing sap tag to outgoing sap tag
-    auto sapTagIn = packet->removeTag<inet::Ieee802SapInd>();
-    auto sapTagOut = packet->addTag<inet::Ieee802SapReq>();
-    sapTagOut->setDsap(sapTagIn->getDsap());
-    sapTagOut->setSsap(sapTagIn->getSsap());
-    delete macTagIn;
-    delete vlanTagIn;
-    delete sapTagIn;
-
-    // remove encapsulation
-    packet->trim();
+    int pcpValue;
+    if (vlanTagType == C_TAG) {
+        pcpValue = frame->getCTag()->getPcp();
+    } else {
+        pcpValue = frame->getSTag()->getPcp();
+    }
 
     // Check whether the PCP value is correct.
     if (pcpValue > kNumberOfPCPValues) {

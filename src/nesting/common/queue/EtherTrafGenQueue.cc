@@ -13,7 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "EtherTrafGenQueue.h"
+#include "nesting/common/queue/EtherTrafGenQueue.h"
+
+#include <cstdio>
+#include <iostream>
+#include <string>
 
 #include <omnetpp/ccomponent.h>
 #include <omnetpp/cexception.h>
@@ -27,9 +31,6 @@
 #include <omnetpp/cwatch.h>
 #include <omnetpp/regmacros.h>
 #include <omnetpp/simutil.h>
-#include <cstdio>
-#include <iostream>
-#include <string>
 
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 

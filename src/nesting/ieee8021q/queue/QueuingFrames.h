@@ -19,12 +19,12 @@
 #include <omnetpp.h>
 #include <array>
 
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/packet/Message.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "../Ieee8021q.h"
-#include "../../linklayer/common/VLANTag_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/linklayer/vlan/VlanTag_m.h"
+
+#include "nesting/ieee8021q/Ieee8021q.h"
+#include "nesting/linklayer/vlan/VlanTagType.h"
 
 using namespace omnetpp;
 
@@ -51,12 +51,11 @@ private:
               { 1, 0, 2, 3, 4, 5, 6, 7 }
           };
 
-
-    int getFramePriority(int numberOfQueues);
+    VlanTagType vlanTagType;
 protected:
-    virtual void initialize();
+    virtual void initialize() override;
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace nesting

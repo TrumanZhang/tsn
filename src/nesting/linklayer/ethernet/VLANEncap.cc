@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "VLANEncap.h"
+#include "nesting/linklayer/ethernet/VLANEncap.h"
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
@@ -75,7 +75,7 @@ void VLANEncap::processPacketFromHigherLevel(inet::Packet *packet) {
         vlanHeader->setPcp(vlanTag->getPcp());
         vlanHeader->setDe(vlanTag->getDe());
         vlanHeader->setVid(vlanTag->getVID());
-        ethernetMacHeader->setSTag(vlanHeader);
+        ethernetMacHeader->setCTag(vlanHeader);
         delete packet->removeTagIfPresent<VLANTagReq>();
         EV_INFO << getFullPath() << ":Encapsulating higher layer packet `"
                        << packet->getName() << "' into VLAN tag" << endl;

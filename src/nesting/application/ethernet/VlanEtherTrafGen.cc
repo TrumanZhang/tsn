@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "VlanEtherTrafGen.h"
+#include "nesting/application/ethernet/VlanEtherTrafGen.h"
 
 namespace nesting {
 
@@ -51,12 +51,12 @@ void VlanEtherTrafGen::sendBurstPackets() {
         datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
                 &Protocol::ethernetMac);
         // TODO check which protocol to insert
-        auto sapTag = datapacket->addTagIfAbsent<Ieee802SapInd>();
+        auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
         sapTag->setSsap(ssap);
         sapTag->setDsap(dsap);
 
         // create control info for encap modules
-        auto macTag = datapacket->addTag<MacAddressInd>();
+        auto macTag = datapacket->addTag<MacAddressReq>();
         macTag->setDestAddress(destMacAddress);
 
         uint8_t PCP;
@@ -64,7 +64,7 @@ void VlanEtherTrafGen::sendBurstPackets() {
         short VID;
         // create VLAN control info
         if (vlanTagEnabled->boolValue()) {
-            auto ieee8021q = datapacket->addTag<VLANTagInd>();
+            auto ieee8021q = datapacket->addTag<VLANTagReq>();
             PCP = pcp->intValue();
             de = dei->boolValue();
             VID = vid->intValue();

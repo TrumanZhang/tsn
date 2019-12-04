@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../queue/TransmissionSelection.h"
+#include "nesting/ieee8021q/queue/TransmissionSelection.h"
 
 namespace nesting {
 
@@ -46,11 +46,6 @@ void TransmissionSelection::initialize() {
             tGates.push_back(tg);
         }
     }
-
-    // so that EtherEncap does not drop packets
-    llcSocket.setOutputGate(gate("eOut"));
-
-    llcSocket.open(-1, ssap);
 }
 
 void TransmissionSelection::handleMessage(cMessage* msg) {

@@ -13,20 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.relay;
+#include "nesting/common/time/IdealOscillator.h"
 
-//
-// Implementations of this module interface should perform relaying of packets
-// between input-, output- and management-connections of an ethernet switch.
-//
-moduleinterface RelayUnit {
-    parameters:
-        @display("i=block/switch");
-        int numberOfPorts;
-        bool verbose;
-    gates:
-        input in[numberOfPorts];
-        output out[numberOfPorts];
-        input managementIn[];
-        output managementOut[];
+namespace nesting {
+
+Define_Module(IdealOscillator);
+
+simtime_t IdealOscillator::globalSchedulingTimeForTick(uint64_t tick)
+{
+    uint64_t currentTick = updateAndGetTickCount();
+    uint64_t deltaTick = tick - currentTick;
+    return timeOfLastTick + deltaTick * tickInterval();
 }
+
+} // namespace nesting
