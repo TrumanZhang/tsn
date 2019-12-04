@@ -74,8 +74,10 @@ void GateController::initialize(int stage) {
                         this->getModuleByPath(par("networkInterfaceModule"))->getIndex());
 
         lastChange = simTime();
-        currentSchedule = std::unique_ptr < Schedule
-                < GateBitvector >> (new Schedule<GateBitvector>());
+
+        currentSchedule = std::unique_ptr<Schedule<GateBitvector>>(new Schedule<GateBitvector>());
+        currentSchedule->addControlListEntry(SimTime(1, SIMTIME_S), GateBitvector("11111111"));
+
         cXMLElement* xml = par("initialSchedule").xmlValue();
         loadScheduleOrDefault(xml);
         if (par("enableHoldAndRelease")) {
