@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 #include <bitset>
 #include <vector>
+#include <iostream>
 
 using namespace omnetpp;
 
@@ -90,6 +91,16 @@ public:
         return sumTimeIntervals;
     }
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream& stream, const Schedule<T>& schedule)
+{
+    return stream << "Schedule[baseTime=" << schedule.getBaseTime() 
+            << ", cycleTime=" << schedule.getCycleTime()
+            << ", cycleTimeExtension=" << schedule.getCycleTimeExtension()
+            << ", controlListLength=" << schedule.getControlListLength()
+            << ", sumTimeIntervals=" << schedule.getSumTimeIntervals() << "]";
+}
 
 } // namespace nesting
 
