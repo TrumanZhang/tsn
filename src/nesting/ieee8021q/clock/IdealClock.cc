@@ -59,7 +59,7 @@ void IdealClock::unsubscribeTicks(IClockListener* listener)
     }
 }
 
-void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick)
+void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
     IClockListener* listener = tickToListenerTable[tick];
     listener->tick(this, tick->getKind());

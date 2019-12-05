@@ -62,7 +62,7 @@ void OscillatorBase::handleMessage(cMessage *msg)
         // Otherwise the self-message shouldn't exist.
         assert(!scheduledEvents.empty());
 
-        std::shared_ptr<OscillatorBaseTick> tickEvent = scheduledEvents.front();
+        std::shared_ptr<OscillatorBase::TickImpl> tickEvent = scheduledEvents.front();
         scheduledEvents.pop_front();
 
         // Invariant: Monotonic increasing tick count
@@ -97,7 +97,7 @@ void OscillatorBase::scheduleNextTick() {
 
     // We only have to schedule the next tick if there exists a future event.
     if (!scheduledEvents.empty()) {
-        std::shared_ptr<OscillatorBaseTick>& nextTickEvent = scheduledEvents.front();
+        std::shared_ptr<OscillatorBase::TickImpl>& nextTickEvent = scheduledEvents.front();
 
         uint64_t currentTick = updateAndGetTickCount();
         uint64_t nextScheduledTick = nextTickEvent->getTick();
@@ -127,7 +127,7 @@ uint64_t OscillatorBase::updateAndGetTickCount()
     return currentTick;
 }
 
-std::shared_ptr<const IOscillatorTick> OscillatorBase::subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind)
+std::shared_ptr<const IOscillator::Tick> OscillatorBase::subscribeTick(IOscillator::TickListener& listener, uint64_t idleTicks, uint64_t kind)
 {
     Enter_Method_Silent();
 
@@ -136,7 +136,7 @@ std::shared_ptr<const IOscillatorTick> OscillatorBase::subscribeTick(IOscillator
 
     // Create new tick event.
     uint64_t tick = currentTick + idleTicks;
-    std::shared_ptr<OscillatorBaseTick> tickEvent = std::make_shared<OscillatorBaseTick>(
+    std::shared_ptr<OscillatorBase::TickImpl> tickEvent = std::make_shared<OscillatorBase::TickImpl>(
             listener,
             tick,
             kind,
@@ -158,16 +158,16 @@ std::shared_ptr<const IOscillatorTick> OscillatorBase::subscribeTick(IOscillator
     return tickEvent;
 }
 
-std::shared_ptr<const IOscillatorTick> OscillatorBase::subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks)
+std::shared_ptr<const IOscillator::Tick> OscillatorBase::subscribeTick(IOscillator::TickListener& listener, uint64_t idleTicks)
 {
     return subscribeTick(listener, idleTicks, 0);
 }
 
-void OscillatorBase::unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick)
+void OscillatorBase::unsubscribeTick(IOscillator::TickListener& listener, const IOscillator::Tick& tick)
 {
     Enter_Method_Silent();
 
-    std::shared_ptr<OscillatorBaseTick> tickEvent = std::make_shared<OscillatorBaseTick>(
+    std::shared_ptr<OscillatorBase::TickImpl> tickEvent = std::make_shared<OscillatorBase::TickImpl>(
         listener, 
         tick.getTick(), 
         tick.getKind(), 
@@ -187,10 +187,10 @@ void OscillatorBase::unsubscribeTick(IOscillatorTickListener& listener, const IO
     scheduleNextTick();
 }
 
-void OscillatorBase::unsubscribeTicks(IOscillatorTickListener& listener, uint64_t kind)
+void OscillatorBase::unsubscribeTicks(IOscillator::TickListener& listener, uint64_t kind)
 {
     Enter_Method_Silent();
-    auto removeCondition = [&](std::shared_ptr<OscillatorBaseTick> tickEvent) {
+    auto removeCondition = [&](std::shared_ptr<OscillatorBase::TickImpl> tickEvent) {
         return &(tickEvent->getListener()) == &listener
                 && tickEvent->getKind() == kind;
     };
@@ -200,10 +200,10 @@ void OscillatorBase::unsubscribeTicks(IOscillatorTickListener& listener, uint64_
     scheduleNextTick();
 }
 
-void OscillatorBase::unsubscribeTicks(IOscillatorTickListener& listener)
+void OscillatorBase::unsubscribeTicks(IOscillator::TickListener& listener)
 {
     Enter_Method_Silent();
-    auto removeCondition = [&](std::shared_ptr<OscillatorBaseTick> tickEvent) {
+    auto removeCondition = [&](std::shared_ptr<OscillatorBase::TickImpl> tickEvent) {
         return &(tickEvent->getListener()) == &listener;
     };
     scheduledEvents.erase(
@@ -212,9 +212,9 @@ void OscillatorBase::unsubscribeTicks(IOscillatorTickListener& listener)
     scheduleNextTick();
 }
 
-bool OscillatorBase::isTickScheduled(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent) const
+bool OscillatorBase::isTickScheduled(IOscillator::TickListener& listener, const IOscillator::Tick& tickEvent) const
 {
-    std::shared_ptr<OscillatorBaseTick> tick = std::make_shared<OscillatorBaseTick>(listener, tickEvent);
+    std::shared_ptr<OscillatorBase::TickImpl> tick = std::make_shared<OscillatorBase::TickImpl>(listener, tickEvent);
     auto it = std::lower_bound(
             scheduledEvents.begin(),
             scheduledEvents.end(),
@@ -234,7 +234,7 @@ void OscillatorBase::setFrequency(double newFrequency)
     this->frequency = newFrequency;
 
     // Update scheduling times for each tick
-    for (std::shared_ptr<OscillatorBaseTick> tickEvent : scheduledEvents) {
+    for (std::shared_ptr<OscillatorBase::TickImpl> tickEvent : scheduledEvents) {
         simtime_t updatedSchedulingTime = globalSchedulingTimeForTick(tickEvent->getTick());
         tickEvent->setGlobalSchedulingTime(updatedSchedulingTime);
     }
@@ -243,22 +243,22 @@ void OscillatorBase::setFrequency(double newFrequency)
     scheduleNextTick();
 
     // Notify config subscribers
-    for (IOscillatorConfigListener* listener : configListeners) {
+    for (IOscillator::ConfigListener* listener : configListeners) {
         listener->onFrequencyChange(*this, oldFrequency, newFrequency);
     }
 }
 
-void OscillatorBase::subscribeConfigChanges(IOscillatorConfigListener& listener)
+void OscillatorBase::subscribeConfigChanges(IOscillator::ConfigListener& listener)
 {
     configListeners.insert(&listener);
 }
 
-void OscillatorBase::unsubscribeConfigChanges(IOscillatorConfigListener& listener)
+void OscillatorBase::unsubscribeConfigChanges(IOscillator::ConfigListener& listener)
 {
     configListeners.erase(&listener);
 }
 
-OscillatorBaseTick::OscillatorBaseTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime)
+OscillatorBase::TickImpl::TickImpl(IOscillator::TickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime)
     : listener(listener)
     , tick(tick)
     , kind(kind)
@@ -266,7 +266,7 @@ OscillatorBaseTick::OscillatorBaseTick(IOscillatorTickListener& listener, uint64
 {
 }
 
-OscillatorBaseTick::OscillatorBaseTick(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent)
+OscillatorBase::TickImpl::TickImpl(IOscillator::TickListener& listener, const IOscillator::Tick& tickEvent)
     : listener(listener)
     , tick(tickEvent.getTick())
     , kind(tickEvent.getKind())
@@ -274,51 +274,51 @@ OscillatorBaseTick::OscillatorBaseTick(IOscillatorTickListener& listener, const 
 {
 }
 
-OscillatorBaseTick::~OscillatorBaseTick()
+OscillatorBase::TickImpl::~TickImpl()
 {
 }
 
-IOscillatorTickListener& OscillatorBaseTick::getListener() const
+IOscillator::TickListener& OscillatorBase::TickImpl::getListener() const
 {
     return listener;
 }
 
-void OscillatorBaseTick::setListener(IOscillatorTickListener& listener)
+void OscillatorBase::TickImpl::setListener(IOscillator::TickListener& listener)
 {
     this->listener = listener;
 }
 
-uint64_t OscillatorBaseTick::getTick() const
+uint64_t OscillatorBase::TickImpl::getTick() const
 {
     return tick;
 }
 
-void OscillatorBaseTick::setTick(uint64_t tick)
+void OscillatorBase::TickImpl::setTick(uint64_t tick)
 {
     this->tick = tick;
 }
 
-uint64_t OscillatorBaseTick::getKind() const
+uint64_t OscillatorBase::TickImpl::getKind() const
 {
     return kind;
 }
 
-void OscillatorBaseTick::setKind(uint64_t kind)
+void OscillatorBase::TickImpl::setKind(uint64_t kind)
 {
     this->kind = kind;
 }
 
-simtime_t OscillatorBaseTick::getGlobalSchedulingTime() const
+simtime_t OscillatorBase::TickImpl::getGlobalSchedulingTime() const
 {
     return globalSchedulingTime;
 }
 
-void OscillatorBaseTick::setGlobalSchedulingTime(simtime_t globalSchedulingTime)
+void OscillatorBase::TickImpl::setGlobalSchedulingTime(simtime_t globalSchedulingTime)
 {
     this->globalSchedulingTime = globalSchedulingTime;
 }
 
-bool OscillatorBaseTick::operator<(const OscillatorBaseTick& tickEvent) const
+bool OscillatorBase::TickImpl::operator<(const OscillatorBase::TickImpl& tickEvent) const
 {
     if (this->tick < tickEvent.getTick()) {
         return true;
@@ -332,19 +332,19 @@ bool OscillatorBaseTick::operator<(const OscillatorBaseTick& tickEvent) const
     return false;
 }
 
-bool OscillatorBaseTick::operator==(const OscillatorBaseTick& tickEvent) const
+bool OscillatorBase::TickImpl::operator==(const OscillatorBase::TickImpl& tickEvent) const
 {
     return &(this->listener) == &(tickEvent.listener)
             && this->tick == tickEvent.tick
             && this->kind == tickEvent.kind;
 }
 
-bool OscillatorBaseTick::operator!=(const OscillatorBaseTick& tickEvent) const
+bool OscillatorBase::TickImpl::operator!=(const OscillatorBase::TickImpl& tickEvent) const
 {
     return !(*this == tickEvent);
 }
 
-std::ostream& operator<<(std::ostream& stream, const OscillatorBaseTick* tickEvent)
+std::ostream& operator<<(std::ostream& stream, const OscillatorBase::TickImpl* tickEvent)
 {
     stream << "TickEvent[tick=\"" << tickEvent->getTick()
             << "\",kind=\"" << tickEvent->getKind()
@@ -352,7 +352,7 @@ std::ostream& operator<<(std::ostream& stream, const OscillatorBaseTick* tickEve
     return stream;
 }
 
-bool operator<(std::shared_ptr<OscillatorBaseTick> left, std::shared_ptr<OscillatorBaseTick> right)
+bool operator<(std::shared_ptr<OscillatorBase::TickImpl> left, std::shared_ptr<OscillatorBase::TickImpl> right)
 {
     return *left < *right;
 }

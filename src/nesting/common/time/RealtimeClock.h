@@ -28,8 +28,6 @@
 #include "nesting/common/time/IClock2TimestampListener.h"
 #include "nesting/common/time/IClock2ConfigListener.h"
 #include "nesting/common/time/IOscillator.h"
-#include "nesting/common/time/IOscillatorTickListener.h"
-#include "nesting/common/time/IOscillatorConfigListener.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -41,7 +39,7 @@ class RealtimeClockTimestamp;
 /**
  * TODO - Generated class
  */
-class RealtimeClock : public cSimpleModule, public IClock2, public IOscillatorTickListener, public IOscillatorConfigListener
+class RealtimeClock : public cSimpleModule, public IClock2, public IOscillator::TickListener, public IOscillator::ConfigListener
 {
 protected:
     IOscillator* oscillator;
@@ -50,7 +48,7 @@ protected:
     double driftRate;
     std::set<IClock2ConfigListener*> configListeners;
     std::list<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
-    std::shared_ptr<IOscillatorTick> nextTick;
+    std::shared_ptr<IOscillator::Tick> nextTick;
     /** 
      * If the clockRate + driftRate is smaller than this threshold, the clock
      * is stopped instead of running really slow to prevent numeric errors.
@@ -73,7 +71,7 @@ public:
     virtual void setClockRate(double clockRate) override;
     virtual double getDriftRate() const override;
     virtual void setDriftRate(double driftRate) override;
-    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick) override;
+    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick) override;
     virtual void onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) override;
     virtual bool isStopped();
 };

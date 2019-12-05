@@ -39,7 +39,6 @@ simple TestIdealOscillator
 #include <omnetpp.h>
 
 #include "nesting/common/time/IOscillator.h"
-#include "nesting/common/time/IOscillatorTickListener.h"
 #include "nesting/common/time/IdealOscillator.h"
 
 using namespace omnetpp;
@@ -47,7 +46,7 @@ using namespace nesting;
 
 namespace @TESTNAME@ {
 
-class TestIdealOscillator : public cSimpleModule, public IOscillatorTickListener
+class TestIdealOscillator : public cSimpleModule, public IOscillator::TickListener
 {
 protected:
     IdealOscillator* oscillator;
@@ -56,7 +55,7 @@ protected:
     virtual void initialize() override;
     virtual void finish() override;
 public:
-    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick) override;
+    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick) override;
 };
 
 } // namespace @TESTNAME@
@@ -77,7 +76,7 @@ Define_Module(TestIdealOscillator);
 void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
-    std::shared_ptr<const IOscillatorTick> tickEvent = oscillator->subscribeTick(*this, 0);
+    std::shared_ptr<const IOscillator::Tick> tickEvent = oscillator->subscribeTick(*this, 0);
     oscillator->unsubscribeTick(*this, *tickEvent);
 }
 
@@ -88,7 +87,7 @@ void TestIdealOscillator::finish()
 	}
 }
 
-void TestIdealOscillator::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick)
+void TestIdealOscillator::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
     Enter_Method("tick");
     tickCount++;

@@ -21,57 +21,55 @@
 
 #include <omnetpp.h>
 
-#include "nesting/common/time/IOscillatorTickListener.h"
-#include "nesting/common/time/IOscillatorConfigListener.h"
-
 using namespace omnetpp;
 
 namespace nesting {
 
-class IOscillatorTick;
-class IOscillatorTickListener;
-class IOscillatorTickConfig;
-
 /** Interface for oscillator implementations. */
 class IOscillator {
 public:
+    // Forward declarations
+    class Tick;
+    class TickListener;
+    class ConfigListener;
+
     virtual ~IOscillator() {};
 
     /**
      * Subscribes a tick event for a given listener. The kind value can be used
      * to create inverse mappings of oscillator ticks within subscribers.
      */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind) = 0;
+    virtual std::shared_ptr<const IOscillator::Tick> subscribeTick(IOscillator::TickListener& listener, uint64_t idleTicks, uint64_t kind) = 0;
 
     /**
-     * Same as IOscillator::subscribeTick(IOscillatorTickListener&, uint64_t,
+     * Same as IOscillator::subscribeTick(IOscillator::TickListener&, uint64_t,
      * uint64_t) except that the kind value is set to 0.
      */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks) = 0;
+    virtual std::shared_ptr<const IOscillator::Tick> subscribeTick(IOscillator::TickListener& listener, uint64_t idleTicks) = 0;
 
     /**
      * Unsubscribes a listener from a tick event.
      */
-    virtual void unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick) = 0;
+    virtual void unsubscribeTick(IOscillator::TickListener& listener, const Tick& tick) = 0;
 
     /**
      * Unsubscribes a listener from all tick events of a certain kind value.
      */
-    virtual void unsubscribeTicks(IOscillatorTickListener& listener, uint64_t kind) = 0;
+    virtual void unsubscribeTicks(IOscillator::TickListener& listener, uint64_t kind) = 0;
 
     /**
      * Unsubscribes all ticks scheduled for a given listener.
      */
-    virtual void unsubscribeTicks(IOscillatorTickListener& listener) = 0;
+    virtual void unsubscribeTicks(IOscillator::TickListener& listener) = 0;
 
-    virtual void subscribeConfigChanges(IOscillatorConfigListener& listener) = 0;
+    virtual void subscribeConfigChanges(IOscillator::ConfigListener& listener) = 0;
 
-    virtual void unsubscribeConfigChanges(IOscillatorConfigListener& listener) = 0;
+    virtual void unsubscribeConfigChanges(IOscillator::ConfigListener& listener) = 0;
 
     /**
      * Returns true if a given tick event is scheduled for a given listener.
      */
-    virtual bool isTickScheduled(IOscillatorTickListener& listener, const IOscillatorTick& tick) const = 0;
+    virtual bool isTickScheduled(IOscillator::TickListener& listener, const Tick& tick) const = 0;
 
     /**
      * Returns the frequency of the oscillator module.
@@ -94,19 +92,35 @@ public:
      * implementations.
      */
     virtual uint64_t updateAndGetTickCount() = 0;
-};
-
-/** Interface for oscillator ticks. */
-class IOscillatorTick {
 public:
-    virtual ~IOscillatorTick() {};
+    /** Interface for oscillator ticks. */
+    class Tick {
+    public:
+        virtual ~Tick() {};
 
-    virtual uint64_t getTick() const = 0;
+        virtual uint64_t getTick() const = 0;
 
-    virtual uint64_t getKind() const = 0;
+        virtual uint64_t getKind() const = 0;
 
-    /** Global simulation time when the tick event will be scheduled. */
-    virtual simtime_t getGlobalSchedulingTime() const = 0;
+        /** Global simulation time when the tick event will be scheduled. */
+        virtual simtime_t getGlobalSchedulingTime() const = 0;
+    };
+
+    /** Interface for listeners subscribing tick events. */
+    class TickListener {
+    public:
+        virtual ~TickListener() {};
+
+        virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick) = 0;
+    };
+
+    /** Interface for listeners subscribing to config changes. */
+    class ConfigListener {
+    public:
+        virtual ~ConfigListener() {};
+
+        virtual void onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency) = 0;
+    };
 };
 
 } // namespace nesting
