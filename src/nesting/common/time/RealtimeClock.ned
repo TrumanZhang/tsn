@@ -18,7 +18,7 @@ package nesting.common.time;
 //
 // TODO auto-generated module
 //
-simple RealtimeClock
+simple RealtimeClock like IClock2
 {
     parameters:
         @display("i=block/timer");
