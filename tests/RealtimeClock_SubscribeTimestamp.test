@@ -45,7 +45,6 @@ simple TestRealtimeClock
 #include <omnetpp.h>
 
 #include "nesting/common/time/IClock2.h"
-#include "nesting/common/time/IClock2TimestampListener.h"
 #include "nesting/common/time/RealtimeClock.h"
 
 using namespace omnetpp;
@@ -53,7 +52,7 @@ using namespace nesting;
 
 namespace @TESTNAME@ {
 
-class TestRealtimeClock : public cSimpleModule, public IClock2TimestampListener
+class TestRealtimeClock : public cSimpleModule, public IClock2::TimestampListener
 {
 protected:
     IClock2* clock;
@@ -62,7 +61,7 @@ protected:
     virtual void initialize() override;
     virtual void finish() override;
 public:
-    virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2Timestamp> timestamp) override;
+    virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2::Timestamp> timestamp) override;
 };
 
 } // namespace @TESTNAME@
@@ -95,7 +94,7 @@ void TestRealtimeClock::finish()
 	}
 }
 
-void TestRealtimeClock::onTimestamp(IClock2& clock, std::shared_ptr<const IClock2Timestamp> timestamp)
+void TestRealtimeClock::onTimestamp(IClock2& clock, std::shared_ptr<const IClock2::Timestamp> timestamp)
 {
     Enter_Method("timestamp");
 

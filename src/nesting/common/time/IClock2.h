@@ -21,26 +21,26 @@
 #include <memory>
 #include <cstdint>
 
-#include "nesting/common/time/IClock2TimestampListener.h"
-#include "nesting/common/time/IClock2ConfigListener.h"
-
 using namespace omnetpp;
 
 namespace nesting {
 
-class IClock2Timestamp;
-
 class IClock2 {
 public:
+    // Forward declarations
+    class Timestamp;
+    class TimestampListener;
+    class ConfigListener;
+
     virtual ~IClock2() {};
 
-    virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) = 0;
+    virtual std::shared_ptr<const Timestamp> subscribeDelta(TimestampListener& listener, simtime_t delta, uint64_t kind = 0) = 0;
 
-    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t time, uint64_t kind = 0) = 0;
+    virtual std::shared_ptr<const Timestamp> subscribeTimestamp(TimestampListener& listener, simtime_t time, uint64_t kind = 0) = 0;
 
-    virtual void subscribeConfigChanges(IClock2ConfigListener& listener) = 0;
+    virtual void subscribeConfigChanges(ConfigListener& listener) = 0;
 
-    virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) = 0;
+    virtual void unsubscribeConfigChanges(ConfigListener& listener) = 0;
 
     virtual simtime_t updateAndGetLocalTime() = 0;
 
@@ -53,14 +53,33 @@ public:
     virtual double getDriftRate() const = 0;
 
     virtual void setDriftRate(double driftRate) = 0;
-};
 
-class IClock2Timestamp {
 public:
-    /** TODO write doc */
-    virtual simtime_t getLocalTime() const = 0;
+    class Timestamp {
+    public:
+        /** TODO write doc */
+        virtual simtime_t getLocalTime() const = 0;
 
-    virtual uint64_t getKind() const = 0;
+        virtual uint64_t getKind() const = 0;
+    };
+
+    class TimestampListener {
+    public:
+        virtual ~TimestampListener() {};
+
+        virtual void onTimestamp(IClock2& clock, std::shared_ptr<const Timestamp>) = 0;
+    };
+
+    class ConfigListener {
+    public:
+        virtual ~ConfigListener() {};
+
+        virtual void onClockRateChange(IClock2& clock, double oldClockRate, double newClockRate) = 0;
+
+        virtual void onDriftRateChange(IClock2& clock, double oldDriftRate, double newDriftRate) = 0;
+
+        virtual void onPhaseJump(IClock2& clock, simtime_t oldTime, simtime_t newTime) = 0;
+    };
 };
 
 } /* namespace nesting */

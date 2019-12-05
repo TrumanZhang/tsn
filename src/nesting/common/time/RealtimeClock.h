@@ -25,8 +25,6 @@
 #include "inet/common/ModuleAccess.h"
 
 #include "nesting/common/time/IClock2.h"
-#include "nesting/common/time/IClock2TimestampListener.h"
-#include "nesting/common/time/IClock2ConfigListener.h"
 #include "nesting/common/time/IOscillator.h"
 
 using namespace omnetpp;
@@ -34,20 +32,38 @@ using namespace inet;
 
 namespace nesting {
 
-class RealtimeClockTimestamp;
-
 /**
  * TODO - Generated class
  */
 class RealtimeClock : public cSimpleModule, public IClock2, public IOscillator::TickListener, public IOscillator::ConfigListener
 {
 protected:
+    class TimestampImpl : public IClock2::Timestamp
+    {
+    protected:
+        simtime_t localTime;
+        uint64_t kind;
+        IClock2::TimestampListener& listener;
+    public:
+        TimestampImpl(IClock2::TimestampListener& listener, simtime_t localTime, uint64_t kind);
+        virtual simtime_t getLocalTime() const override;
+        virtual uint64_t getKind() const override;
+        virtual IClock2::TimestampListener& getListener() const;
+        bool operator==(const TimestampImpl& other) const;
+        bool operator!=(const TimestampImpl& other) const;
+        bool operator<(const TimestampImpl& other) const;
+    };
+protected:
+    // Friend declarations
+    friend std::ostream& operator<<(std::ostream& stream, const TimestampImpl* timestamp);
+    friend bool operator<(std::shared_ptr<TimestampImpl> left, std::shared_ptr<TimestampImpl> right);
+
     IOscillator* oscillator;
     simtime_t localTime;
     uint64_t lastTick;
     double driftRate;
-    std::set<IClock2ConfigListener*> configListeners;
-    std::list<std::shared_ptr<RealtimeClockTimestamp>> scheduledEvents;
+    std::set<IClock2::ConfigListener*> configListeners;
+    std::list<std::shared_ptr<TimestampImpl>> scheduledEvents;
     std::shared_ptr<IOscillator::Tick> nextTick;
     /** 
      * If the clockRate + driftRate is smaller than this threshold, the clock
@@ -61,10 +77,10 @@ protected:
 public:
     RealtimeClock();
     virtual ~RealtimeClock();
-    virtual std::shared_ptr<const IClock2Timestamp> subscribeDelta(IClock2TimestampListener& listener, simtime_t delta, uint64_t kind = 0) override;
-    virtual std::shared_ptr<const IClock2Timestamp> subscribeTimestamp(IClock2TimestampListener& listener, simtime_t time, uint64_t kind = 0) override;
-    virtual void subscribeConfigChanges(IClock2ConfigListener& listener) override;
-    virtual void unsubscribeConfigChanges(IClock2ConfigListener& listener) override;
+    virtual std::shared_ptr<const IClock2::Timestamp> subscribeDelta(IClock2::TimestampListener& listener, simtime_t delta, uint64_t kind = 0) override;
+    virtual std::shared_ptr<const IClock2::Timestamp> subscribeTimestamp(IClock2::TimestampListener& listener, simtime_t time, uint64_t kind = 0) override;
+    virtual void subscribeConfigChanges(IClock2::ConfigListener& listener) override;
+    virtual void unsubscribeConfigChanges(IClock2::ConfigListener& listener) override;
     virtual simtime_t updateAndGetLocalTime() override;
     virtual void setLocalTime(simtime_t time) override;
     virtual double getClockRate() const override;
@@ -76,27 +92,11 @@ public:
     virtual bool isStopped();
 };
 
-class RealtimeClockTimestamp : public IClock2Timestamp
-{
-protected:
-    simtime_t localTime;
-    uint64_t kind;
-    IClock2TimestampListener& listener;
-public:
-    RealtimeClockTimestamp(IClock2TimestampListener& listener, simtime_t localTime, uint64_t kind);
-    virtual simtime_t getLocalTime() const override;
-    virtual uint64_t getKind() const override;
-    virtual IClock2TimestampListener& getListener() const;
-    bool operator==(const RealtimeClockTimestamp& other) const;
-    bool operator!=(const RealtimeClockTimestamp& other) const;
-    bool operator<(const RealtimeClockTimestamp& other) const;
-};
-
 // Useful for debugging
-std::ostream& operator<<(std::ostream& stream, const RealtimeClockTimestamp* timestamp);
+std::ostream& operator<<(std::ostream& stream, const RealtimeClock::TimestampImpl* timestamp);
 
 // Required to sort timestamp events
-bool operator<(std::shared_ptr<RealtimeClockTimestamp> left, std::shared_ptr<RealtimeClockTimestamp> right);
+bool operator<(std::shared_ptr<RealtimeClock::TimestampImpl> left, std::shared_ptr<RealtimeClock::TimestampImpl> right);
 
 } //namespace
 
