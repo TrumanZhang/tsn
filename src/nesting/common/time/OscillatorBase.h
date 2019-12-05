@@ -35,9 +35,49 @@ namespace nesting {
 class OscillatorBase : public cSimpleModule, public IOscillator
 {
 protected:
-    // Forward declarations
-    class TickImpl;
+    class TickImpl : public Tick {
+    protected:
+        TickListener& listener;
 
+        uint64_t tick;
+
+        uint64_t kind;
+
+        simtime_t globalSchedulingTime;
+    public:
+        TickImpl(TickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime);
+
+        TickImpl(TickListener& listener, const Tick& tickEvent);
+
+        virtual ~TickImpl();
+
+        /** @copydoc Tick::getListener() */
+        virtual TickListener& getListener() const;
+
+        virtual void setListener(TickListener& listener);
+
+        /** @copydoc Tick::getTick() */
+        virtual uint64_t getTick() const override;
+
+        virtual void setTick(uint64_t tick);
+
+        /** @copydoc Tick::getKind() */
+        virtual uint64_t getKind() const override;
+
+        virtual void setKind(uint64_t kind);
+
+        /** @copydoc Tick::getGlobalSchedulingTime() */
+        virtual simtime_t getGlobalSchedulingTime() const override;
+
+        virtual void setGlobalSchedulingTime(simtime_t globalSchedulingTime);
+
+        bool operator<(const TickImpl& tickEvent) const;
+
+        bool operator==(const TickImpl& tickEvent) const;
+
+        bool operator!=(const TickImpl& tickEvent) const;
+    };
+protected:
     // Friend declarations
     friend std::ostream& operator<<(std::ostream& stream, const OscillatorBase::TickImpl* tickEvent);
     friend bool operator<(std::shared_ptr<OscillatorBase::TickImpl> left, std::shared_ptr<OscillatorBase::TickImpl> right);
@@ -119,49 +159,6 @@ protected:
     virtual void scheduleNextTick();
 
     virtual simtime_t globalSchedulingTimeForTick(uint64_t idleTicks) = 0;
-protected:
-    class TickImpl : public Tick {
-    protected:
-        TickListener& listener;
-
-        uint64_t tick;
-
-        uint64_t kind;
-
-        simtime_t globalSchedulingTime;
-    public:
-        TickImpl(TickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime);
-
-        TickImpl(TickListener& listener, const Tick& tickEvent);
-
-        virtual ~TickImpl();
-
-        /** @copydoc Tick::getListener() */
-        virtual TickListener& getListener() const;
-
-        virtual void setListener(TickListener& listener);
-
-        /** @copydoc Tick::getTick() */
-        virtual uint64_t getTick() const override;
-
-        virtual void setTick(uint64_t tick);
-
-        /** @copydoc Tick::getKind() */
-        virtual uint64_t getKind() const override;
-
-        virtual void setKind(uint64_t kind);
-
-        /** @copydoc Tick::getGlobalSchedulingTime() */
-        virtual simtime_t getGlobalSchedulingTime() const override;
-
-        virtual void setGlobalSchedulingTime(simtime_t globalSchedulingTime);
-
-        bool operator<(const TickImpl& tickEvent) const;
-
-        bool operator==(const TickImpl& tickEvent) const;
-
-        bool operator!=(const TickImpl& tickEvent) const;
-    };
 };
 
 // Useful for logging oscillator ticks
