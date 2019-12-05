@@ -19,11 +19,12 @@ import inet.common.MessageDispatcher;
 import inet.common.queue.Delayer;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.networklayer.common.InterfaceTable;
+import nesting.common.time.IClock2;
+import nesting.common.time.IOscillator;
 import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.FilteringDatabase;
 import nesting.linklayer.ethernet.VlanEthernetInterfaceSwitchPreemptable;
-import nesting.common.time.IOscillator;
 
 
 //
@@ -66,6 +67,9 @@ module VlanEtherSwitchPreemptable
         }
         legacyClock: <default("IdealClock")> like IClock {
             @display("p=90.94039,409.23175;is=s");
+        }
+        clock: <default("RealtimeClock")> like IClock2 {
+            @display("p=90.94039,504.3058;is=s");
         }
         filteringDatabase: FilteringDatabase {
             @display("p=90.94039,133.65482;is=s");
