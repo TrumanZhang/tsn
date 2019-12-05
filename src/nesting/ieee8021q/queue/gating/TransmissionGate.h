@@ -24,7 +24,7 @@
 #include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 #include "inet/common/packet/Packet.h"
 
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/common/time/IClock.h"
 #include "nesting/ieee8021q/queue/TransmissionSelection.h"
 #include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/TSAlgorithm.h"
 #include "nesting/ieee8021q/queue/gating/GateController.h"

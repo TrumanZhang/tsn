@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.clock;
+package nesting.common.time;
 
 //
 // This ideal clock implementation provides the ability to subscribe to clock

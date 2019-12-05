@@ -22,7 +22,7 @@
 
 #include "inet/common/ModuleAccess.h"
 
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/common/time/IClock.h"
 #include "nesting/common/time/IdealOscillator.h"
 
 using namespace omnetpp;

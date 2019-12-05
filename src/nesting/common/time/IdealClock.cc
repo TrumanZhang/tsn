@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/ieee8021q/clock/IdealClock.h"
+#include "nesting/common/time/IdealClock.h"
 
 namespace nesting {
 

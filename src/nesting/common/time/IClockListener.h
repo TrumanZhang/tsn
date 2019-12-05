@@ -16,7 +16,7 @@
 #ifndef NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_
 #define NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_
 
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/common/time/IClock.h"
 
 namespace nesting {
 

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package nesting.ieee8021q.clock;
+package nesting.common.time;
 
 //
 // This module interface is used to provide a stub for clock components with a

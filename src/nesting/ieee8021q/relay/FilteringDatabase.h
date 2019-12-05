@@ -23,7 +23,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
-#include "nesting/ieee8021q/clock/IClockListener.h"
+#include "nesting/common/time/IClockListener.h"
 
 using namespace omnetpp;
 using namespace inet;

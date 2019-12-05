@@ -22,8 +22,8 @@
 
 #include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
 #include "nesting/ieee8021q/Ieee8021q.h"
-#include "nesting/ieee8021q/clock/IClock.h"
-#include "nesting/ieee8021q/clock/IClockListener.h"
+#include "nesting/common/time/IClock.h"
+#include "nesting/common/time/IClockListener.h"
 #include "nesting/ieee8021q/queue/gating/GateController.h"
 #include "nesting/ieee8021q/relay/FilteringDatabase.h"
 
