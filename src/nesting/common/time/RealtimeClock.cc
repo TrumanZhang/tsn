@@ -61,7 +61,7 @@ void RealtimeClock::scheduleNextTimestamp()
         simtime_t idleTime = nextTimestamp->getLocalTime() - updateAndGetLocalTime();
         // We have to round up to the next highest tick
         uint64_t idleTicks = static_cast<uint64_t>(std::ceil(idleTime / timeIncrementPerTick()));
-        oscillator->subscribeTick(*this, idleTicks);
+        nextTick = oscillator->subscribeTick(*this, idleTicks);
     }
 }
 
@@ -90,6 +90,18 @@ std::shared_ptr<const IClock2::Timestamp> RealtimeClock::subscribeTimestamp(IClo
     }
     scheduleNextTimestamp();
     return event;
+}
+
+void RealtimeClock::unsubscribeTimestamp(IClock2::TimestampListener& listener, const IClock2::Timestamp& timestamp)
+{
+    std::shared_ptr<TimestampImpl> event = std::make_shared<TimestampImpl>(listener, timestamp.getLocalTime(), timestamp.getKind());
+    std::list<std::shared_ptr<TimestampImpl>>::iterator it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
+
+    if (it != scheduledEvents.end() && **it == *event) {
+        scheduledEvents.erase(it);
+    }
+
+    scheduleNextTimestamp();
 }
 
 void RealtimeClock::subscribeConfigChanges(IClock2::ConfigListener& listener)

@@ -64,7 +64,7 @@ protected:
     double driftRate;
     std::set<IClock2::ConfigListener*> configListeners;
     std::list<std::shared_ptr<TimestampImpl>> scheduledEvents;
-    std::shared_ptr<IOscillator::Tick> nextTick;
+    std::shared_ptr<const IOscillator::Tick> nextTick;
     /** 
      * If the clockRate + driftRate is smaller than this threshold, the clock
      * is stopped instead of running really slow to prevent numeric errors.
@@ -79,6 +79,7 @@ public:
     virtual ~RealtimeClock();
     virtual std::shared_ptr<const IClock2::Timestamp> subscribeDelta(IClock2::TimestampListener& listener, simtime_t delta, uint64_t kind = 0) override;
     virtual std::shared_ptr<const IClock2::Timestamp> subscribeTimestamp(IClock2::TimestampListener& listener, simtime_t time, uint64_t kind = 0) override;
+    virtual void unsubscribeTimestamp(IClock2::TimestampListener& listener, const IClock2::Timestamp& timestamp) override;
     virtual void subscribeConfigChanges(IClock2::ConfigListener& listener) override;
     virtual void unsubscribeConfigChanges(IClock2::ConfigListener& listener) override;
     virtual simtime_t updateAndGetLocalTime() override;

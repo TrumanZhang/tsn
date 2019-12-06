@@ -38,6 +38,8 @@ public:
 
     virtual std::shared_ptr<const Timestamp> subscribeTimestamp(TimestampListener& listener, simtime_t time, uint64_t kind = 0) = 0;
 
+    virtual void unsubscribeTimestamp(TimestampListener& listener, const Timestamp& timestamp) = 0;
+
     virtual void subscribeConfigChanges(ConfigListener& listener) = 0;
 
     virtual void unsubscribeConfigChanges(ConfigListener& listener) = 0;
