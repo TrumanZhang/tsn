@@ -85,6 +85,8 @@ std::shared_ptr<const IClock2::Timestamp> RealtimeClock::subscribeTimestamp(IClo
     std::list<std::shared_ptr<TimestampImpl>>::iterator it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
     if (it == scheduledEvents.end() || **it != *event) {
         scheduledEvents.insert(it, event);
+    } else {
+        event = *it;
     }
     scheduleNextTimestamp();
     return event;
