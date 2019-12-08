@@ -151,6 +151,8 @@ std::shared_ptr<const IOscillator::Tick> OscillatorBase::subscribeTick(IOscillat
     // Insert tick event in event queue.
     if (it == scheduledEvents.end() || **it != *tickEvent) {
         scheduledEvents.insert(it, tickEvent);
+    } else {
+        tickEvent = *it;
     }
 
     scheduleNextTick();
