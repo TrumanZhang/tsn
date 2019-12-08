@@ -231,6 +231,8 @@ double OscillatorBase::getFrequency() const
 
 void OscillatorBase::setFrequency(double newFrequency)
 {
+    Enter_Method_Silent();
+    
     // Update frequency
     double oldFrequency = this->frequency;
     this->frequency = newFrequency;

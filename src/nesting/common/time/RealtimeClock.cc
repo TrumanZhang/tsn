@@ -124,6 +124,8 @@ simtime_t RealtimeClock::updateAndGetLocalTime()
 
 void RealtimeClock::setLocalTime(simtime_t newTime)
 {
+    Enter_Method_Silent();
+
     // Update time
     simtime_t oldTime = localTime;
     localTime = newTime;
@@ -160,6 +162,7 @@ double RealtimeClock::getClockRate() const
 
 void RealtimeClock::setClockRate(double clockRate)
 {
+    Enter_Method_Silent();
     oscillator->setFrequency(clockRate);
 }
 
