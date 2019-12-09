@@ -15,10 +15,13 @@
 
 package nesting.ieee8021q.queue;
 
+import inet.common.queue.IOutputQueue;
 import nesting.ieee8021q.queue.framePreemption.LengthAwareQueue;
 import nesting.ieee8021q.queue.gating.GateController;
 import nesting.ieee8021q.queue.gating.TransmissionGate;
 import nesting.ieee8021q.queue.transmissionSelectionAlgorithms.TSAlgorithm;
+
+
 //
 // This module implements a queuing network providing scheduling of congested
 // packets for a given output port according to the IEEE802.1Q standard,
@@ -30,7 +33,7 @@ import nesting.ieee8021q.queue.transmissionSelectionAlgorithms.TSAlgorithm;
 // @see ~QueuingFrames, ~TransmissionGate, ~Schedule, ~TransmissionSelection
 // @see ~TSAlgorithm, ~GateController, ~LengthAwareQueue
 //
-module Queuing
+module Queuing like IOutputQueue
 {
     parameters:
         @display("i=block/queue;bgb=1254,645");
@@ -38,8 +41,7 @@ module Queuing
         string defaultTSA = "StrictPriority"; // Default transmission-selection-algorithm implementation
     gates:
         input in;
-        output pOut;
-        output eOut;
+        output out;
     submodules:
         queuingFrames: QueuingFrames {
             @display("p=289,38");
@@ -74,6 +76,5 @@ module Queuing
             tsAlgorithms[i].out --> tGates[i].in;
             tGates[i].out --> transmissionSelection.in++;
         }
-        transmissionSelection.eOut --> eOut;
-        transmissionSelection.pOut --> pOut;
+        transmissionSelection.out --> out;
 }

@@ -71,11 +71,8 @@ void TransmissionSelection::handleMessage(cMessage* msg) {
         }
         ASSERT(packetRequestedFromUs);
         packetRequestedFromUs = false;
-        if (transmissionGate->isExpressQueue()) {
-            send(msg, "eOut");
-        } else {
-            send(msg, "pOut");
-        }
+
+        send(msg, "out");
     }
 }
 

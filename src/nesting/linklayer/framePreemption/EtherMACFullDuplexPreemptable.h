@@ -94,6 +94,7 @@ protected:
     virtual void handleUpperPacket(Packet *frame) override;
     virtual void startFrameTransmission() override;
     virtual void refreshDisplay() const override;
+    virtual bool isExpressFrame(Packet* packet) const;
 public:
     virtual void packetEnqueued(IPassiveQueue *queue);
     virtual void hold(simtime_t delay);

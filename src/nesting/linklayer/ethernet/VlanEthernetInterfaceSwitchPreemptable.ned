@@ -45,51 +45,30 @@ module VlanEthernetInterfaceSwitchPreemptable extends InterfaceEntry like IEther
     submodules:
         // mac supporting frame preemption
         mac: EtherMACFullDuplexPreemptable {
-            @display("p=139,478");
+            @display("p=139,298");
         }
         queuing: Queuing {
             parameters:
                 @display("p=202,61;q=l2queue");
         }
-        encapE: <default("EtherEncap")> like IEtherEncap {
+        encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
-                @display("p=90,202");
+                @display("p=100,61");
         }
-        encapP: <default("EtherEncap")> like IEtherEncap {
+        qEncap: <default("Ieee8021qEncap")> like IIeee8021qEncap {
             parameters:
-                @display("p=202,202");
-        }
-        qEncapE: <default("Ieee8021qEncap")> like IIeee8021qEncap {
-            parameters:
-                @display("p=90,333");
-        }
-        qEncapP: <default("Ieee8021qEncap")> like IIeee8021qEncap {
-            @display("p=202,333");
-        }
-        frameForward: FrameForward {
-            @display("p=90,61");
+                @display("p=139,189");
         }
     connections:
+        queuing.out --> encap.upperLayerIn;
         upperLayerIn --> queuing.in;
-        frameForward.upperLayerOut --> upperLayerOut;
 
-        encapE.upperLayerOut --> frameForward.lowerLayerInE;
-        encapP.upperLayerOut --> frameForward.lowerLayerInP;
+        encap.upperLayerOut --> upperLayerOut;
+        encap.lowerLayerOut --> qEncap.upperLayerIn;
 
-        queuing.eOut --> encapE.upperLayerIn;
-        queuing.pOut --> encapP.upperLayerIn;
-
-        qEncapE.lowerLayerOut --> mac.upperLayerIn;
-        mac.upperLayerOut --> qEncapE.lowerLayerIn;
-
-        qEncapP.lowerLayerOut --> mac.upperLayerPreemptableIn;
-        mac.upperLayerPreemptableOut --> qEncapP.lowerLayerIn;
-
-        encapE.lowerLayerOut --> qEncapE.upperLayerIn;
-        qEncapE.upperLayerOut --> encapE.lowerLayerIn;
-
-        encapP.lowerLayerOut --> qEncapP.upperLayerIn;
-        qEncapP.upperLayerOut --> encapP.lowerLayerIn;
-
+        qEncap.lowerLayerOut --> mac.upperLayerIn;
+        qEncap.upperLayerOut --> encap.lowerLayerIn;
+        
+        mac.upperLayerOut --> qEncap.lowerLayerIn;
         mac.phys <--> { @display("m=s"); } <--> phys;
 }
