@@ -55,9 +55,8 @@ module VlanEtherHostSched
             @display("p=311,96;is=s");
         }
         scheduleSwap: ScheduleSwap {
+            @display("p=310,153;is=s");
             usedInHost = true;
-
-            @display("p=310,153;b=29,25;is=s");
         }
         eth: <default("VlanEthernetInterface")> like IEthernetInterface {
             parameters:
