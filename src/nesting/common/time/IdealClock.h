@@ -22,9 +22,8 @@
 
 #include "inet/common/ModuleAccess.h"
 
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/common/time/IClock.h"
 #include "nesting/common/time/IdealOscillator.h"
-#include "nesting/common/time/IOscillatorTickListener.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -36,7 +35,7 @@ namespace nesting {
  * 
  * @deprecated Use nesting::RealtimeClock instead
  */
-class IdealClock: public cSimpleModule, public IClock, public IOscillatorTickListener {
+class IdealClock: public cSimpleModule, public IClock, public IOscillator::TickListener {
 protected:
     IdealOscillator* oscillator;
 
@@ -44,7 +43,7 @@ protected:
 
     simtime_t time;
 
-    std::map<std::shared_ptr<const IOscillatorTick>, IClockListener*> tickToListenerTable;
+    std::map<std::shared_ptr<const IOscillator::Tick>, IClockListener*> tickToListenerTable;
 protected:
     virtual void initialize() override;
 public:
@@ -60,7 +59,7 @@ public:
 
     virtual void unsubscribeTicks(IClockListener* listener) override;
 
-    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick) override;
+    virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick) override;
 };
 
 } // namespace nesting

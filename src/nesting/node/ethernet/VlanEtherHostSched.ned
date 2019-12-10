@@ -18,8 +18,8 @@ package nesting.node.ethernet;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGenSched;
+import nesting.common.time.IClock;
 import nesting.common.time.IOscillator;
-import nesting.ieee8021q.clock.IClock;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 
 

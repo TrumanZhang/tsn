@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/ieee8021q/clock/IdealClock.h"
+#include "nesting/common/time/IdealClock.h"
 
 namespace nesting {
 
@@ -59,7 +59,7 @@ void IdealClock::unsubscribeTicks(IClockListener* listener)
     }
 }
 
-void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillatorTick> tick)
+void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
     IClockListener* listener = tickToListenerTable[tick];
     listener->tick(this, tick->getKind());

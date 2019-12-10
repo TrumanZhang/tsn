@@ -67,6 +67,9 @@ module VlanEtherSwitchPreemptable
         legacyClock: <default("IdealClock")> like IClock {
             @display("p=90.94039,409.23175;is=s");
         }
+        clock: <default("RealtimeClock")> like IClock2 {
+            @display("p=90.94039,504.3058;is=s");
+        }
         filteringDatabase: FilteringDatabase {
             @display("p=90.94039,133.65482;is=s");
         }
