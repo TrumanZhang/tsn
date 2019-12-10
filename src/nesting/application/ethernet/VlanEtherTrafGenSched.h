@@ -21,14 +21,7 @@
 #include <omnetpp/cxmlelement.h>
 #include <vector>
 
-#include "inet/applications/ethernet/EtherTrafGen.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/InitStages.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/common/Protocol.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/common/TimeTag_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 
 #include "nesting/common/schedule/HostSchedule.h"
 #include "nesting/common/schedule/HostScheduleBuilder.h"
