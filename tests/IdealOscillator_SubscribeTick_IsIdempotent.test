@@ -1,7 +1,5 @@
 %description:
-Removes tick events from an IdealOscillator module by their kind attribute. In
-this test case we implement a Sieve of Eratosthenes to schedule ticks only at
-ticks with an index equal to a prime number.
+Schedules tick events, that are added to the back of the event queue within the IdealOscillator module.
 
 %file: package.ned
 package @TESTNAME@;
@@ -43,8 +41,6 @@ simple TestIdealOscillator
 #include "nesting/common/time/IOscillator.h"
 #include "nesting/common/time/IdealOscillator.h"
 
-#include <vector>
-
 using namespace omnetpp;
 using namespace nesting;
 
@@ -54,9 +50,10 @@ class TestIdealOscillator : public cSimpleModule, public IOscillator::TickListen
 {
 protected:
     IdealOscillator* oscillator;
-    std::vector<uint64_t> primes = {2, 3, 5, 7, 11, 13, 17, 19}; // prime numbers <= 20
+    unsigned tickCount = 0;
 protected:
     virtual void initialize() override;
+    virtual void finish() override;
 public:
     virtual void onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick) override;
 };
@@ -71,7 +68,6 @@ public:
 #include "inet/common/ModuleAccess.h"
 
 #include <iostream>
-#include <algorithm>
 
 namespace @TESTNAME@ {
 
@@ -81,26 +77,25 @@ void TestIdealOscillator::initialize()
 {
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
     
-    for (int idleTicks = 2; idleTicks <= 20; idleTicks++) {
-    	oscillator->subscribeTick(*this, idleTicks, idleTicks);
+    std::shared_ptr<const IOscillator::Tick> t1 = oscillator->subscribeTick(*this, 1);
+    std::shared_ptr<const IOscillator::Tick> t2 = oscillator->subscribeTick(*this, 1);
+
+    if (t1 != t2) {
+        throw cRuntimeError("Expected ticks t1 and t2 to point to the same object.");
     }
+}
+
+void TestIdealOscillator::finish()
+{
+	if (tickCount != 1) {
+		throw cRuntimeError("Expected 1 ticks to be scheduled!");
+	}
 }
 
 void TestIdealOscillator::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
     Enter_Method("tick");
-    
-    // Tick should be prime number
-    uint64_t currentTick = oscillator.updateAndGetTickCount();
-    
-    bool isPrime = std::find(primes.begin(), primes.end(), currentTick) != primes.end();
-    if (!isPrime) {
-    	throw cRuntimeError("Current tick should not have been scheduled!");
-    }
-    
-    for (uint64_t tick = currentTick; tick <= 20; tick += currentTick) {
-    	oscillator.unsubscribeTicks(*this, tick);
-    }
+    tickCount++;
 }
 
 } // namespace @TESTNAME@

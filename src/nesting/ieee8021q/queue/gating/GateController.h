@@ -31,8 +31,8 @@
 #include "nesting/ieee8021q/Ieee8021q.h"
 #include "nesting/ieee8021q/queue/TransmissionSelection.h"
 #include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
-#include "nesting/ieee8021q/clock/IClock.h"
-#include "nesting/ieee8021q/clock/IClockListener.h"
+#include "nesting/common/time/IClock.h"
+#include "nesting/common/time/IClockListener.h"
 
 using namespace omnetpp;
 

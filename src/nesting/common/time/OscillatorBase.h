@@ -26,19 +26,62 @@
 #include <functional>
 
 #include "nesting/common/time/IOscillator.h"
-#include "nesting/common/time/IOscillatorTickListener.h"
-#include "nesting/common/time/IOscillatorConfigListener.h"
 
 using namespace omnetpp;
 
 namespace nesting {
 
-class OscillatorBaseTick;
-
 /** Implementation of an oscillator module without drift or jitter. */
 class OscillatorBase : public cSimpleModule, public IOscillator
 {
 protected:
+    class TickImpl : public Tick {
+    protected:
+        TickListener& listener;
+
+        uint64_t tick;
+
+        uint64_t kind;
+
+        simtime_t globalSchedulingTime;
+    public:
+        TickImpl(TickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime);
+
+        TickImpl(TickListener& listener, const Tick& tickEvent);
+
+        virtual ~TickImpl();
+
+        /** @copydoc Tick::getListener() */
+        virtual TickListener& getListener() const;
+
+        virtual void setListener(TickListener& listener);
+
+        /** @copydoc Tick::getTick() */
+        virtual uint64_t getTick() const override;
+
+        virtual void setTick(uint64_t tick);
+
+        /** @copydoc Tick::getKind() */
+        virtual uint64_t getKind() const override;
+
+        virtual void setKind(uint64_t kind);
+
+        /** @copydoc Tick::getGlobalSchedulingTime() */
+        virtual simtime_t getGlobalSchedulingTime() const override;
+
+        virtual void setGlobalSchedulingTime(simtime_t globalSchedulingTime);
+
+        bool operator<(const TickImpl& tickEvent) const;
+
+        bool operator==(const TickImpl& tickEvent) const;
+
+        bool operator!=(const TickImpl& tickEvent) const;
+    };
+protected:
+    // Friend declarations
+    friend std::ostream& operator<<(std::ostream& stream, const OscillatorBase::TickImpl* tickEvent);
+    friend bool operator<(std::shared_ptr<OscillatorBase::TickImpl> left, std::shared_ptr<OscillatorBase::TickImpl> right);
+
     /** Flag that is set to true mid tick event. */
     bool tickEventNow;
 
@@ -55,9 +98,9 @@ protected:
      * Event queue that contains the scheduled tick events. Events are kept in
      * order to allow the use of binary search for fast lookups.
      */
-    std::list<std::shared_ptr<OscillatorBaseTick>> scheduledEvents;
+    std::list<std::shared_ptr<TickImpl>> scheduledEvents;
 
-    std::set<IOscillatorConfigListener*> configListeners;
+    std::set<ConfigListener*> configListeners;
 
     /** Used as self message to notify the component of the next tick event */
     cMessage tickMessage;
@@ -66,37 +109,37 @@ public:
 
     virtual ~OscillatorBase();
 
-    /** @copydoc IOscillator::subscribeTick(IOscillatorTickListener&, uint64_t, uint64_t) */
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks, uint64_t kind) override;
+    /** @copydoc subscribeTick(TickListener&, uint64_t, uint64_t) */
+    virtual std::shared_ptr<const Tick> subscribeTick(TickListener& listener, uint64_t idleTicks, uint64_t kind) override;
 
-    virtual std::shared_ptr<const IOscillatorTick> subscribeTick(IOscillatorTickListener& listener, uint64_t idleTicks) override;
+    virtual std::shared_ptr<const Tick> subscribeTick(TickListener& listener, uint64_t idleTicks) override;
 
-    /** @copydoc IOscillator::unsubscribeTick() */
-    virtual void unsubscribeTick(IOscillatorTickListener& listener, const IOscillatorTick& tick) override;
+    /** @copydoc unsubscribeTick() */
+    virtual void unsubscribeTick(TickListener& listener, const Tick& tick) override;
 
-    /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*, uint64_t) */
-    virtual void unsubscribeTicks(IOscillatorTickListener& listener, uint64_t kind) override;
+    /** @copydoc unsubscribeTicks(IOscillatorListener*, uint64_t) */
+    virtual void unsubscribeTicks(TickListener& listener, uint64_t kind) override;
 
-    /** @copydoc IOscillator::unsubscribeTicks(IOscillatorListener*) */
-    virtual void unsubscribeTicks(IOscillatorTickListener& listener) override;
+    /** @copydoc unsubscribeTicks(IOscillatorListener*) */
+    virtual void unsubscribeTicks(TickListener& listener) override;
 
-    /** @copydoc IOscillator::isScheduled() */
-    virtual bool isTickScheduled(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent) const override;
+    /** @copydoc isScheduled() */
+    virtual bool isTickScheduled(TickListener& listener, const Tick& tickEvent) const override;
 
-    /** @copydoc IOscillator::getFrequency() */
+    /** @copydoc getFrequency() */
     virtual double getFrequency() const override;
 
-    /** @copydoc IOscillator::setFrequency() */
+    /** @copydoc setFrequency() */
     virtual void setFrequency(double frequency) override;
 
-    /** @copydoc IOscillator::updateAndGetTickCount() */
+    /** @copydoc updateAndGetTickCount() */
     virtual uint64_t updateAndGetTickCount() override;
 
-    /** @copydoc IOscillator::subscribeConfigChanges() */
-    void subscribeConfigChanges(IOscillatorConfigListener& listener) override;
+    /** @copydoc subscribeConfigChanges() */
+    virtual void subscribeConfigChanges(ConfigListener& listener) override;
 
-    /** @copydoc IOscillator::unsubscribeConfigChanges() */
-    void unsubscribeConfigChanges(IOscillatorConfigListener& listener) override;
+    /** @copydoc unsubscribeConfigChanges() */
+    virtual void unsubscribeConfigChanges(ConfigListener& listener) override;
 protected:
     virtual void initialize() override;
 
@@ -118,54 +161,11 @@ protected:
     virtual simtime_t globalSchedulingTimeForTick(uint64_t idleTicks) = 0;
 };
 
-class OscillatorBaseTick : public IOscillatorTick {
-protected:
-    IOscillatorTickListener& listener;
-
-    uint64_t tick;
-
-    uint64_t kind;
-
-    simtime_t globalSchedulingTime;
-public:
-    OscillatorBaseTick(IOscillatorTickListener& listener, uint64_t tick, uint64_t kind, simtime_t globalSchedulingTime);
-
-    OscillatorBaseTick(IOscillatorTickListener& listener, const IOscillatorTick& tickEvent);
-
-    virtual ~OscillatorBaseTick();
-
-    /** @copydoc IOscillatorTick::getListener() */
-    virtual IOscillatorTickListener& getListener() const;
-
-    virtual void setListener(IOscillatorTickListener& listener);
-
-    /** @copydoc IOscillatorTick::getTick() */
-    virtual uint64_t getTick() const override;
-
-    virtual void setTick(uint64_t tick);
-
-    /** @copydoc IOscillatorTick::getKind() */
-    virtual uint64_t getKind() const override;
-
-    virtual void setKind(uint64_t kind);
-
-    /** @copydoc IOscillatorTick::getGlobalSchedulingTime() */
-    virtual simtime_t getGlobalSchedulingTime() const override;
-
-    virtual void setGlobalSchedulingTime(simtime_t globalSchedulingTime);
-
-    bool operator<(const OscillatorBaseTick& tickEvent) const;
-
-    bool operator==(const OscillatorBaseTick& tickEvent) const;
-
-    bool operator!=(const OscillatorBaseTick& tickEvent) const;
-};
-
 // Useful for logging oscillator ticks
-std::ostream& operator<<(std::ostream& stream, const OscillatorBaseTick* tickEvent);
+std::ostream& operator<<(std::ostream& stream, const OscillatorBase::TickImpl* tickEvent);
 
 // Used to keep oscillator ticks sorted
-bool operator<(std::shared_ptr<OscillatorBaseTick> left, std::shared_ptr<OscillatorBaseTick> right);
+bool operator<(std::shared_ptr<OscillatorBase::TickImpl> left, std::shared_ptr<OscillatorBase::TickImpl> right);
 
 } //namespace nesting
 

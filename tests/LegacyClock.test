@@ -8,7 +8,7 @@ package @TESTNAME@;
 %file: test.ned
 package @TESTNAME@;
 
-import nesting.ieee8021q.clock.IClock;
+import nesting.common.time.IClock;
 import nesting.common.time.IOscillator;
 
 network Test
@@ -42,8 +42,8 @@ simple TestClock
 
 #include <iostream>
 
-#include "nesting/ieee8021q/clock/IClock.h"
-#include "nesting/ieee8021q/clock/IClockListener.h"
+#include "nesting/common/time/IClock.h"
+#include "nesting/common/time/IClockListener.h"
 
 using namespace omnetpp;
 

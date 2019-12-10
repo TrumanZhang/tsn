@@ -32,7 +32,7 @@
 
 #include "nesting/common/schedule/HostSchedule.h"
 #include "nesting/common/schedule/HostScheduleBuilder.h"
-#include "nesting/ieee8021q/clock/IClock.h"
+#include "nesting/common/time/IClock.h"
 
 using namespace omnetpp;
 using namespace inet;
