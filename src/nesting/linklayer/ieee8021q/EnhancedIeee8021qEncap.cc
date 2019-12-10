@@ -96,17 +96,21 @@ void EnhancedIeee8021qEncap::processPacket(Packet *packet, std::vector<int>& vla
     Ieee8021qHeader *vlanTag = findVlanTag(ethernetMacHeader);
     auto oldVlanId = -1;
     auto oldPcp = 0;
+    auto oldDe = false;
     if (vlanTag != nullptr) {
         oldVlanId = vlanTag->getVid();
         oldPcp = vlanTag->getPcp();
+        oldDe = vlanTag->getDe();
     }
 
     auto vlanReq = packet->removeTagIfPresent<EnhancedVlanReq>();
     auto newVlanId = oldVlanId;
     auto newPcp = oldPcp;
+    auto newDe = oldDe;
     if (vlanReq != nullptr) {
         newVlanId = vlanReq->getVlanId();
         newPcp = vlanReq->getPcp();
+        newDe = vlanReq->getDe();
     }
 
     bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
@@ -130,13 +134,9 @@ void EnhancedIeee8021qEncap::processPacket(Packet *packet, std::vector<int>& vla
             if (newVlanId != oldVlanId) {
                 EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
             }
-
-            // Set PCP.
             vlanTag->setVid(newVlanId);
-            if (newPcp != oldPcp) {
-                EV_WARN << "Changing PCP: new = " << newPcp << ", old = " << oldPcp << ".\n";
-            }
             vlanTag->setPcp(newPcp);
+            vlanTag->setDe(newDe);
 
             // Update FCS.
             packet->insertAtFront(ethernetMacHeader);

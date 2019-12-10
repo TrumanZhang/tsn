@@ -29,6 +29,7 @@ namespace nesting;
 class EnhancedVlanTagBase extends inet::VlanTagBase
 {
     int pcp = 0;
+    bool de = false;
 }
 
 //
