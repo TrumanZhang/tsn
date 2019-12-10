@@ -10,6 +10,7 @@ package @TESTNAME@;
 
 import ned.DatarateChannel;
 import nesting.node.ethernet.VlanEtherHostQ;
+import nesting.node.ethernet.VlanEtherHostSched;
 import nesting.node.ethernet.VlanEtherSwitchPreemptable;
 
 network Test
@@ -23,7 +24,7 @@ network Test
     submodules:
         s1: VlanEtherSwitchPreemptable;
         h1: VlanEtherHostQ;
-        h2: VlanEtherHostQ;
+        h2: VlanEtherHostSched;
         h3: VlanEtherHostQ;
         h4: VlanEtherHostQ;
     connections:
@@ -45,6 +46,21 @@ network Test
 <?xml version="1.0" ?>
 <schedule>
 	<defaultcycle>400us</defaultcycle>
+    <host name="h2">
+		<cycle>5us</cycle>
+		<entry>
+			<start>1us</start>
+			<queue>7</queue>
+			<dest>00:00:00:00:00:03</dest>
+			<size>1400</size>
+		</entry>
+        <entry>
+			<start>3us</start>
+			<queue>7</queue>
+			<dest>00:00:00:00:00:03</dest>
+			<size>1400</size>
+		</entry>
+	</host>
 </schedule>
 
 %inifile: omnetpp.ini
@@ -60,7 +76,7 @@ debug-on-errors = true
 **.h4.eth.address = "00-00-00-00-00-04"
 
 **.h1.trafGenApp.destAddress = "00-00-00-00-00-02"
-**.h2.trafGenApp.destAddress = "00-00-00-00-00-03"
+**.h2.trafGenSchedApp.initialSchedule = xmldoc("schedule.xml")
 **.h3.trafGenApp.destAddress = "00-00-00-00-00-04"
 **.h4.trafGenApp.destAddress = "00-00-00-00-00-01"
 
