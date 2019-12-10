@@ -14,6 +14,16 @@
 // 
 
 #include "nesting/application/ethernet/VlanEtherTrafGen.h"
+#include "nesting/linklayer/vlan/EnhancedVlanTag_m.h"
+
+#include "inet/common/TimeTag_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace nesting {
 
@@ -59,18 +69,12 @@ void VlanEtherTrafGen::sendBurstPackets() {
         auto macTag = datapacket->addTag<MacAddressReq>();
         macTag->setDestAddress(destMacAddress);
 
-        uint8_t PCP;
-        bool de;
-        short VID;
         // create VLAN control info
         if (vlanTagEnabled->boolValue()) {
-            auto ieee8021q = datapacket->addTag<VLANTagReq>();
-            PCP = pcp->intValue();
-            de = dei->boolValue();
-            VID = vid->intValue();
-            ieee8021q->setPcp(PCP);
-            ieee8021q->setDe(de);
-            ieee8021q->setVID(VID);
+            EnhancedVlanReq* vlanReq = datapacket->addTag<EnhancedVlanReq>();
+            vlanReq->setPcp(pcp->intValue());
+            vlanReq->setDe(dei->boolValue());
+            vlanReq->setVlanId(vid->intValue());
         }
 
         EV_TRACE << getFullPath() << ": Send packet `" << datapacket->getName()
@@ -79,7 +83,7 @@ void VlanEtherTrafGen::sendBurstPackets() {
                         << IEEE802CTRL_DATA << " vlan-tagged="
                         << vlanTagEnabled->boolValue();
         if (vlanTagEnabled->boolValue()) {
-            EV_TRACE << " pcp=" << PCP << " dei=" << de << " vid=" << VID;
+            EV_TRACE << " pcp=" << pcp->intValue() << " dei=" << dei->boolValue() << " vid=" << vid->intValue();
         }
         EV_TRACE << endl;
 

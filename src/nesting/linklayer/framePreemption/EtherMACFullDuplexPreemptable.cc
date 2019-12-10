@@ -64,8 +64,18 @@ void EtherMACFullDuplexPreemptable::initialize(int stage) {
     EtherMacFullDuplex::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        transmissionSelectionModule = getModuleFromPar<TransmissionSelection>(
-                par("queueModule"), this);
+        cModule* queueModule = getModuleFromPar<cModule>(par("queueModule"), this);
+        if (queueModule->isSimple()) {
+            transmissionSelectionModule = getModuleFromPar<TransmissionSelection>(par("queueModule"), this);
+        } else {
+            std::string path = par("queueModule").stdstringValue() + std::string(".transmissionSelection");
+            cModule* mod = getModuleByPath(path.c_str());
+            transmissionSelectionModule = dynamic_cast<TransmissionSelection*>(mod);
+            if (!transmissionSelectionModule) {
+                throw cRuntimeError("Cannot cast queue module to transmission selection module");
+            }
+        }
+        
         transmissionSelectionModule->addListener(this);
         preemptCurrentFrameMsg = new cMessage("preemptCurrentFrame");
     }
@@ -78,11 +88,7 @@ void EtherMACFullDuplexPreemptable::handleMessageWhenUp(cMessage *msg) {
 
     if (msg->isSelfMessage()) {
         handleSelfMessage(msg);
-    } else if (msg->arrivedOn("upperLayerPreemptableIn")) {
-        // preemptible from upper
-        handleUpperPacket(check_and_cast<Packet *>(msg));
     } else if (msg->arrivedOn("upperLayerIn")) {
-        // express from upper
         handleUpperPacket(check_and_cast<Packet *>(msg));
     } else if (msg->getArrivalGate() == physInGate) {
         // from phys
@@ -149,17 +155,21 @@ void EtherMACFullDuplexPreemptable::handleSelfMessage(cMessage *msg) {
     }
 }
 
+bool EtherMACFullDuplexPreemptable::isExpressFrame(Packet* packet) const
+{
+    // TODO there is no upperLayerPreemptableIn gate anymore
+    return !(packet->arrivedOn("upperLayerPreemptableIn"));
+}
+
 void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/BEGIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
-
-    if (packet->arrivedOn("upperLayerPreemptableIn")) {
+    
+    if (isExpressFrame(packet)) {
         pFrameArrivalTime = simTime();
     } else {
         eFrameArrivalTime = simTime();
     }
-
-    bool isExpressFrame = !(packet->arrivedOn("upperLayerPreemptableIn"));
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
@@ -206,22 +216,22 @@ void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
         EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (isExpressFrame && recheckForQueuedExpressFrameMsg != nullptr
+    if (isExpressFrame(packet) && recheckForQueuedExpressFrameMsg != nullptr
             && recheckForQueuedExpressFrameMsg->isScheduled()) {
         cancelAndDelete(recheckForQueuedExpressFrameMsg);
     }
     bool nowPreempting = false;
     // currently not transmitting express frame and this frame is express or preemptible frame
-    if ((!transmittingExpressFrame && isExpressFrame) || txQueue.extQueue) {
+    if ((!transmittingExpressFrame && isExpressFrame(packet)) || txQueue.extQueue) {
         ASSERT(
                 transmitState == TX_IDLE_STATE || transmitState == PAUSE_STATE
-                        || (!transmittingExpressFrame && isExpressFrame));
-        if (transmittingPreemptableFrame && isExpressFrame) {
+                        || (!transmittingExpressFrame && isExpressFrame(packet)));
+        if (transmittingPreemptableFrame && isExpressFrame(packet)) {
             //An express frame arrived at the correct time to preempt a preemptable frame
             currentExpressFrame = packet;
             preemptCurrentFrame();
             nowPreempting = true;
-        } else if (isExpressFrame && transmitState == WAIT_IFG_STATE) {
+        } else if (isExpressFrame(packet) && transmitState == WAIT_IFG_STATE) {
             //If an express frame arrives during the IFG, save it for later. Otherwise the assert in handleEndIFGPeriod() would fail
             currentExpressFrame = packet;
         } else {
@@ -250,7 +260,7 @@ void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
         }
     }
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (onHold && !isExpressFrame && !currentPreemptableFrame) {
+    if (onHold && !isExpressFrame(packet) && !currentPreemptableFrame) {
         currentPreemptableFrame = curTxFrame;
         curTxFrame = nullptr;
     }
@@ -265,7 +275,6 @@ void EtherMACFullDuplexPreemptable::startFrameTransmission() {
     ASSERT(curTxFrame);
     EV_DETAIL << "Transmitting a copy of frame " << curTxFrame << endl;
 
-    bool isExpressFrame = !(curTxFrame->arrivedOn("upperLayerPreemptableIn"));
     Packet *frame = curTxFrame->dup();// note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
     const auto& hdr = frame->peekAtFront<EthernetMacHeader>();// note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
     ASSERT(hdr);
@@ -278,11 +287,13 @@ void EtherMACFullDuplexPreemptable::startFrameTransmission() {
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ASSERT(!transmittingExpressFrame);
     ASSERT(!transmittingPreemptableFrame);
-    EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS) << "ns:" << " Starting Transmission of " << frame << ". Express: " << isExpressFrame << endl;
+    EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS)
+            << "ns:" << " Starting Transmission of " << frame << ". Express: " 
+            << isExpressFrame(frame) << endl;
     emit(startTransmissionExpressFrameSignal, curTxFrame->getTreeId());
 
     //If frame preemption is disabled, treat all frames as express so they are properly displayed
-    if (!par("enablePreemptingFrames") || isExpressFrame) {
+    if (!par("enablePreemptingFrames") || isExpressFrame(frame)) {
         //Send frame out normally
         transmittingExpressFrame = true;
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~INET/BEGIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

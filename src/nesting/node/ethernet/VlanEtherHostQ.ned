@@ -36,6 +36,7 @@ module VlanEtherHostQ
         @labels(node,ethernet-node);
         **.clockModule = default(absPath(".legacyClock"));
         **.oscillatorModule = default(absPath(".oscillator"));
+        **.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -48,10 +49,12 @@ module VlanEtherHostQ
         legacyClock: <default("IdealClock")> like IClock {
             @display("p=53,39;is=s");
         }
-        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
+        eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=232,283,row,150;q=txQueue");
-                interfaceTableModule = "^.interfaceTable";
+                encap.typename = "EtherEncap";
+                qEncap.typename = "EnhancedIeee8021qEncap";
+                mac.typename = "EtherMacFullDuplex";
                 mac.mtu = 1500B;
         }
         interfaceTable: InterfaceTable {

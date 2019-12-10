@@ -37,6 +37,5 @@ simple TransmissionSelection {
         bool verbose = default(false);
     gates:
         input in[];
-        output eOut;
-        output pOut;
+        output out;
 }

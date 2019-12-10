@@ -18,13 +18,13 @@ package nesting.node.ethernet;
 import inet.common.MessageDispatcher;
 import inet.common.queue.Delayer;
 import inet.linklayer.contract.IMacRelayUnit;
+import inet.linklayer.ethernet.EthernetInterface;
 import inet.networklayer.common.InterfaceTable;
 import nesting.common.time.IClock;
 import nesting.common.time.IClock2;
 import nesting.common.time.IOscillator;
 import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.FilteringDatabase;
-import nesting.linklayer.ethernet.VlanEthernetInterfaceSwitchPreemptable;
 
 
 //
@@ -35,23 +35,23 @@ module VlanEtherSwitchPreemptable
     parameters:
         @networkNode();
         @display("i=device/switch;bgb=1429,570");
-        *.vlanTagType = default("c");
-        *.interfaceTableModule = absPath(".interfaceTable");
-        *.filteringDatabaseModule = absPath(".filteringDatabase");
+        **.vlanTagType = default("c");
+        **.interfaceTableModule = default(absPath(".interfaceTable"));
+        **.filteringDatabaseModule = default(absPath(".filteringDatabase"));
         **.clockModule = default(absPath(".legacyClock"));
         **.oscillatorModule = default(absPath(".oscillator"));
     gates:
         inout ethg[];
     submodules:
-        eth[sizeof(ethg)]: VlanEthernetInterfaceSwitchPreemptable {
-            mac.queueModule = "^.^.eth[" + string(index) + "].queuing.transmissionSelection";
+        eth[sizeof(ethg)]: EthernetInterface {
+            mac.typename = "EtherMACFullDuplexPreemptable";
+            encap.typename = "EtherEncapDummy";
+            qEncap.typename = "Ieee8021qEncap";
+            queue.typename = "Queuing";
             mac.mtu = 1500B;
             mac.promiscuous = true;
-            mac.interfaceTableModule = "^.interfaceTable";
-            queuing.tsAlgorithms[*].macModule = "^.^.^.eth[" + string(index) + "].mac";
-            queuing.gateController.macModule = "^.^.^.eth[" + string(index) + "].mac";
-            encapE.typename = "EtherEncapDummy";
-            encapP.typename = "EtherEncapDummy";
+            queue.tsAlgorithms[*].macModule = absPath(".mac");
+            queue.gateController.macModule = absPath(".mac");
             @display("p=249,480,r,150");
         }
         relayUnit: <default("ForwardingRelayUnit")> like IMacRelayUnit {

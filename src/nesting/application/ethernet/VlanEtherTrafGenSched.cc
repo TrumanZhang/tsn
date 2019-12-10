@@ -14,6 +14,15 @@
 // 
 
 #include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
+#include "nesting/linklayer/vlan/EnhancedVlanTag_m.h"
+
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/TimeTag_m.h"
 
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
@@ -109,10 +118,10 @@ void VlanEtherTrafGenSched::sendPacket() {
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(header.macTag.getDestAddress());
     // create VLAN control info
-    auto ieee8021q = datapacket->addTag<VLANTagReq>();
-    ieee8021q->setPcp(header.q1Tag.getPcp());
-    ieee8021q->setDe(header.q1Tag.getDe());
-    ieee8021q->setVID(header.q1Tag.getVID());
+    auto vlanReq = datapacket->addTag<EnhancedVlanReq>();
+    vlanReq->setPcp(header.q1Tag.getPcp());
+    vlanReq->setDe(header.q1Tag.getDe());
+    vlanReq->setVlanId(header.q1Tag.getVID());
 
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
