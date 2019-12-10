@@ -38,6 +38,7 @@ module VlanEtherHostSched
         *.fcsMode = fcsMode;
         **.clockModule = default(absPath(".legacyClock"));
         **.oscillatorModule = default(absPath(".oscillator"));
+        **.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -58,10 +59,13 @@ module VlanEtherHostSched
             @display("p=310,153;is=s");
             usedInHost = true;
         }
-        eth: <default("VlanEthernetInterface")> like IEthernetInterface {
+        eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=138,271,row,150;q=txQueue");
-                interfaceTableModule = "^.interfaceTable";
+                @display("p=232,283,row,150;q=txQueue");
+                encap.typename = "EtherEncap";
+                qEncap.typename = "EnhancedIeee8021qEncap";
+                mac.typename = "EtherMacFullDuplex";
+                mac.mtu = 1500B;
         }
     connections:
         trafGenSchedApp.out --> eth.upperLayerIn;
