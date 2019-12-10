@@ -27,9 +27,6 @@ using namespace inet;
 
 namespace nesting {
 
-/**
- * TODO - Generated class
- */
 class EnhancedIeee8021qEncap : public cSimpleModule
 {
 protected:
