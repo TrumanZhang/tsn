@@ -15,6 +15,7 @@
 
 #include "nesting/linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
 #include "nesting/linklayer/framePreemption/PreemptedFrame.h"
+#include "nesting/ieee8021q/queue/framePreemption/ExpressFrameTag_m.h"
 
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -157,8 +158,7 @@ void EtherMACFullDuplexPreemptable::handleSelfMessage(cMessage *msg) {
 
 bool EtherMACFullDuplexPreemptable::isExpressFrame(Packet* packet) const
 {
-    // TODO there is no upperLayerPreemptableIn gate anymore
-    return !(packet->arrivedOn("upperLayerPreemptableIn"));
+    return packet->getTag<ExpressFrameReq>() != nullptr;
 }
 
 void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
