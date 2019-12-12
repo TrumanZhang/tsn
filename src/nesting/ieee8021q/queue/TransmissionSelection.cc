@@ -14,6 +14,9 @@
 // 
 
 #include "nesting/ieee8021q/queue/TransmissionSelection.h"
+#include "nesting/ieee8021q/queue/framePreemption/ExpressFrameTag_m.h"
+
+#include "inet/common/packet/Packet.h"
 
 namespace nesting {
 
@@ -56,9 +59,11 @@ void TransmissionSelection::handleMessage(cMessage* msg) {
             handleRequestPacketEvent();
         }
     } else {
+        Packet* packet = check_and_cast<Packet*>(msg);
+
         int gateId = -1;
         for (unsigned int i = 0; i < tGates.size(); ++i) {
-            if (msg->arrivedOn("in", i)) {
+            if (packet->arrivedOn("in", i)) {
                 gateId = i;
                 break;
             }
@@ -72,7 +77,12 @@ void TransmissionSelection::handleMessage(cMessage* msg) {
         ASSERT(packetRequestedFromUs);
         packetRequestedFromUs = false;
 
-        send(msg, "out");
+        // Tag frame from express queues
+        if (transmissionGate->isExpressQueue()) {
+            packet->addTagIfAbsent<ExpressFrameReq>();
+        }
+        
+        send(packet, "out");
     }
 }
 
