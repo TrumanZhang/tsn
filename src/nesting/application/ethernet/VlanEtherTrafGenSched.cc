@@ -15,6 +15,7 @@
 
 #include "VlanEtherTrafGenSched.h"
 #include <algorithm>
+#include <string.h>
 
 #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
@@ -83,12 +84,21 @@ void VlanEtherTrafGenSched::initialize(int stage) {
 
 std::vector<int> VlanEtherTrafGenSched::parseMappingString(std::string mappingString){
     std::vector<int> tmp_mapping;
+    std::stringstream tmp_string;
+    int cast_int;
     unsigned int i = 0;
     if(mappingString.length() == 0) return tmp_mapping;
     while (i <= mappingString.length()) {
-        tmp_mapping.push_back(mappingString[i] - '0');
-        i += 2;
+        tmp_string.clear();
+        while(mappingString[i] != ',' && i <= mappingString.length()){
+            tmp_string << mappingString[i];
+            i += 1;
+        }
+        tmp_string >> cast_int;
+        tmp_mapping.push_back(cast_int);
+        i += 1;
     }
+    //(const char)mappingString[i], ","
     return tmp_mapping;
 }
 
