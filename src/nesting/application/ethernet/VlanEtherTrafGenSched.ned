@@ -37,7 +37,7 @@ simple VlanEtherTrafGenSched
         @signal[rcvdPkId](type=long); // type=unique packet id
         @signal[sentPk](type=inet::Packet);
         @signal[rcvdPk](type=inet::Packet);
-        
+		@signal[packetMap](type=long); // should be non-negative
 
         //Actual schedule has to be set in .ini file
         xml initialSchedule = default(xml("<schedule><cycle>100</cycle></schedule>"));
@@ -47,6 +47,7 @@ simple VlanEtherTrafGenSched
         bool verbose = default(false);
         double jitter @unit(s) = default(0s); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
         int seed = default(0);
+        string mapping = default("");
         
         @statistic[packetReceived](title="packets received"; source=rcvdPkId; record=count, vector; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=sentPkId; record=count, vector; interpolationmode=none);

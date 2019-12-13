@@ -38,6 +38,7 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         rcvdPkIdSignal = registerSignal("rcvdPkId");
         sentPkSignal = registerSignal("sentPk");
         rcvdPkSignal = registerSignal("rcvdPk");
+        packetMapSignal = registerSignal("packetMap");
 
         seqNum = 0;
         //WATCH(seqNum);
@@ -47,6 +48,8 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         int seed = par("seed");
         generator.seed(seed);
         distribution = *new std::uniform_real_distribution<double>(0, 1.0);
+
+        mapping = this->parseMappingString(par("mapping").stringValue());
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -69,11 +72,24 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
 
+        if ((currentSchedule->size() != mapping.size()) && mapping.size() != 0) throw cRuntimeError("Schedule and mapping for host need to be same size");
+
         clock->subscribeTick(this,
                 scheduleNextTickEvent().raw() / clock->getClockRate().raw());
 
         llcSocket.open(-1, ssap);
     }
+}
+
+std::vector<int> VlanEtherTrafGenSched::parseMappingString(std::string mappingString){
+    std::vector<int> tmp_mapping;
+    unsigned int i = 0;
+    if(mappingString.length() == 0) return tmp_mapping;
+    while (i <= mappingString.length()) {
+        tmp_mapping.push_back(mappingString[i] - '0');
+        i += 2;
+    }
+    return tmp_mapping;
 }
 
 int VlanEtherTrafGenSched::numInitStages() const {
@@ -130,6 +146,10 @@ void VlanEtherTrafGenSched::sendPacket() {
 
     emit(sentPkIdSignal, datapacket->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
     emit(sentPkSignal, datapacket);
+    if(mapping.size() != 0)
+        emit(packetMapSignal, mapping[indexSchedule]);
+    else
+        emit(packetMapSignal, -1);
     send(datapacket, "out");
     TSNpacketsSent++;
 }
