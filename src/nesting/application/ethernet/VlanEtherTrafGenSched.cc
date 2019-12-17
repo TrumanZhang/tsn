@@ -157,7 +157,7 @@ void VlanEtherTrafGenSched::sendPacket() {
     emit(sentPkIdSignal, datapacket->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
     emit(sentPkSignal, datapacket);
     if(mapping.size() != 0)
-        emit(packetMapSignal, mapping[indexSchedule]);
+        emit(packetMapSignal, mapping[indexTx % currentSchedule->size()]);
     else
         emit(packetMapSignal, -1);
     send(datapacket, "out");
