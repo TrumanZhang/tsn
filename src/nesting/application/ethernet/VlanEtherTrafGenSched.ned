@@ -49,6 +49,7 @@ simple VlanEtherTrafGenSched
         int seed = default(0);
         string mapping = default("");
         
+        @statistic[packetMap](title="packet to flow mapping"; source=packetMap; record=vector; interpolationmode=none);
         @statistic[packetReceived](title="packets received"; source=rcvdPkId; record=count, vector; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=sentPkId; record=count, vector; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
