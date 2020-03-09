@@ -1,4 +1,4 @@
-image: niessan/omnetpp-inet:omnet-5.4.2-inet-4.1.0
+image: niessan/omnetpp-inet:omnet-5.5.1-inet-4.2.0
 
 stages:
     - build

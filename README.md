@@ -8,7 +8,7 @@ The model was initially developed by a group of students during a curricular pro
 
 ## Compatibility
 
-The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.4.1 and INET version 4.1.0 under Linux.
+The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.5.1 and INET version 4.2.0 under Linux.
 
 ## Getting Started
 
