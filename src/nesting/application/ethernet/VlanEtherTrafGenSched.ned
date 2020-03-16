@@ -37,8 +37,8 @@ simple VlanEtherTrafGenSched
         @signal[rcvdPk](type=long); // type=unique packet id
 
         //Actual schedule has to be set in .ini file
-        xml initialSchedule = default(xml("<schedule><defaultcycle>100</defaultcycle></schedule>"));
-        xml emptySchedule = default(xml("<schedule><defaultcycle>100</defaultcycle></schedule>"));
+        xml initialSchedule = default(xml("<host><cycle>100ms</cycle></host>"));
+        xml emptySchedule = default(xml("<host><cycle>100ms</cycle></host>"));
         string clockModule = default("^.clock");
         string hostModule = default("^");
         bool verbose = default(false);
