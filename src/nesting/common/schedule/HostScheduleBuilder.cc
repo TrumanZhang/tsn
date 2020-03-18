@@ -36,9 +36,8 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
             throw cRuntimeError("Frame is scheduled after its host cycle ends!");
         }
         // Get size
-        const char* sizeCString =
-                entry->getFirstChildWithTag("size")->getNodeValue();
-        unsigned int size = atoi(sizeCString);
+        const char* sizeCString = entry->getFirstChildWithTag("size")->getNodeValue();
+        unsigned size = static_cast<unsigned>(std::ceil(cNedValue::parseQuantity(sizeCString, "B")));
 
         // Get Ieee8021QCtrl
         Ieee8021QCtrl header;
