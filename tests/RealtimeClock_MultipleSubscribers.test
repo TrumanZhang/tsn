@@ -83,14 +83,12 @@ void TestRealtimeClock::initialize()
 {
     clock = check_and_cast<IClock2*>(getModuleByPath(par("clockModule")));
     clock->subscribeTimestamp(*this, SimTime(1, SIMTIME_US));  
-    clock->subscribeTimestamp(*this, SimTime(2, SIMTIME_US));
-    clock->subscribeTimestamp(*this, SimTime(3, SIMTIME_US));
 }
 
 void TestRealtimeClock::finish()
 {
-	if (subscribedTimestampCount != 3) {
-		throw cRuntimeError("Expected 3 timestamp to be scheduled!");
+	if (subscribedTimestampCount != 1) {
+		throw cRuntimeError("Expected 1 timestamp to be scheduled!");
 	}
 }
 

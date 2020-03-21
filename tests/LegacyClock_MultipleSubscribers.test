@@ -80,15 +80,13 @@ void TestClock::initialize()
     clock = check_and_cast<IClock*>(getModuleByPath(par("clockModule")));
 
     clock->subscribeTick(this, 1, 0);
-    clock->subscribeTick(this, 3, 0);
-    clock->subscribeTick(this, 2, 0);
 }
 
 void TestClock::finish()
 {
     EV_INFO << "tickCount=" << tickCount << std::endl;
-    if (tickCount != 3) {
-    	throw cRuntimeError("Expected 3 ticks to be scheduled!");
+    if (tickCount != 1) {
+    	throw cRuntimeError("Expected 1 ticks to be scheduled!");
     }
 }
 

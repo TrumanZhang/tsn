@@ -78,14 +78,12 @@ void TestIdealOscillator::initialize()
     oscillator = check_and_cast<IdealOscillator*>(getModuleByPath(par("oscillatorModule")));
     
     oscillator->subscribeTick(*this, 1);
-    oscillator->subscribeTick(*this, 2);
-    oscillator->subscribeTick(*this, 3);
 }
 
 void TestIdealOscillator::finish()
 {
-	if (tickCount != 3) {
-		throw cRuntimeError("Expected 3 ticks to be scheduled!");
+	if (tickCount != 1) {
+		throw cRuntimeError("Expected 1 ticks to be scheduled!");
 	}
 }
 
