@@ -46,23 +46,28 @@ simtime_t IdealClock::getClockRate()
 void IdealClock::subscribeTick(IClockListener* listener, unsigned idleTicks, short kind)
 {
     auto tick = oscillator->subscribeTick(*this, idleTicks, kind);
-    tickToListenerTable[tick] = listener;
+    if (tickToListenerTable.find(tick) == tickToListenerTable.end()) {
+        tickToListenerTable[tick] = std::unordered_set<IClockListener*>();
+    }
+    tickToListenerTable[tick].insert(listener);
 }
 
 void IdealClock::unsubscribeTicks(IClockListener* listener)
 {
     for (auto it = tickToListenerTable.begin(); it != tickToListenerTable.end(); it++) {
-        if (it->second == listener) {
+        if (it->second.find(listener) != it->second.end()) {
+            it->second.erase(listener);
             oscillator->unsubscribeTick(*this, *(it->first));
-            it = tickToListenerTable.erase(it);
         }
     }
 }
 
 void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
-    IClockListener* listener = tickToListenerTable[tick];
-    listener->tick(this, tick->getKind());
+    auto listeners = tickToListenerTable[tick];
+    for (IClockListener* listener : listeners) {
+        listener->tick(this, tick->getKind());
+    }
     tickToListenerTable.erase(tick);
 }
 

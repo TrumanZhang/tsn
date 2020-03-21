@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 
 #include <map>
+#include <unordered_set>
 
 #include "inet/common/ModuleAccess.h"
 
@@ -43,7 +44,7 @@ protected:
 
     simtime_t time;
 
-    std::map<std::shared_ptr<const IOscillator::Tick>, IClockListener*> tickToListenerTable;
+    std::map<std::shared_ptr<const IOscillator::Tick>, std::unordered_set<IClockListener*>> tickToListenerTable;
 protected:
     virtual void initialize() override;
 public:
