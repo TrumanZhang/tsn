@@ -3,7 +3,7 @@ Tests the IdealClock submodule
 
 %file: package.ned
 package @TESTNAME@;
-@namespace(nesting);
+@namespace(@TESTNAME@);
 
 %file: test.ned
 package @TESTNAME@;
@@ -46,8 +46,9 @@ simple TestClock
 #include "nesting/common/time/IClockListener.h"
 
 using namespace omnetpp;
+using namespace nesting;
 
-namespace nesting {
+namespace @TESTNAME@ {
 
 class TestClock : public cSimpleModule, public IClockListener
 {
@@ -61,7 +62,7 @@ public:
     virtual void tick(IClock *clock, short kind) override;
 };
 
-} // namespace nesting
+} // namespace @TESTNAME@
 
 #endif
 
@@ -70,7 +71,7 @@ public:
 
 #include "inet/common/ModuleAccess.h"
 
-namespace nesting {
+namespace @TESTNAME@ {
 
 Define_Module(TestClock);
 
@@ -144,7 +145,7 @@ void TestClock::tick(IClock *clock, short kind)
     tickCount++;
 }
 
-} // namespace nesting
+} // namespace @TESTNAME@
 
 %inifile: omnetpp.ini
 [General]
