@@ -17,15 +17,25 @@
 #define __NESTING_VETHERTRAFGENSCHED_H
 
 #include <omnetpp.h>
-#include <memory>
-#include <omnetpp/cxmlelement.h>
-#include <vector>
-
-#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 
 #include "nesting/common/schedule/HostSchedule.h"
 #include "nesting/common/schedule/HostScheduleBuilder.h"
 #include "nesting/common/time/IClock.h"
+
+#include "inet/applications/ethernet/EtherTrafGen.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
+#include "inet/common/TimeTag_m.h"
+
+#include <memory>
+#include <random>
+#include <iostream>
+#include <vector>
 
 using namespace omnetpp;
 using namespace inet;
@@ -48,7 +58,10 @@ private:
     std::unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
-    long int index = 0;
+    long int indexSchedule = 0;
+
+    /** Index for the net packet to be sent out. */
+    long int indexTx = 0;
 
     IClock *clock;
 
@@ -57,13 +70,26 @@ protected:
     // receive statistics
     long TSNpacketsSent = 0;
     long packetsReceived = 0;
+    simsignal_t sentPkIdSignal;
+    simsignal_t rcvdPkIdSignal;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
+    simsignal_t packetMapSignal;
     int ssap = -1;
     int dsap = -1;
 
-    cMessage* jitterMsg = new cMessage("jitterMsg");
-    double jitter;
+    // maximum time scheduled packet can be delayed from ini file
+    simtime_t jitter;
+    // seed to seed the random number generator for random delays bounded by jitter variable
+    int seed;
+    // vector to hold all messages that delays scheduled packets. Msgs need to be saved until delayed packet was sent
+    // ,in order to delete said msg and avoid a memory leak
+    std::vector<cMessage*> jitterMsgVector;
+    // random number generator
+    std::mt19937 generator;
+    std::uniform_real_distribution<double> distribution;
+    // mapping to map packets to streams
+    std::vector<int> mapping;
 
     Ieee8022LlcSocket llcSocket;
 
@@ -73,10 +99,11 @@ protected:
     virtual void sendPacket();
     virtual void receivePacket(Packet *msg);
     virtual void handleMessage(cMessage *msg) override;
-    virtual void sendDelayed();
+    virtual void sendDelayed(cMessage *msg);
 
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
+    std::vector<int> parseMappingString(std::string mappingString);
 public:
     virtual void tick(IClock *clock, short kind) override;
 

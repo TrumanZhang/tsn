@@ -83,6 +83,7 @@ protected:
     static simsignal_t pMacDelay;
     static simsignal_t receivedExpressFrame;
     static simsignal_t receivedPreemptableFrameFull;
+    static simsignal_t receivedExpressFrameFromUpper;
 
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
