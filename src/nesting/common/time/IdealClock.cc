@@ -36,6 +36,7 @@ simtime_t IdealClock::getTime()
     Enter_Method_Silent();
     uint64_t idleTicks = oscillator->updateAndGetTickCount() - lastTick;
     time += idleTicks * getClockRate();
+    lastTick += idleTicks;
     return time;
 }
 
