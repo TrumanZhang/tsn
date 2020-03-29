@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __MAIN_IDEALCLOCK_H_
-#define __MAIN_IDEALCLOCK_H_
+#ifndef NESTING_COMMON_TIME_IDEALCLOCK_H_
+#define NESTING_COMMON_TIME_IDEALCLOCK_H_
 
 #include <omnetpp.h>
 
