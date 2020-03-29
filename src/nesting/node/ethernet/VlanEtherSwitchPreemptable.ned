@@ -65,7 +65,7 @@ module VlanEtherSwitchPreemptable
         oscillator: <default("IdealOscillator")> like IOscillator {
             @display("p=90.94039,312.77982;is=s");
         }
-        legacyClock: <default("IdealClock")> like IClock {
+        legacyClock: <default("LegacyClock")> like IClock {
             @display("p=90.94039,409.23175;is=s");
         }
         clock: <default("RealtimeClock")> like IClock2 {

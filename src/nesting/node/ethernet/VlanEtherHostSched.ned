@@ -52,7 +52,7 @@ module VlanEtherHostSched
         oscillator: <default("IdealOscillator")> like IOscillator {
             @display("p=311,40;is=s");
         }
-        legacyClock: <default("IdealClock")> like IClock {
+        legacyClock: <default("LegacyClock")> like IClock {
             @display("p=311,96;is=s");
         }
         scheduleSwap: ScheduleSwap {

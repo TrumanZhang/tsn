@@ -24,9 +24,9 @@ package nesting.common.time;
 //
 // @see ~IClock
 //
-simple IdealClock like IClock {
+simple LegacyClock like IClock {
     parameters:
         @display("i=block/timer");
-        @class(IdealClock);
+        @class(LegacyClock);
         string oscillatorModule;
 }

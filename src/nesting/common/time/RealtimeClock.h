@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __NESTINGNG_REALTIMECLOCK_H_
-#define __NESTINGNG_REALTIMECLOCK_H_
+#ifndef NESTING_COMMON_TIME_REALTIMECLOCK_H_
+#define NESTING_COMMON_TIME_REALTIMECLOCK_H_
 
 #include <omnetpp.h>
 

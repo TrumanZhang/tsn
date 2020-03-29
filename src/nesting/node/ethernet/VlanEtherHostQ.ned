@@ -46,7 +46,7 @@ module VlanEtherHostQ
         oscillator: <default("IdealOscillator")> like IOscillator {
             @display("p=53,101;is=s");
         }
-        legacyClock: <default("IdealClock")> like IClock {
+        legacyClock: <default("LegacyClock")> like IClock {
             @display("p=53,39;is=s");
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
