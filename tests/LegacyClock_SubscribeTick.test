@@ -1,5 +1,5 @@
 %description:
-Tests the IdealClock submodule
+Tests the LegacyClock submodule
 
 %file: package.ned
 package @TESTNAME@;
@@ -16,7 +16,7 @@ network Test
     @display("bgb=280,213");
     submodules:
         oscillator: <"IdealOscillator"> like IOscillator;
-        clock: <"IdealClock"> like IClock {
+        clock: <"LegacyClock"> like IClock {
             @display("p=87,103");
             oscillatorModule = "^.oscillator";
         }

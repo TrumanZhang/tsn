@@ -13,25 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/common/time/IdealClock.h"
+#include "nesting/common/time/LegacyClock.h"
 
 namespace nesting {
 
-Define_Module(IdealClock);
+Define_Module(LegacyClock);
 
-IdealClock::IdealClock()
+LegacyClock::LegacyClock()
     : oscillator(nullptr)
     , lastTick(0)
     , time(SimTime::ZERO)
 {
 }
 
-void IdealClock::initialize()
+void LegacyClock::initialize()
 {
     oscillator = getModuleFromPar<IdealOscillator>(par("oscillatorModule"), this);
 }
 
-simtime_t IdealClock::getTime()
+simtime_t LegacyClock::getTime()
 {
     Enter_Method_Silent();
     uint64_t idleTicks = oscillator->updateAndGetTickCount() - lastTick;
@@ -40,13 +40,13 @@ simtime_t IdealClock::getTime()
     return time;
 }
 
-simtime_t IdealClock::getClockRate()
+simtime_t LegacyClock::getClockRate()
 {
     Enter_Method_Silent();
     return SimTime(1, SIMTIME_S) / oscillator->getFrequency();
 }
 
-void IdealClock::subscribeTick(IClockListener* listener, unsigned idleTicks, short kind)
+void LegacyClock::subscribeTick(IClockListener* listener, unsigned idleTicks, short kind)
 {
     Enter_Method_Silent();
     auto tick = oscillator->subscribeTick(*this, idleTicks, kind);
@@ -56,7 +56,7 @@ void IdealClock::subscribeTick(IClockListener* listener, unsigned idleTicks, sho
     tickToListenerTable[tick].insert(listener);
 }
 
-void IdealClock::unsubscribeTicks(IClockListener* listener)
+void LegacyClock::unsubscribeTicks(IClockListener* listener)
 {
     Enter_Method_Silent();
     for (auto it = tickToListenerTable.begin(); it != tickToListenerTable.end(); it++) {
@@ -67,7 +67,7 @@ void IdealClock::unsubscribeTicks(IClockListener* listener)
     }
 }
 
-void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
+void LegacyClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
     Enter_Method("onTick()");
     auto listeners = tickToListenerTable[tick];
