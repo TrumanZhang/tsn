@@ -33,6 +33,7 @@ void IdealClock::initialize()
 
 simtime_t IdealClock::getTime()
 {
+    Enter_Method_Silent();
     uint64_t idleTicks = oscillator->updateAndGetTickCount() - lastTick;
     time += idleTicks * getClockRate();
     return time;
@@ -40,11 +41,13 @@ simtime_t IdealClock::getTime()
 
 simtime_t IdealClock::getClockRate()
 {
+    Enter_Method_Silent();
     return SimTime(1, SIMTIME_S) / oscillator->getFrequency();
 }
 
 void IdealClock::subscribeTick(IClockListener* listener, unsigned idleTicks, short kind)
 {
+    Enter_Method_Silent();
     auto tick = oscillator->subscribeTick(*this, idleTicks, kind);
     if (tickToListenerTable.find(tick) == tickToListenerTable.end()) {
         tickToListenerTable[tick] = std::unordered_set<IClockListener*>();
@@ -54,6 +57,7 @@ void IdealClock::subscribeTick(IClockListener* listener, unsigned idleTicks, sho
 
 void IdealClock::unsubscribeTicks(IClockListener* listener)
 {
+    Enter_Method_Silent();
     for (auto it = tickToListenerTable.begin(); it != tickToListenerTable.end(); it++) {
         if (it->second.find(listener) != it->second.end()) {
             it->second.erase(listener);
@@ -64,6 +68,7 @@ void IdealClock::unsubscribeTicks(IClockListener* listener)
 
 void IdealClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
+    Enter_Method("onTick()");
     auto listeners = tickToListenerTable[tick];
     for (IClockListener* listener : listeners) {
         listener->tick(this, tick->getKind());

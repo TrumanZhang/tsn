@@ -94,6 +94,7 @@ std::shared_ptr<const IClock2::Timestamp> RealtimeClock::subscribeTimestamp(IClo
 
 void RealtimeClock::unsubscribeTimestamp(IClock2::TimestampListener& listener, const IClock2::Timestamp& timestamp)
 {
+    Enter_Method_Silent();
     std::shared_ptr<TimestampImpl> event = std::make_shared<TimestampImpl>(listener, timestamp.getLocalTime(), timestamp.getKind());
     std::list<std::shared_ptr<TimestampImpl>>::iterator it = std::lower_bound(scheduledEvents.begin(), scheduledEvents.end(), event);
 
@@ -106,16 +107,19 @@ void RealtimeClock::unsubscribeTimestamp(IClock2::TimestampListener& listener, c
 
 void RealtimeClock::subscribeConfigChanges(IClock2::ConfigListener& listener)
 {
+    Enter_Method_Silent();
     configListeners.insert(&listener);
 }
 
 void RealtimeClock::unsubscribeConfigChanges(IClock2::ConfigListener& listener)
 {
+    Enter_Method_Silent();
     configListeners.erase(&listener);
 }
 
 simtime_t RealtimeClock::updateAndGetLocalTime()
 {
+    Enter_Method_Silent();
     uint64_t elapsedTicks = oscillator->updateAndGetTickCount() - lastTick;
     localTime += elapsedTicks * timeIncrementPerTick();
     lastTick += elapsedTicks;
@@ -157,6 +161,7 @@ void RealtimeClock::setLocalTime(simtime_t newTime)
 
 double RealtimeClock::getClockRate() const
 {
+    Enter_Method_Silent();
     return oscillator->getFrequency();
 }
 
@@ -168,11 +173,14 @@ void RealtimeClock::setClockRate(double clockRate)
 
 double RealtimeClock::getDriftRate() const
 {
+    Enter_Method_Silent();
     return driftRate;
 }
 
 void RealtimeClock::setDriftRate(double driftRate)
 {
+    Enter_Method_Silent();
+
     // Update drift rate
     double oldDriftRate = this->driftRate;
     this->driftRate = driftRate;
@@ -188,6 +196,7 @@ void RealtimeClock::setDriftRate(double driftRate)
 
 bool RealtimeClock::isStopped()
 {
+    Enter_Method_Silent();
     return oscillator->getFrequency() + driftRate < minEffectiveClockRate;
 }
 

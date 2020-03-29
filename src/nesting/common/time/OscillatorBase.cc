@@ -162,6 +162,7 @@ std::shared_ptr<const IOscillator::Tick> OscillatorBase::subscribeTick(IOscillat
 
 std::shared_ptr<const IOscillator::Tick> OscillatorBase::subscribeTick(IOscillator::TickListener& listener, uint64_t idleTicks)
 {
+    Enter_Method_Silent();
     return subscribeTick(listener, idleTicks, 0);
 }
 
@@ -216,6 +217,7 @@ void OscillatorBase::unsubscribeTicks(IOscillator::TickListener& listener)
 
 bool OscillatorBase::isTickScheduled(IOscillator::TickListener& listener, const IOscillator::Tick& tickEvent) const
 {
+    Enter_Method_Silent();
     std::shared_ptr<OscillatorBase::TickImpl> tick = std::make_shared<OscillatorBase::TickImpl>(listener, tickEvent);
     auto it = std::lower_bound(
             scheduledEvents.begin(),
@@ -226,6 +228,7 @@ bool OscillatorBase::isTickScheduled(IOscillator::TickListener& listener, const 
 
 double OscillatorBase::getFrequency() const
 {
+    Enter_Method_Silent();
     return frequency;
 }
 
@@ -254,11 +257,13 @@ void OscillatorBase::setFrequency(double newFrequency)
 
 void OscillatorBase::subscribeConfigChanges(IOscillator::ConfigListener& listener)
 {
+    Enter_Method_Silent();
     configListeners.insert(&listener);
 }
 
 void OscillatorBase::unsubscribeConfigChanges(IOscillator::ConfigListener& listener)
 {
+    Enter_Method_Silent();
     configListeners.erase(&listener);
 }
 
