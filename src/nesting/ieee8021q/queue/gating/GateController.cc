@@ -22,8 +22,13 @@ Define_Module(GateController);
 
 GateController::~GateController() {
     transmissionGates.clear();
-    currentSchedule.reset();
-    nextSchedule.reset();
+    
+    assert(currentSchedule != nullptr);
+    delete currentSchedule;
+
+    if (nextSchedule != nullptr) {
+        delete nextSchedule;
+    }
 }
 
 void GateController::initialize(int stage) {
@@ -75,7 +80,7 @@ void GateController::initialize(int stage) {
 
         lastChange = simTime();
 
-        currentSchedule = std::unique_ptr<Schedule<GateBitvector>>(new Schedule<GateBitvector>());
+        currentSchedule = new Schedule<GateBitvector>();
         currentSchedule->addControlListEntry(SimTime(1, SIMTIME_S), GateBitvector("11111111"));
 
         cXMLElement* xml = par("initialSchedule").xmlValue();
@@ -86,7 +91,7 @@ void GateController::initialize(int stage) {
             //but not for the current one. Therefore the first entry would not be held.
             for (TransmissionGate* transmissionGate : transmissionGates) {
                 if ((!currentSchedule->isEmpty()
-                        && currentSchedule->getControlListEntry(0).test(
+                        && currentSchedule->getScheduledObject(0).test(
                                 transmissionGate->getIndex()))
                         && transmissionGate->isExpressQueue()) {
                     preemptMacModule->hold(SIMTIME_ZERO);
@@ -95,6 +100,8 @@ void GateController::initialize(int stage) {
             }
         }
         clock->subscribeTick(this, 0);
+
+        WATCH_PTR(currentSchedule);
     }
 }
 
@@ -124,8 +131,9 @@ void GateController::tick(IClock *clock, short kind) {
         }
 
         // Load new schedule and delete the old one if there is new schedule.
-        currentSchedule = move(nextSchedule);
-        nextSchedule.reset();
+        delete currentSchedule;
+        currentSchedule = nextSchedule;
+        nextSchedule = nullptr;
 
         // If an empty schedule was loaded, all gates are opened and there is no
         // need to subscribe to clock ticks
@@ -145,7 +153,7 @@ void GateController::tick(IClock *clock, short kind) {
     }
 
     // Get next gatestate bitvector
-    GateBitvector bitvector = currentSchedule->getControlListEntry(scheduleIndex);
+    GateBitvector bitvector = currentSchedule->getScheduledObject(scheduleIndex);
     bool releaseNeeded = false;
     if(par("enableHoldAndRelease")) {
         //Check whether some express gate is open
@@ -190,9 +198,9 @@ void GateController::tick(IClock *clock, short kind) {
         GateBitvector nextVector;
         if(nextSchedule && scheduleIndex == currentSchedule->getControlListLength()-1) {
             //If we are at the last entry of the current schedule, look at the first entry of the next one
-            nextVector = nextSchedule->getControlListEntry(0);
+            nextVector = nextSchedule->getScheduledObject(0);
         } else {
-            nextVector = currentSchedule->getControlListEntry((scheduleIndex + 1) % currentSchedule->getControlListLength());
+            nextVector = currentSchedule->getScheduledObject((scheduleIndex + 1) % currentSchedule->getControlListLength());
         }
 
         for (TransmissionGate* transmissionGate : transmissionGates) {
@@ -248,7 +256,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
         cumSumGateLength = tmp;
 
     }
-    GateBitvector bitvector = currentSchedule->getControlListEntry(currentIndex);
+    GateBitvector bitvector = currentSchedule->getScheduledObject(currentIndex);
     while (bits < kEthernet2MaximumTransmissionUnitBitLength.get()) {
         //if the bitvector is now closed, return all bit summed up until now
         if (!bitvector.test(gateIndex)) {
@@ -280,7 +288,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
             if (currentIndex == 0) {
                 cumSumGateLength = SIMTIME_ZERO;
             }
-            bitvector = currentSchedule->getControlListEntry(currentIndex);
+            bitvector = currentSchedule->getScheduledObject(currentIndex);
         } else {
             //if there is a nextSchedule but it is not yet being looked at
             bool hitCycleEnd = false;
@@ -308,13 +316,13 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
                 if (currentIndex < (int) currentSchedule->getControlListLength() - 1
                         && !hitCycleEnd) {
                     currentIndex = (currentIndex + 1) % currentSchedule->getControlListLength();
-                    bitvector = currentSchedule->getControlListEntry(
+                    bitvector = currentSchedule->getScheduledObject(
                             currentIndex);
                 } else {
                     //if it is the last index in currentSchedule or schedule hit cycle end, look into nextSchedule from now on
                     touchedNextSchedule = true;
                     currentIndex = 0;
-                    bitvector = nextSchedule->getControlListEntry(currentIndex);
+                    bitvector = nextSchedule->getScheduledObject(currentIndex);
                     // nextSchedule cycle starts in the future, therefore cycleStart of new schedule is the end of the old schedule
                     if (hitCycleEnd) {
                         cycleStart = cycleStart
@@ -347,7 +355,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
                 if (currentIndex == 0) {
                     cumSumGateLength = SIMTIME_ZERO;
                 }
-                bitvector = nextSchedule->getControlListEntry(currentIndex);
+                bitvector = nextSchedule->getScheduledObject(currentIndex);
             }
         }
     }
@@ -397,8 +405,7 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
                     << schedule->getControlListLength() << ". Time is "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
 
-    std::unique_ptr<Schedule<GateBitvector>> schedulePtr(schedule);
-    nextSchedule = move(schedulePtr);
+    nextSchedule = schedule;
 }
 
 void GateController::setGateStates(GateBitvector bitvector, bool release) {
