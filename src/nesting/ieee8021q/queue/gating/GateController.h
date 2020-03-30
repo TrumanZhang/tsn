@@ -47,13 +47,13 @@ namespace nesting {
 class GateController: public cSimpleModule, public IClockListener {
 private:
     /** Current schedule. Is never null. */
-    std::unique_ptr<Schedule<GateBitvector>> currentSchedule;
+    Schedule<GateBitvector>* currentSchedule;
 
     /**
      * Next schedule to load after the current schedule finishes it's cycle.
      * Can be null.
      */
-    std::unique_ptr<Schedule<GateBitvector>> nextSchedule;
+    Schedule<GateBitvector>* nextSchedule;
 
     /** Index for the current entry in the schedule. */
     unsigned int scheduleIndex;

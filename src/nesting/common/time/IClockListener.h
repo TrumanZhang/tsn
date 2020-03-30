@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_
-#define NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_
+#ifndef NESTING_COMMON_TIME_ICLOCKLISTENER_H_
+#define NESTING_COMMON_TIME_ICLOCKLISTENER_H_
 
 #include "nesting/common/time/IClock.h"
 
@@ -39,4 +39,4 @@ public:
 
 } // namespace nesting
 
-#endif /* NESTING_IEEE8021Q_CLOCK_ICLOCKLISTENER_H_ */
+#endif /* NESTING_COMMON_TIME_ICLOCKLISTENER_H_ */

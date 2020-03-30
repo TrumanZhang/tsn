@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef NESTING_IEEE8021Q_QUEUE_GATING_SCHEDULE_H_
-#define NESTING_IEEE8021Q_QUEUE_GATING_SCHEDULE_H_
+#ifndef NESTING_COMMON_SCHEDULE_SCHEDULE_H_
+#define NESTING_COMMON_SCHEDULE_SCHEDULE_H_
 
 #include <omnetpp.h>
 #include <bitset>
@@ -30,12 +30,32 @@ namespace nesting {
  * For more information about terminologies and context see chapters 8.6.8.4 and 8.6.9 of the IEEE802.1Q standard.
  */
 template<typename T>
-class Schedule {
+class Schedule : public cObject {
+    /** Tuple consisting of a time interval and a scheduled object. */
+    struct ControlListEntry {
+        simtime_t timeInterval;
+        T scheduledObject;
+    };
 protected:
-    std::vector<std::tuple<simtime_t, T>> controlList;
+    /** The control list contains tuples of time intervals and scheduled objects. */
+    std::vector<ControlListEntry> controlList;
+
+    /**
+     * The base time is considered when starting a schedule. Valid starting
+     * points for a schedule are (baseTime + N * cycleTime) where N is a
+     * positive integer.
+     */
     simtime_t baseTime;
+
     simtime_t cycleTime;
+
     simtime_t cycleTimeExtension;
+
+    /**
+     * Sum of all time intervals from the control list. The IEEE802.1Q
+     * standard explicitely specifies that this number can be different from
+     * the cycle time.
+     */
     simtime_t sumTimeIntervals;
 public:
     virtual ~Schedule() {}
@@ -71,42 +91,52 @@ public:
         return cycleTimeExtension;
     }
 
-    virtual unsigned int getControlListLength() const {
+    virtual unsigned getControlListLength() const {
         return controlList.size();
     }
 
-    virtual const T& getControlListEntry(unsigned int controlListIndex) const {
-        return std::get<1>(controlList[controlListIndex]);
+    virtual const T& getScheduledObject(unsigned index) const {
+        return controlList[index].scheduledObject;
     }
 
-    virtual simtime_t getTimeInterval(unsigned int controlListIndex) const {
-        return std::get<0>(controlList[controlListIndex]);
+    virtual simtime_t getTimeInterval(unsigned index) const {
+        return controlList[index].timeInterval;
     }
 
     virtual bool isEmpty() const {
         return controlList.empty();
     }
 
-    virtual void addControlListEntry(simtime_t timeInterval, T controlListEntry) {
+    virtual void addControlListEntry(simtime_t timeInterval, T scheduledObject) {
         sumTimeIntervals += timeInterval;
-        controlList.push_back(std::make_tuple(timeInterval, controlListEntry));
+        ControlListEntry entry;
+        entry.timeInterval = timeInterval;
+        entry.scheduledObject = scheduledObject;
+        controlList.push_back(entry);
     }
 
     virtual simtime_t getSumTimeIntervals() const {
         return sumTimeIntervals;
+    }
+
+    virtual std::string str() const override
+    {
+        std::ostringstream buffer;
+        buffer << "baseTime=" << getBaseTime() 
+            << ", cycleTime=" << getCycleTime()
+            << ", cycleTimeExtension=" << getCycleTimeExtension()
+            << ", controlListLength=" << getControlListLength()
+            << ", sumTimeIntervals=" << getSumTimeIntervals();
+        return buffer.str();
     }
 };
 
 template<typename T>
 std::ostream& operator<<(std::ostream& stream, const Schedule<T>& schedule)
 {
-    return stream << "Schedule[baseTime=" << schedule.getBaseTime() 
-            << ", cycleTime=" << schedule.getCycleTime()
-            << ", cycleTimeExtension=" << schedule.getCycleTimeExtension()
-            << ", controlListLength=" << schedule.getControlListLength()
-            << ", sumTimeIntervals=" << schedule.getSumTimeIntervals() << "]";
+    return stream << "Schedule[" << schedule.str() << "]";
 }
 
 } // namespace nesting
 
-#endif /* NESTING_IEEE8021Q_QUEUE_GATING_SCHEDULE_H_ */
+#endif /* NESTING_COMMON_SCHEDULE_SCHEDULE_H_ */

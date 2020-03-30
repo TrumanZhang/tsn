@@ -17,14 +17,17 @@
 #define __STUPRONESTINGPROJECT_QUEUINGFRAMES_H_
 
 #include <omnetpp.h>
-#include <array>
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/vlan/VlanTag_m.h"
+#include "inet/linklayer/common/MacAddress_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 
 #include "nesting/ieee8021q/Ieee8021q.h"
 #include "nesting/linklayer/vlan/VlanTagType.h"
+
+#include <array>
 
 using namespace omnetpp;
 

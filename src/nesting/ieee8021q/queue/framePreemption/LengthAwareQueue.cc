@@ -121,7 +121,10 @@ bool LengthAwareQueue::isEmpty(uint64_t maxBits) {
     }
 
     cPacket* nextPacket = static_cast<cPacket*>(queue.front());
-    return static_cast<uint64_t>(nextPacket->getBitLength() + 240) > maxBits; // add 240 bits to account for headers (30 bytes * 8)
+
+    // Overhead is 8B preamble + 18B ethernet header + 3B LLC + 4B FCS = 33B
+    // -> add 264 bits to account for headers (33B * 8)
+    return static_cast<uint64_t>(nextPacket->getBitLength() + 264) > maxBits;
 }
 
 void LengthAwareQueue::requestPacket(uint64_t maxBits) {

@@ -13,12 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __MAIN_IDEALCLOCK_H_
-#define __MAIN_IDEALCLOCK_H_
+#ifndef NESTING_COMMON_TIME_LEGACYCLOCK_H_
+#define NESTING_COMMON_TIME_LEGACYCLOCK_H_
 
 #include <omnetpp.h>
 
 #include <map>
+#include <unordered_set>
 
 #include "inet/common/ModuleAccess.h"
 
@@ -35,7 +36,7 @@ namespace nesting {
  * 
  * @deprecated Use nesting::RealtimeClock instead
  */
-class IdealClock: public cSimpleModule, public IClock, public IOscillator::TickListener {
+class LegacyClock: public cSimpleModule, public IClock, public IOscillator::TickListener {
 protected:
     IdealOscillator* oscillator;
 
@@ -43,13 +44,13 @@ protected:
 
     simtime_t time;
 
-    std::map<std::shared_ptr<const IOscillator::Tick>, IClockListener*> tickToListenerTable;
+    std::map<std::shared_ptr<const IOscillator::Tick>, std::unordered_set<IClockListener*>> tickToListenerTable;
 protected:
     virtual void initialize() override;
 public:
-    IdealClock();
+    LegacyClock();
 
-    virtual ~IdealClock() {};
+    virtual ~LegacyClock() {};
 
     virtual simtime_t getTime() override;
 
