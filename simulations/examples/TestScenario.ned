@@ -16,10 +16,9 @@
 package nesting.simulations.examples;
 
 import ned.DatarateChannel;
-import nesting.node.ethernet.VlanEtherSwitchPreemptable;
-import nesting.node.ethernet.VlanEtherHostSched;
-import nesting.node.ethernet.VlanEtherHostFullLoad;
 import nesting.node.ethernet.VlanEtherHostQ;
+import nesting.node.ethernet.VlanEtherHostSched;
+import nesting.node.ethernet.VlanEtherSwitchPreemptable;
 
 
 network TestScenario
@@ -43,10 +42,10 @@ network TestScenario
             gates:
                 ethg[3];
         }
-        workstation1: VlanEtherHostFullLoad {
+        workstation1: VlanEtherHostQ {
             @display("p=79,62");
         }
-        workstation2: VlanEtherHostFullLoad {
+        workstation2: VlanEtherHostQ {
             @display("p=172,29");
         }
         backupServer: VlanEtherHostQ {
