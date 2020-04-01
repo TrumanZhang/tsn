@@ -53,12 +53,14 @@ network Test
 			<queue>7</queue>
 			<dest>00:00:00:00:00:03</dest>
 			<size>1400B</size>
+            <flowId>1</flowId>
 		</entry>
         <entry>
 			<start>3us</start>
 			<queue>7</queue>
 			<dest>00:00:00:00:00:03</dest>
 			<size>1400B</size>
+            <flowId>1</flowId>
 		</entry>
 	</host>
 </schedule>
