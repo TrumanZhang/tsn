@@ -272,8 +272,7 @@ std::vector<int> FilteringDatabase::getDestInterfaceIds(MacAddress macAddress,
     std::vector<int> ports;
 
     if (!macAddress.isMulticast()) {
-        ports.push_back(-1);
-        return ports;
+        throw cRuntimeError("Expected multicast MAC address!");
     }
 
     auto it = operFdb.find(macAddress);
@@ -293,7 +292,6 @@ std::vector<int> FilteringDatabase::getDestInterfaceIds(MacAddress macAddress,
 
     }
 
-    ports.push_back(-1);
     return ports;
 }
 
