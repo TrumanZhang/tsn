@@ -15,31 +15,9 @@
 
 package nesting.application.ethernet;
 
-//
-// Traffic generator application for VLAN tagged ethernet frames. This
-// module should be connected to a VLANEncap module and the VLANEncap
-// module should be connected to an EtherEncap module to provide encap/decap
-// functionality for VLAN Tag and Ethernet Header.
-//
-// This application module does not generate encapsulated packets but adds
-// the necessary information, that other modules (EtherEncap, VLANEncap) can
-// provide the necessary encapsulation/decapsulation. Therefore an
-// Ieee8021QCtrl control information is added to packets.
-//
-// @see ~VLANEncap, ~EtherEncap, ~Ieee8021QCtrl
-//
 simple VlanEtherTrafGenSched
 {
     parameters:
-        @class(VlanEtherTrafGenSched);
-
-        @signal[sentPkId](type=long); // type=unique packet id
-        @signal[rcvdPkId](type=long); // type=unique packet id
-        @signal[sentPk](type=inet::Packet);
-        @signal[rcvdPk](type=inet::Packet);
-		@signal[packetMap](type=long); // should be non-negative
-
-        //Actual schedule has to be set in .ini file
         xml initialSchedule = default(xml("<host><cycle>100ms</cycle></host>"));
         xml emptySchedule = default(xml("<host><cycle>100ms</cycle></host>"));
         string clockModule = default("^.clock");
@@ -47,16 +25,16 @@ simple VlanEtherTrafGenSched
         bool verbose = default(false);
         double jitter @unit(s) = default(0s); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
         int seed = default(0);
-        string mapping = default("");
+
+        @signal[sentPk](type=inet::Packet);
+        @signal[rcvdPk](type=inet::Packet);
         
-        @statistic[packetMap](title="packet to flow mapping"; source=packetMap; record=vector; interpolationmode=none);
-        @statistic[packetReceived](title="packets received"; source=rcvdPkId; record=count, vector; interpolationmode=none);
-        @statistic[packetSent](title="packets sent"; source=sentPkId; record=count, vector; interpolationmode=none);
+        @statistic[pktSent](title="packets sent"; source=sentPk; record=count; interpolationmode=none);
+        @statistic[pktSentFlowId](title="packets sent with flow id"; source="flowId(sentPk)"; record=vector; interpolationmode=none);
+        @statistic[pktRcvd](title="packets received"; source=rcvdPk; record=count; interpolationmode=none);
+        @statistic[pktRcvdFlowId](title="packets received with flow id"; source="flowId(rcvdPk)"; record=vector; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
         input in;
         output out;
 }
-
-
-
