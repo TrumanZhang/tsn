@@ -180,14 +180,20 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                             "ports attribute");
         }
         std::string portsString = multicastAddress->getAttribute("ports");
-        std::vector<int> port;
+        std::vector<int> ports;
         std::stringstream stream(portsString);
         while(1) {
            int n;
            stream >> n;
            if(!stream)
               break;
-           port.push_back(n);
+           ports.push_back(n);
+        }
+
+        std::vector<int> destInterfaces;
+        for (int port : ports) {
+            int interfaceId = ifTable->getInterface(port)->getInterfaceId();
+            destInterfaces.push_back(interfaceId);
         }
 
         uint8_t vid = 0;
@@ -205,8 +211,7 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                 throw new cRuntimeError(
                         "Mac address is not a Multicast address.");
             }
-            adminFdb.insert( { macAddress,
-                    std::pair<simtime_t, std::vector<int>>(0, port) });
+            adminFdb.insert({macAddress, std::pair<simtime_t, std::vector<int>>(0, destInterfaces)});
         } else {
             // TODO
             throw cRuntimeError(
