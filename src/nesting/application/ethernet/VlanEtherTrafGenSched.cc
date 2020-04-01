@@ -111,7 +111,6 @@ void VlanEtherTrafGenSched::sendPacket() {
     auto timeTag = payload->addTag<CreationTimeTag>();
     timeTag->setCreationTime(simTime());
 
-    datapacket->insertAtBack(payload);
     datapacket->removeTagIfPresent<PacketProtocolTag>();
     datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
@@ -135,6 +134,8 @@ void VlanEtherTrafGenSched::sendPacket() {
 
     // Add flow id to packet meta information
     payload->addTagIfAbsent<FlowMetaTag>()->setFlowId(header.flowId);
+
+    datapacket->insertAtBack(payload);
 
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
