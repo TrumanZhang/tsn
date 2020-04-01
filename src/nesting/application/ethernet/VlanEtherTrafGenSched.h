@@ -70,11 +70,8 @@ protected:
     // receive statistics
     long TSNpacketsSent = 0;
     long packetsReceived = 0;
-    simsignal_t sentPkIdSignal;
-    simsignal_t rcvdPkIdSignal;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
-    simsignal_t packetMapSignal;
     int ssap = -1;
     int dsap = -1;
 
@@ -88,8 +85,6 @@ protected:
     // random number generator
     std::mt19937 generator;
     std::uniform_real_distribution<double> distribution;
-    // mapping to map packets to streams
-    std::vector<int> mapping;
 
     Ieee8022LlcSocket llcSocket;
 
@@ -103,7 +98,6 @@ protected:
 
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
-    std::vector<int> parseMappingString(std::string mappingString);
 public:
     virtual void tick(IClock *clock, short kind) override;
 
