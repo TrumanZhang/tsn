@@ -29,7 +29,7 @@ void FlowIdFilter::receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject*
     if (Packet* packet = dynamic_cast<Packet*>(object)) {
         auto flowTag = packet->peekData()->findTag<FlowMetaTag>();
         if (flowTag != nullptr) {
-            fire(this, t, t - flowTag->getFlowId(), details);
+            fire(this, t, static_cast<unsigned long>(flowTag->getFlowId()), details);
         }
     }
 }
