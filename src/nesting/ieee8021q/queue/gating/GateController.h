@@ -16,7 +16,8 @@
 #ifndef __MAIN_GATECONTROLLER_H_
 #define __MAIN_GATECONTROLLER_H_
 
-#include <omnetpp/simtime_t.h>
+#include <omnetpp.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -77,6 +78,8 @@ private:
     std::string switchString;
     std::string portString;
     simtime_t lastChange;
+
+    cMessage updateScheduleMsg = cMessage("updateSchedule");
 protected:
     /** @see cSimpleModule::initialize(int) */
     virtual void initialize(int stage) override;
@@ -94,6 +97,8 @@ protected:
     virtual void openAllGates(); // TODO use setGateStates internal
 
     virtual void setGateStates(GateBitvector bitvector, bool release);
+
+    virtual void updateSchedule();
 
 public:
     virtual ~GateController();
