@@ -112,7 +112,9 @@ void VlanEtherTrafGenSched::sendPacket() {
     timeTag->setCreationTime(simTime());
 
     datapacket->removeTagIfPresent<PacketProtocolTag>();
-    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+
+    // We choose an arbitrary protocol from inet::ProtocolGroup::ethertype
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
 
     // TODO check if protocol is correct
     auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
