@@ -14,7 +14,6 @@
 // 
 
 #include "nesting/ieee8021q/queue/gating/GateController.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
 
@@ -29,6 +28,8 @@ GateController::~GateController() {
     if (nextSchedule != nullptr) {
         delete nextSchedule;
     }
+
+    cancelEvent(&updateScheduleMsg);
 }
 
 void GateController::initialize(int stage) {
@@ -110,112 +111,16 @@ int GateController::numInitStages() const {
 }
 
 void GateController::handleMessage(cMessage *msg) {
-    throw cRuntimeError("cannot handle messages");
+    if (msg->isSelfMessage() && msg == &updateScheduleMsg) {
+        updateSchedule();
+    } else {
+        throw cRuntimeError("Cannot handle this message!");
+    }
 }
 
 void GateController::tick(IClock *clock, short kind) {
     Enter_Method("tick()");
-
-// When the current schedule index is 0, this means that the current
-// schedule's cycle was not started or was just finished. Therefore in this
-// case a new schedule is loaded if available.
-// If cycleStart + cycleTime is greater than the current time
-// , a new cycle hast started and the scheduleIndex needs to be reset to 0.
-    if (scheduleIndex == 0 && nextSchedule) {
-
-        // Print warning if the feature is used in combination with frame preemption
-        if(preemptMacModule != nullptr) {
-            if( preemptMacModule->isFramePreemptionEnabled() && par("enableHoldAndRelease")) {
-                EV_WARN << "Using schedule swap in combination with Hold&Release (Frame Preemption) can lead to wrong hold periods."<<endl;
-            }
-        }
-
-        // Load new schedule and delete the old one if there is new schedule.
-        delete currentSchedule;
-        currentSchedule = nextSchedule;
-        nextSchedule = nullptr;
-
-        // If an empty schedule was loaded, all gates are opened and there is no
-        // need to subscribe to clock ticks
-        if (currentSchedule->isEmpty()) {
-            openAllGates();
-            return;
-        }
-    }
-
-    if((cycleStart + currentSchedule->getCycleTime() == clock->getTime())
-    && currentSchedule->getCycleTime() != 0) {
-        // need to be set to 0, if cycle time has ended
-        scheduleIndex = 0;
-    }
-    if(scheduleIndex == 0) {
-        cycleStart = clock->getTime();
-    }
-
-    // Get next gatestate bitvector
-    GateBitvector bitvector = currentSchedule->getScheduledObject(scheduleIndex);
-    bool releaseNeeded = false;
-    if(par("enableHoldAndRelease")) {
-        //Check whether some express gate is open
-        bool someExpressGateOpen=false;
-        for (TransmissionGate* transmissionGate : transmissionGates) {
-            if(bitvector.test(transmissionGate->getIndex()) && transmissionGate->isExpressQueue()) {
-                someExpressGateOpen=true;
-                break;
-            }
-        }
-        //If the Mac component was on hold and no express gate is opened, release it
-        releaseNeeded = !someExpressGateOpen && currentlyOnHold();
-        if(releaseNeeded) {
-            if(preemptMacModule != nullptr) {
-                preemptMacModule->release();
-            }
-        }
-    }
-    //Set gate states for every gate
-    setGateStates(bitvector, releaseNeeded);
-    // from high prio to low prio
-    EV_DEBUG << getFullPath() << ": Got Tick. Setting gates to "<< bitvector << " at time "<< clock->getTime().inUnit(SIMTIME_US) << endl;
-    std::stringstream ss;
-    for (TransmissionGate* transmissionGate : transmissionGates) {
-        if(transmissionGate->isGateOpen()) {
-            ss << "1";
-        }
-        else {
-            ss << "0";
-        }
-    }
-    std::string ss_str = ss.str();
-    std::reverse(ss_str.begin(), ss_str.end());
-    EV_DEBUG << getFullPath() << ": Actual gate states: " << ss_str << " at time "<< clock->getTime().inUnit(SIMTIME_US) << endl;
-
-    // Subscribe to the tick, on which a new schedule entry is loaded.
-    clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
-    lastChange = clock->getTime();
-
-    if(par("enableHoldAndRelease")) {
-        //Get following bitvector to be able to schedule hold with advance
-        GateBitvector nextVector;
-        if(nextSchedule && scheduleIndex == currentSchedule->getControlListLength()-1) {
-            //If we are at the last entry of the current schedule, look at the first entry of the next one
-            nextVector = nextSchedule->getScheduledObject(0);
-        } else {
-            nextVector = currentSchedule->getScheduledObject((scheduleIndex + 1) % currentSchedule->getControlListLength());
-        }
-
-        for (TransmissionGate* transmissionGate : transmissionGates) {
-            //Schedule hold if any express gate is open in the next schdule state
-            if(nextVector.test(transmissionGate->getIndex()) && transmissionGate->isExpressQueue()) {
-                if(preemptMacModule!=nullptr) {
-                    preemptMacModule->hold((currentSchedule->getTimeInterval(scheduleIndex)) - preemptMacModule->getHoldAdvance());
-                    break;
-                }
-            }
-        }
-    }
-
-    // Switch to next schedule entry
-    scheduleIndex = (scheduleIndex + 1) % currentSchedule->getControlListLength();
+    scheduleAt(simTime(), &updateScheduleMsg);
 }
 
 simtime_t GateController::scheduleNextTickEvent() {
@@ -409,10 +314,102 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
 }
 
 void GateController::setGateStates(GateBitvector bitvector, bool release) {
-    for (TransmissionGate* transmissionGate : transmissionGates) {
-        transmissionGate->setGateState(
-                bitvector.test(transmissionGate->getIndex()), release);
+    for (TransmissionGate* transmissionGate : transmissionGates) { 
+        transmissionGate->setGateState(bitvector.test(transmissionGate->getIndex()), release);
     }
+}
+
+void GateController::updateSchedule()
+{
+    // When the current schedule index is 0, this means that the current
+    // schedule's cycle was not started or was just finished. Therefore in this
+    // case a new schedule is loaded if available.
+    // If cycleStart + cycleTime is greater than the current time
+    // , a new cycle hast started and the scheduleIndex needs to be reset to 0.
+    if (scheduleIndex == 0 && nextSchedule) {
+
+        // Print warning if the feature is used in combination with frame preemption
+        if(preemptMacModule != nullptr) {
+            if( preemptMacModule->isFramePreemptionEnabled() && par("enableHoldAndRelease")) {
+                EV_WARN << "Using schedule swap in combination with Hold&Release (Frame Preemption) can lead to wrong hold periods."<<endl;
+            }
+        }
+
+        // Load new schedule and delete the old one if there is new schedule.
+        delete currentSchedule;
+        currentSchedule = nextSchedule;
+        nextSchedule = nullptr;
+
+        // If an empty schedule was loaded, all gates are opened and there is no
+        // need to subscribe to clock ticks
+        if (currentSchedule->isEmpty()) {
+            openAllGates();
+            return;
+        }
+    }
+
+    if((cycleStart + currentSchedule->getCycleTime() == clock->getTime())
+    && currentSchedule->getCycleTime() != 0) {
+        // need to be set to 0, if cycle time has ended
+        scheduleIndex = 0;
+    }
+    if(scheduleIndex == 0) {
+        cycleStart = clock->getTime();
+    }
+
+    // Get next gatestate bitvector
+    GateBitvector bitvector = currentSchedule->getScheduledObject(scheduleIndex);
+    bool releaseNeeded = false;
+    if(par("enableHoldAndRelease")) {
+        //Check whether some express gate is open
+        bool someExpressGateOpen=false;
+        for (TransmissionGate* transmissionGate : transmissionGates) {
+            if(bitvector.test(transmissionGate->getIndex()) && transmissionGate->isExpressQueue()) {
+                someExpressGateOpen=true;
+                break;
+            }
+        }
+        //If the Mac component was on hold and no express gate is opened, release it
+        releaseNeeded = !someExpressGateOpen && currentlyOnHold();
+        if(releaseNeeded) {
+            if(preemptMacModule != nullptr) {
+                preemptMacModule->release();
+            }
+        }
+    }
+    //Set gate states for every gate
+    setGateStates(bitvector, releaseNeeded);
+    // from high prio to low prio
+    EV_INFO << "Setting gates to "<< bitvector << " at t="
+            << clock->getTime().inUnit(SIMTIME_US) << "us." << endl;
+
+    // Subscribe to the tick, on which a new schedule entry is loaded.
+    clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+    lastChange = clock->getTime();
+
+    if(par("enableHoldAndRelease")) {
+        //Get following bitvector to be able to schedule hold with advance
+        GateBitvector nextVector;
+        if(nextSchedule && scheduleIndex == currentSchedule->getControlListLength()-1) {
+            //If we are at the last entry of the current schedule, look at the first entry of the next one
+            nextVector = nextSchedule->getScheduledObject(0);
+        } else {
+            nextVector = currentSchedule->getScheduledObject((scheduleIndex + 1) % currentSchedule->getControlListLength());
+        }
+
+        for (TransmissionGate* transmissionGate : transmissionGates) {
+            //Schedule hold if any express gate is open in the next schdule state
+            if(nextVector.test(transmissionGate->getIndex()) && transmissionGate->isExpressQueue()) {
+                if(preemptMacModule!=nullptr) {
+                    preemptMacModule->hold((currentSchedule->getTimeInterval(scheduleIndex)) - preemptMacModule->getHoldAdvance());
+                    break;
+                }
+            }
+        }
+    }
+
+    // Switch to next schedule entry
+    scheduleIndex = (scheduleIndex + 1) % currentSchedule->getControlListLength();
 }
 
 void GateController::openAllGates() {

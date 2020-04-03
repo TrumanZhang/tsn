@@ -32,7 +32,6 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
         const char* bitvectorCString =
                 entry->getFirstChildWithTag("bitvector")->getNodeValue();
         std::string originalVector = std::string(bitvectorCString);
-        reverse(originalVector.begin(), originalVector.end());
         GateBitvector bitvector = GateBitvector(originalVector);
 
         schedule->addControlListEntry(length, bitvector);

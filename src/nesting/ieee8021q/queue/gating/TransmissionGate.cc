@@ -14,7 +14,6 @@
 // 
 
 #include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
 
@@ -96,12 +95,9 @@ void TransmissionGate::handlePacketEnqueuedEvent() {
 }
 
 void TransmissionGate::handleGateStateChangedEvent() {
-    EV_INFO << getFullPath() << ":Handle gate-state-changed event: ";
-    if (this->gateOpen) {
-        EV_INFO << "Gate opened." << endl;
-    } else {
-        EV_INFO << "Gate closed." << endl;
-    }
+    EV_DEBUG << "Handle gate-state-changed event: Gate "
+            << (this->gateOpen ? "open" : "closed") << std::endl;
+
     emit(gateStateChangedSignal, this->gateOpen);
     // Notify transmission-selection if packet has become ready for transmission
     if (gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits())
@@ -116,9 +112,9 @@ void TransmissionGate::handleGateStateChangedEvent() {
 uint64_t TransmissionGate::maxTransferableBits() {
     if (lengthAwareSchedulingEnabled) {
         unsigned int maxbit = gateController->calculateMaxBit(getIndex());
-        EV_DEBUG << getFullPath() << ": max bit transferable: " << maxbit
-                        << " at time " << clock->getTime().inUnit(SIMTIME_US)
-                        << endl;
+        EV_DEBUG << "Max bit transferable: " << maxbit
+                << " at time " << clock->getTime().inUnit(SIMTIME_US)
+                << endl;
 
         return maxbit;
     }
