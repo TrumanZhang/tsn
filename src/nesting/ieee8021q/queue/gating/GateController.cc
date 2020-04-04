@@ -37,8 +37,7 @@ void GateController::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         scheduleIndex = 0;
         // Keep reference to clock module
-        cModule* clockModule = getModuleFromPar<cModule>(par("clockModule"),
-                this);
+        cModule* clockModule = getModuleFromPar<cModule>(par("clockModule"), this);
         clock = check_and_cast<IClock*>(clockModule);
 
         // Iterate through transmission gates an keep them as references

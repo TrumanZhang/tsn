@@ -97,7 +97,7 @@ void LengthAwareQueue::handleRequestPacketEvent(uint64_t maxBits) {
     ASSERT(!isEmpty(maxBits));
 
     cPacket* nextPacket = static_cast<cPacket*>(queue.front());
-    EV_TRACE << getFullPath() << ": Packet requested with max length of "
+    EV_INFO << getFullPath() << ": Packet requested with max length of "
                     << maxBits << "bits. Next packet has "
                     << static_cast<uint64_t>(nextPacket->getBitLength())
                     << "bits." << endl;
@@ -122,9 +122,9 @@ bool LengthAwareQueue::isEmpty(uint64_t maxBits) {
 
     cPacket* nextPacket = static_cast<cPacket*>(queue.front());
 
-    // Overhead is 8B preamble + 18B ethernet header + 3B LLC + 4B FCS = 33B
-    // -> add 264 bits to account for headers (33B * 8)
-    return static_cast<uint64_t>(nextPacket->getBitLength() + 264) > maxBits;
+    // Overhead 8Byte from preamble
+    unsigned preambleSize = 8*8;
+    return static_cast<uint64_t>(nextPacket->getBitLength() + preambleSize) >= maxBits;
 }
 
 void LengthAwareQueue::requestPacket(uint64_t maxBits) {
