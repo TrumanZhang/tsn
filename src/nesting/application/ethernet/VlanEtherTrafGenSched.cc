@@ -79,8 +79,7 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
 
-        clock->subscribeTick(this,
-                scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+        clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
         llcSocket.open(-1, ssap);
     }
@@ -170,7 +169,7 @@ void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
             nextSchedule.reset();
         }
         indexSchedule = 0;
-        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+        clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
     }
     else {
@@ -182,7 +181,7 @@ void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
         jitterMsgVector.push_back(jitterMsg);
         indexSchedule++;
         scheduleAt(simTime() + jitter_delay, jitterMsg);
-        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+        clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
     }
 }

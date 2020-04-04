@@ -231,7 +231,7 @@ void FilteringDatabase::tick(IClock *clock, short kind) {
 
         changeDatabase = false;
     }
-    clock->subscribeTick(this, cycle.raw());
+    clock->subscribeTick(this, cycle / clock->getClockRate());
 }
 
 void FilteringDatabase::handleMessage(cMessage *msg) {

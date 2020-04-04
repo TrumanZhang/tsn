@@ -383,7 +383,7 @@ void GateController::updateSchedule()
             << clock->getTime().inUnit(SIMTIME_US) << "us." << endl;
 
     // Subscribe to the tick, on which a new schedule entry is loaded.
-    clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+    clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
     lastChange = clock->getTime();
 
     if(par("enableHoldAndRelease")) {
