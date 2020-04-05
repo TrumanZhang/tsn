@@ -18,11 +18,11 @@ package nesting.application.ethernet;
 simple VlanEtherTrafGenSched
 {
     parameters:
+        @display("i=block/app");
         xml initialSchedule = default(xml("<host><cycle>100ms</cycle></host>"));
         xml emptySchedule = default(xml("<host><cycle>100ms</cycle></host>"));
         string clockModule = default("^.clock");
         string hostModule = default("^");
-        bool verbose = default(false);
         double jitter @unit(s) = default(0s); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
         int seed = default(0);
 
