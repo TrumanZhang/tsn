@@ -23,8 +23,7 @@ simple VlanEtherTrafGenSched
         xml emptySchedule = default(xml("<host><cycle>100ms</cycle></host>"));
         string clockModule = default("^.clock");
         string hostModule = default("^");
-        double jitter @unit(s) = default(0s); // random time, for which transmission of packet can be delayed. Unit depends on clock rate.
-        int seed = default(0);
+        volatile double jitter @unit(s) = default(0s); // random time, for which transmission of packet can be delayed.
 
         @signal[sentPk](type=inet::Packet);
         @signal[rcvdPk](type=inet::Packet);

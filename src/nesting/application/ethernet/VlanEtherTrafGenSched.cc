@@ -33,12 +33,11 @@ namespace nesting {
 Define_Module(VlanEtherTrafGenSched);
 
 VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
-    // delete jitter msg for not yet sent packets
-    for (cMessage* msg : jitterMsgVector) {
-        cancelEvent(msg);
-        delete (msg);
+    // Delete self-messages for not yet sent packets
+    for (std::map<cMessage*, unsigned>::iterator it = sendEvents.begin(); it != sendEvents.end(); it++) {
+        cancelAndDelete(it->first);
     }
-    jitterMsgVector.clear();
+    sendEvents.clear();
 }
 
 void VlanEtherTrafGenSched::initialize(int stage) {
@@ -47,14 +46,10 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         sentPkSignal = registerSignal("sentPk");
         rcvdPkSignal = registerSignal("rcvdPk");
 
+        jitter = &par("jitter");
+
         seqNum = 0;
         //WATCH(seqNum);
-
-        jitter = par("jitter");
-        // set seed for random jitter calculation
-        int seed = par("seed");
-        generator.seed(seed);
-        distribution = *new std::uniform_real_distribution<double>(0, 1.0);
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -163,33 +158,23 @@ void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
 
     }
     else {
-        double delay = distribution(generator); // random
-        simtime_t jitter_delay = delay * jitter;
-        // jitter msg to delay schedules packets
-        cMessage* jitterMsg = new cMessage();
+        double delay = *jitter;
+        cMessage* selfMessage = new cMessage();
         // save msg in vector
-        jitterMsgVector.push_back(jitterMsg);
+        sendEvents[selfMessage] = indexSchedule;
         indexSchedule++;
-        scheduleAt(simTime() + jitter_delay, jitterMsg);
+        scheduleAt(simTime() + delay, selfMessage);
         clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
-
     }
 }
 
 void VlanEtherTrafGenSched::sendDelayed(cMessage *msg) {
     sendPacket();
     indexTx++;
-    std::vector<cMessage*>::iterator it = std::find(jitterMsgVector.begin(),
-            jitterMsgVector.end(), msg);
-    if (it != jitterMsgVector.end()) {
-        cMessage* dlMsg = *it;
-        delete dlMsg;
-        // delete msg from vector because delayed packet was sent
-        jitterMsgVector.erase(it);
-    } else {
-        throw cRuntimeError("Jitter message not found in vector!");
-    }
 
+    assert(!msg->isScheduled()); // msg shouldn't be scheduled atm
+    sendEvents.erase(msg);
+    delete msg;
 }
 
 /* This method returns the timeinterval between

@@ -34,6 +34,7 @@
 #include <random>
 #include <iostream>
 #include <vector>
+#include <tuple>
 
 using namespace omnetpp;
 using namespace inet;
@@ -69,18 +70,14 @@ protected:
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
 
-    // maximum time scheduled packet can be delayed from ini file
-    simtime_t jitter;
-    // seed to seed the random number generator for random delays bounded by jitter variable
-    int seed;
-    // vector to hold all messages that delays scheduled packets. Msgs need to be saved until delayed packet was sent
-    // ,in order to delete said msg and avoid a memory leak
-    std::vector<cMessage*> jitterMsgVector;
-    // random number generator
-    std::mt19937 generator;
-    std::uniform_real_distribution<double> distribution;
+    /**
+     * Keeps track of scheduled send events with their respective schedule index
+     */
+    std::map<cMessage*, unsigned> sendEvents;
 
     int seqNum = 0;
+
+    cPar* jitter;
 
     /**
      * Arbitrary L2 protocol from inet::ProtocolGroup::ethertype, so that the
