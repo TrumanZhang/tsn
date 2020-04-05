@@ -24,11 +24,10 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 #include <algorithm>
 #include <string.h>
-
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
 
@@ -82,6 +81,9 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
         llcSocket.open(-1, ssap);
+
+        registerService(*l2Protocol, nullptr, gate("in"));
+        registerProtocol(*l2Protocol, gate("out"), nullptr);
     }
 }
 
@@ -111,9 +113,7 @@ void VlanEtherTrafGenSched::sendPacket() {
     timeTag->setCreationTime(simTime());
 
     datapacket->removeTagIfPresent<PacketProtocolTag>();
-
-    // We choose an arbitrary protocol from inet::ProtocolGroup::ethertype
-    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(l2Protocol);
 
     // TODO check if protocol is correct
     auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();

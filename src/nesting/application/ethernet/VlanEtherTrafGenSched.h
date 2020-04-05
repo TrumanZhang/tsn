@@ -46,7 +46,7 @@ namespace nesting {
  * See the NED file for a detailed description
  */
 class VlanEtherTrafGenSched: public cSimpleModule, public IClockListener {
-private:
+protected:
 
     /** Current schedule. Is never null. */
     std::unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
@@ -64,8 +64,6 @@ private:
     long int indexTx = 0;
 
     IClock *clock;
-
-protected:
 
     // receive statistics
     long TSNpacketsSent = 0;
@@ -89,6 +87,13 @@ protected:
     Ieee8022LlcSocket llcSocket;
 
     int seqNum = 0;
+
+    /**
+     * Arbitrary L2 protocol from inet::ProtocolGroup::ethertype, so that the
+     * EtherEncap module will encapsulate frames in Ethernet2 format.
+     */
+    const Protocol* l2Protocol = &Protocol::nextHopForwarding;
+protected:
 
     virtual void initialize(int stage) override;
     virtual void sendPacket();
