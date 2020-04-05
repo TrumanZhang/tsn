@@ -28,8 +28,6 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/common/TimeTag_m.h"
 
 #include <memory>
@@ -70,8 +68,6 @@ protected:
     long packetsReceived = 0;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
-    int ssap = -1;
-    int dsap = -1;
 
     // maximum time scheduled packet can be delayed from ini file
     simtime_t jitter;

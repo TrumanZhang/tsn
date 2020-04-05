@@ -17,7 +17,6 @@
 #include "nesting/linklayer/vlan/EnhancedVlanTag_m.h"
 #include "nesting/common/FlowMetaTag_m.h"
 
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -110,11 +109,6 @@ void VlanEtherTrafGenSched::sendPacket() {
 
     datapacket->removeTagIfPresent<PacketProtocolTag>();
     datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(l2Protocol);
-
-    // TODO check if protocol is correct
-    auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
-    sapTag->setSsap(ssap);
-    sapTag->setDsap(dsap);
 
     seqNum++;
 
