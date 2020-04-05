@@ -84,8 +84,6 @@ protected:
     std::mt19937 generator;
     std::uniform_real_distribution<double> distribution;
 
-    Ieee8022LlcSocket llcSocket;
-
     int seqNum = 0;
 
     /**

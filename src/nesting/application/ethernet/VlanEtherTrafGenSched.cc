@@ -65,8 +65,6 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         cModule* clockModule = getModuleFromPar<cModule>(par("clockModule"),
                 this);
         clock = check_and_cast<IClock*>(clockModule);
-
-        llcSocket.setOutputGate(gate("out"));
     } else if (stage == INITSTAGE_LINK_LAYER) {
         //clock module reference from ned parameter
 
@@ -79,8 +77,6 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         nextSchedule.reset();
 
         clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
-
-        llcSocket.open(-1, ssap);
 
         registerService(*l2Protocol, nullptr, gate("in"));
         registerProtocol(*l2Protocol, gate("out"), nullptr);
