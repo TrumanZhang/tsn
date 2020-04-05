@@ -34,4 +34,16 @@ void FlowIdFilter::receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject*
     }
 }
 
+Register_ResultFilter("seqNum", SeqNumFilter);
+
+void SeqNumFilter::receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject* object, cObject* details)
+{
+    if (Packet* packet = dynamic_cast<Packet*>(object)) {
+        auto flowTag = packet->peekData()->findTag<FlowMetaTag>();
+        if (flowTag != nullptr) {
+            fire(this, t, static_cast<unsigned long>(flowTag->getSeqNum()), details);
+        }
+    }
+}
+
 } // namespace nesting

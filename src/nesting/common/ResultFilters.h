@@ -22,10 +22,18 @@ using namespace omnetpp;
 
 namespace nesting {
 
-/**
- * Filter that expects a Packet with an FlowMetaTag and outputs the flow id.
- */
+/** Filter that expects a Packet with a FlowMetaTag and outputs the flow id. */
 class FlowIdFilter : public cObjectResultFilter
+{
+public:
+    virtual void receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject* object, cObject* details) override;
+};
+
+/**
+ * Filter that expects a Packet with a FlowMetaTag and outputs the sequence
+ * number of the respective flow.
+ */
+class SeqNumFilter : public cObjectResultFilter
 {
 public:
     virtual void receiveSignal(cResultFilter* prev, simtime_t_cref t, cObject* object, cObject* details) override;

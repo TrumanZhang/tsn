@@ -27,4 +27,5 @@ namespace nesting;
 class FlowMetaTag extends inet::TagBase
 {
     uint64_t flowId;
+    uint64_t seqNum;
 }

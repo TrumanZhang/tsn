@@ -28,11 +28,13 @@ simple VlanEtherTrafGenSched
         @signal[sentPk](type=inet::Packet);
         @signal[rcvdPk](type=inet::Packet);
         
-        @statistic[pktSent](title="packets sent"; source=sentPk; record=count; interpolationmode=none);
-        @statistic[pktSentFlowId](title="packets sent with flow id"; source="flowId(sentPk)"; record=vector; interpolationmode=none);
-        @statistic[pktRcvd](title="packets received"; source=rcvdPk; record=count; interpolationmode=none);
-        @statistic[pktRcvdFlowId](title="packets received with flow id"; source="flowId(rcvdPk)"; record=vector; interpolationmode=none);
-        @statistic[endToEndDelay](title="end to end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[pktSent](title="num packets sent"; source=sentPk; record=count; interpolationmode=none);
+        @statistic[pktSentFlowId](title="packet sent with flow id"; source="flowId(sentPk)"; record=vector; interpolationmode=none);
+        @statistic[pktSentSeqNum](title="packet sent with sequence number"; source="seqNum(sentPk)"; record=vector; interpolationmode=none);
+        @statistic[pktRcvd](title="num packets received"; source=rcvdPk; record=count; interpolationmode=none);
+        @statistic[pktRcvdFlowId](title="flow id"; source="flowId(rcvdPk)"; record=vector; interpolationmode=none);
+        @statistic[pktRcvdSeqId](title="sequence number"; source="seqNum(rcvdPk)"; record=vector; interpolationmode=none);
+        @statistic[pktRcvdDelay](title="end to end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
         input in;
         output out;

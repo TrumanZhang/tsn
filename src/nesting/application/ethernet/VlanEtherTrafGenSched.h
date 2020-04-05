@@ -57,25 +57,23 @@ protected:
     std::unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
-    long int indexSchedule = 0;
-
-    /** Index for the net packet to be sent out. */
-    long int indexTx = 0;
+    uint64_t indexSchedule = 0;
 
     IClock *clock;
 
     // receive statistics
-    long TSNpacketsSent = 0;
-    long packetsReceived = 0;
+    uint64_t TSNpacketsSent = 0;
+    uint64_t packetsReceived = 0;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
 
     /**
      * Keeps track of scheduled send events with their respective schedule index
      */
-    std::map<cMessage*, unsigned> sendEvents;
+    std::map<cMessage*, uint64_t> sendEvents;
 
-    int seqNum = 0;
+    /** Sequence numbers for every flow id. */
+    std::map<uint64_t, uint64_t> flowIdSeqNums;
 
     cPar* jitter;
 
@@ -87,7 +85,7 @@ protected:
 protected:
 
     virtual void initialize(int stage) override;
-    virtual void sendPacket();
+    virtual void sendPacket(uint64_t scheduleIndexTx);
     virtual void receivePacket(Packet *msg);
     virtual void handleMessage(cMessage *msg) override;
     virtual void sendDelayed(cMessage *msg);

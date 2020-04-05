@@ -34,7 +34,7 @@ Define_Module(VlanEtherTrafGenSched);
 
 VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
     // Delete self-messages for not yet sent packets
-    for (std::map<cMessage*, unsigned>::iterator it = sendEvents.begin(); it != sendEvents.end(); it++) {
+    for (std::map<cMessage*, uint64_t>::iterator it = sendEvents.begin(); it != sendEvents.end(); it++) {
         cancelAndDelete(it->first);
     }
     sendEvents.clear();
@@ -48,8 +48,7 @@ void VlanEtherTrafGenSched::initialize(int stage) {
 
         jitter = &par("jitter");
 
-        seqNum = 0;
-        //WATCH(seqNum);
+        WATCH_MAP(flowIdSeqNums);
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -89,14 +88,26 @@ void VlanEtherTrafGenSched::handleMessage(cMessage *msg) {
     }
 }
 
-void VlanEtherTrafGenSched::sendPacket() {
+void VlanEtherTrafGenSched::sendPacket(uint64_t scheduleIndexTx) {
+    // get scheduled control data
+    Ieee8021QCtrl header = currentSchedule->getScheduledObject(scheduleIndexTx % currentSchedule->size());
+
+    // If no sequence number for flow exists create one
+    if (flowIdSeqNums.find(header.flowId) == flowIdSeqNums.end()) {
+        flowIdSeqNums[header.flowId] = 0;
+    }
+
+    // Get and increment sequence number
+    uint64_t flowId = header.flowId;
+    uint64_t seqNum = flowIdSeqNums[header.flowId];
+    flowIdSeqNums[header.flowId]++;
 
     char msgname[40];
-    sprintf(msgname, "pk-%d-%d", getId(), seqNum);
+    sprintf(msgname, "pk-%d-%d-%d", getId(), flowId, seqNum);
 
     // create new packet
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-    long len = currentSchedule->getSize(indexTx % currentSchedule->size());
+    long len = currentSchedule->getSize(scheduleIndexTx % currentSchedule->size());
     auto payload = makeShared<ByteCountChunk>(B(len));
     // set creation time
     auto timeTag = payload->addTag<CreationTimeTag>();
@@ -105,10 +116,6 @@ void VlanEtherTrafGenSched::sendPacket() {
     datapacket->removeTagIfPresent<PacketProtocolTag>();
     datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(l2Protocol);
 
-    seqNum++;
-
-    // get scheduled control data
-    Ieee8021QCtrl header = currentSchedule->getScheduledObject(indexTx % currentSchedule->size());
     // create mac control info
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(header.macTag.getDestAddress());
@@ -119,7 +126,9 @@ void VlanEtherTrafGenSched::sendPacket() {
     vlanReq->setVlanId(header.q1Tag.getVID());
 
     // Add flow id to packet meta information
-    payload->addTagIfAbsent<FlowMetaTag>()->setFlowId(header.flowId);
+    auto flowMetaTag = payload->addTagIfAbsent<FlowMetaTag>();
+    flowMetaTag->setFlowId(header.flowId);
+    flowMetaTag->setSeqNum(seqNum);
 
     datapacket->insertAtBack(payload);
 
@@ -169,8 +178,7 @@ void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
 }
 
 void VlanEtherTrafGenSched::sendDelayed(cMessage *msg) {
-    sendPacket();
-    indexTx++;
+    sendPacket(sendEvents[msg]);
 
     assert(!msg->isScheduled()); // msg shouldn't be scheduled atm
     sendEvents.erase(msg);
