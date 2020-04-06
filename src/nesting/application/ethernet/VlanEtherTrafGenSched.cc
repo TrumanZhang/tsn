@@ -113,7 +113,6 @@ void VlanEtherTrafGenSched::sendPacket(uint64_t scheduleIndexTx) {
     auto timeTag = payload->addTag<CreationTimeTag>();
     timeTag->setCreationTime(simTime());
 
-    datapacket->removeTagIfPresent<PacketProtocolTag>();
     datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(l2Protocol);
 
     // create mac control info
