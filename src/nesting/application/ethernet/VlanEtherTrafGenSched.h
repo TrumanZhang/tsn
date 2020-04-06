@@ -66,6 +66,8 @@ protected:
     uint64_t packetsReceived = 0;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
+    simsignal_t sentPkTreeIdSignal;
+    simsignal_t rcvdPkTreeIdSignal;
 
     /**
      * Keeps track of scheduled send events with their respective schedule index

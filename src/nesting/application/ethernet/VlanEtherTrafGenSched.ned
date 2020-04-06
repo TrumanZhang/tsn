@@ -27,7 +27,9 @@ simple VlanEtherTrafGenSched
 
         @signal[sentPk](type=inet::Packet);
         @signal[rcvdPk](type=inet::Packet);
-        
+        @signal[sentPkTreeId](type=long);
+        @signal[rcvdPkTreeId](type=long);
+
         @statistic[pktSent](title="num packets sent"; source=sentPk; record=count; interpolationmode=none);
         @statistic[pktSentFlowId](title="packet sent with flow id"; source="flowId(sentPk)"; record=vector; interpolationmode=none);
         @statistic[pktSentSeqNum](title="packet sent with sequence number"; source="seqNum(sentPk)"; record=vector; interpolationmode=none);
@@ -35,6 +37,8 @@ simple VlanEtherTrafGenSched
         @statistic[pktRcvdFlowId](title="flow id"; source="flowId(rcvdPk)"; record=vector; interpolationmode=none);
         @statistic[pktRcvdSeqNum](title="sequence number"; source="seqNum(rcvdPk)"; record=vector; interpolationmode=none);
         @statistic[pktRcvdDelay](title="end to end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[pktSentTreeId](title="packet sent with tree id"; source=sentPkTreeId; record=vector);
+        @statistic[pktRcvdTreeId](title="packet tree id"; source=rcvdPkTreeId; record=vector);
     gates:
         input in;
         output out;

@@ -45,6 +45,8 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         // Signals
         sentPkSignal = registerSignal("sentPk");
         rcvdPkSignal = registerSignal("rcvdPk");
+        sentPkTreeIdSignal = registerSignal("sentPkTreeId");
+        rcvdPkTreeIdSignal = registerSignal("rcvdPkTreeId");
 
         jitter = &par("jitter");
 
@@ -138,6 +140,7 @@ void VlanEtherTrafGenSched::sendPacket(uint64_t scheduleIndexTx) {
     send(datapacket, "out");
     TSNpacketsSent++;
     emit(sentPkSignal, datapacket);
+    emit(sentPkTreeIdSignal, datapacket->getTreeId());
 }
 
 void VlanEtherTrafGenSched::receivePacket(Packet *pkt) {
@@ -147,6 +150,7 @@ void VlanEtherTrafGenSched::receivePacket(Packet *pkt) {
 
     packetsReceived++;
     emit(rcvdPkSignal, pkt);
+    emit(rcvdPkTreeIdSignal, pkt->getTreeId());
     delete pkt;
 }
 
