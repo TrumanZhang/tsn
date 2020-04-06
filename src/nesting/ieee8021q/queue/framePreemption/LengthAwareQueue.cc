@@ -124,7 +124,7 @@ bool LengthAwareQueue::isEmpty(uint64_t maxBits) {
 
     // Overhead 8Byte from preamble
     unsigned preambleSize = 8*8;
-    return static_cast<uint64_t>(nextPacket->getBitLength() + preambleSize) >= maxBits;
+    return static_cast<uint64_t>(nextPacket->getBitLength() + preambleSize) > maxBits;
 }
 
 void LengthAwareQueue::requestPacket(uint64_t maxBits) {
