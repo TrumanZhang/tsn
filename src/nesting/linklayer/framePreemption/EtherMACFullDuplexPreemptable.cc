@@ -293,7 +293,6 @@ void EtherMACFullDuplexPreemptable::startFrameTransmission() {
     EV_INFO << getFullPath() << " at t=" << simTime().inUnit(SIMTIME_NS)
             << "ns:" << " Starting Transmission of " << frame << ". Express: " 
             << isExpressFrame(frame) << endl;
-    emit(startTransmissionExpressFrameSignal, curTxFrame->getTreeId());
     
     //If frame preemption is disabled, treat all frames as express so they are properly displayed
     if (!par("enablePreemptingFrames") || isExpressFrame(frame)) {
