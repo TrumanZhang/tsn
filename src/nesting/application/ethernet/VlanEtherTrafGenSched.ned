@@ -36,7 +36,7 @@ simple VlanEtherTrafGenSched
         @statistic[pktRcvd](title="num packets received"; source=rcvdPk; record=count; interpolationmode=none);
         @statistic[pktRcvdFlowId](title="flow id"; source="flowId(rcvdPk)"; record=vector; interpolationmode=none);
         @statistic[pktRcvdSeqNum](title="sequence number"; source="seqNum(rcvdPk)"; record=vector; interpolationmode=none);
-        @statistic[pktRcvdDelay](title="end to end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[pktRcvdDelay](title="end to end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector,min,max; interpolationmode=none);
         @statistic[pktSentTreeId](title="packet sent with tree id"; source=sentPkTreeId; record=vector; interpolationmode=none);
         @statistic[pktRcvdTreeId](title="packet tree id"; source=rcvdPkTreeId; record=vector; interpolationmode=none);
     gates:
