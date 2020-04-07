@@ -159,7 +159,7 @@ Sim.h2.trafGenApp.destAddress = "00:00:00:00:00:11"
 
 %exitcode: 0
 
-%postrun-command: ./test.sh
+%postrun-command: /bin/env bash ./test.sh
 %file: test.sh
 #!/bin/env bash
 
