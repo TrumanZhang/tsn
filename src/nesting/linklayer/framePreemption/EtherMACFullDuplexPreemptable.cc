@@ -160,7 +160,7 @@ void EtherMACFullDuplexPreemptable::handleSelfMessage(cMessage *msg) {
 
 bool EtherMACFullDuplexPreemptable::isExpressFrame(Packet* packet) const
 {
-    return packet->getTag<ExpressFrameReq>() != nullptr;
+    return packet->findTag<ExpressFrameReq>() != nullptr;
 }
 
 void EtherMACFullDuplexPreemptable::handleUpperPacket(Packet* packet) {
