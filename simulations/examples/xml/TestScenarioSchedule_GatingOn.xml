@@ -10,6 +10,7 @@
 			<dest>00:00:00:00:00:04</dest>
 			<!-- byte -->
 			<size>354B</size>
+			<flowId>1</flowId>
 		</entry>
 	</host>
 	<switch name="switchA">

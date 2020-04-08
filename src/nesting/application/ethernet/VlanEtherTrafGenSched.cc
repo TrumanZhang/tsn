@@ -73,8 +73,8 @@ void VlanEtherTrafGenSched::initialize(int stage) {
 
         clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
-        registerService(*l2Protocol, nullptr, gate("in"));
-        registerProtocol(*l2Protocol, gate("out"), nullptr);
+        registerService(*L2_PROTOCOL, nullptr, gate("in"));
+        registerProtocol(*L2_PROTOCOL, gate("out"), nullptr);
     }
 }
 
@@ -115,7 +115,7 @@ void VlanEtherTrafGenSched::sendPacket(uint64_t scheduleIndexTx) {
     auto timeTag = payload->addTag<CreationTimeTag>();
     timeTag->setCreationTime(simTime());
 
-    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(l2Protocol);
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(L2_PROTOCOL);
 
     // create mac control info
     auto macTag = datapacket->addTag<MacAddressReq>();

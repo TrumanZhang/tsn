@@ -79,11 +79,12 @@ protected:
 
     cPar* jitter;
 
+public:
     /**
      * Arbitrary L2 protocol from inet::ProtocolGroup::ethertype, so that the
      * EtherEncap module will encapsulate frames in Ethernet2 format.
      */
-    const Protocol* l2Protocol = &Protocol::nextHopForwarding;
+    static constexpr const Protocol* L2_PROTOCOL = &Protocol::nextHopForwarding;
 protected:
 
     virtual void initialize(int stage) override;

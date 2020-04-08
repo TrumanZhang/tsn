@@ -15,6 +15,7 @@
 
 #include "nesting/application/ethernet/VlanEtherTrafGen.h"
 #include "nesting/linklayer/vlan/EnhancedVlanTag_m.h"
+#include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
 
 #include "inet/common/TimeTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -24,6 +25,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace nesting {
 
@@ -37,6 +39,9 @@ void VlanEtherTrafGen::initialize(int stage) {
         pcp = &par("pcp");
         dei = &par("dei");
         vid = &par("vid");
+    } else if (stage == INITSTAGE_LINK_LAYER) {
+        registerService(*VlanEtherTrafGenSched::L2_PROTOCOL, nullptr, gate("in"));
+        registerProtocol(*VlanEtherTrafGenSched::L2_PROTOCOL, gate("out"), nullptr);
     }
 }
 
@@ -58,8 +63,7 @@ void VlanEtherTrafGen::sendBurstPackets() {
 
         datapacket->insertAtBack(payload);
         datapacket->removeTagIfPresent<PacketProtocolTag>();
-        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
-                &Protocol::ethernetMac);
+        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(VlanEtherTrafGenSched::L2_PROTOCOL);
         // TODO check which protocol to insert
         auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
         sapTag->setSsap(ssap);
