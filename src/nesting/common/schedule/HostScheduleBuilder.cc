@@ -56,6 +56,9 @@ HostSchedule<Ieee8021QCtrl>* HostScheduleBuilder::createHostScheduleFromXML(
         header.q1Tag.setVID(0);
         header.q1Tag.setDe(false);
 
+        const char* flowIdCString = entry->getFirstChildWithTag("flowId")->getNodeValue();
+        header.flowId = atoi(flowIdCString);
+
         schedule->addEntry(time, size, header);
     }
 

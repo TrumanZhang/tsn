@@ -15,52 +15,42 @@
 
 #include "nesting/application/ethernet/VlanEtherTrafGenSched.h"
 #include "nesting/linklayer/vlan/EnhancedVlanTag_m.h"
+#include "nesting/common/FlowMetaTag_m.h"
 
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/InitStages.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 #include <algorithm>
 #include <string.h>
-
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
 
 Define_Module(VlanEtherTrafGenSched);
 
 VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
-    // delete jitter msg for not yet sent packets
-    for (cMessage* msg : jitterMsgVector) {
-        cancelEvent(msg);
-        delete (msg);
+    // Delete self-messages for not yet sent packets
+    for (std::map<cMessage*, uint64_t>::iterator it = sendEvents.begin(); it != sendEvents.end(); it++) {
+        cancelAndDelete(it->first);
     }
-    jitterMsgVector.clear();
+    sendEvents.clear();
 }
 
 void VlanEtherTrafGenSched::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
         // Signals
-        sentPkIdSignal = registerSignal("sentPkId");
-        rcvdPkIdSignal = registerSignal("rcvdPkId");
         sentPkSignal = registerSignal("sentPk");
         rcvdPkSignal = registerSignal("rcvdPk");
-        packetMapSignal = registerSignal("packetMap");
+        sentPkTreeIdSignal = registerSignal("sentPkTreeId");
+        rcvdPkTreeIdSignal = registerSignal("rcvdPkTreeId");
 
-        seqNum = 0;
-        //WATCH(seqNum);
+        jitter = &par("jitter");
 
-        jitter = par("jitter");
-        // set seed for random jitter calculation
-        int seed = par("seed");
-        generator.seed(seed);
-        distribution = *new std::uniform_real_distribution<double>(0, 1.0);
-
-        mapping = this->parseMappingString(par("mapping").stringValue());
+        WATCH_MAP(flowIdSeqNums);
 
         // statistics
         TSNpacketsSent = packetsReceived = 0;
@@ -70,8 +60,6 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         cModule* clockModule = getModuleFromPar<cModule>(par("clockModule"),
                 this);
         clock = check_and_cast<IClock*>(clockModule);
-
-        llcSocket.setOutputGate(gate("out"));
     } else if (stage == INITSTAGE_LINK_LAYER) {
         //clock module reference from ned parameter
 
@@ -83,33 +71,11 @@ void VlanEtherTrafGenSched::initialize(int stage) {
         currentSchedule = move(nextSchedule);
         nextSchedule.reset();
 
-        if ((currentSchedule->size() != mapping.size()) && mapping.size() != 0) throw cRuntimeError("Schedule and mapping for host need to be same size");
+        clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
-        clock->subscribeTick(this,
-                scheduleNextTickEvent().raw() / clock->getClockRate().raw());
-
-        llcSocket.open(-1, ssap);
+        registerService(*l2Protocol, nullptr, gate("in"));
+        registerProtocol(*l2Protocol, gate("out"), nullptr);
     }
-}
-
-std::vector<int> VlanEtherTrafGenSched::parseMappingString(std::string mappingString){
-    std::vector<int> tmp_mapping;
-    std::stringstream tmp_string;
-    int cast_int;
-    unsigned int i = 0;
-    if(mappingString.length() == 0) return tmp_mapping;
-    while (i <= mappingString.length()) {
-        tmp_string.clear();
-        while(mappingString[i] != ',' && i <= mappingString.length()){
-            tmp_string << mappingString[i];
-            i += 1;
-        }
-        tmp_string >> cast_int;
-        tmp_mapping.push_back(cast_int);
-        i += 1;
-    }
-    //(const char)mappingString[i], ","
-    return tmp_mapping;
 }
 
 int VlanEtherTrafGenSched::numInitStages() const {
@@ -124,33 +90,33 @@ void VlanEtherTrafGenSched::handleMessage(cMessage *msg) {
     }
 }
 
-void VlanEtherTrafGenSched::sendPacket() {
+void VlanEtherTrafGenSched::sendPacket(uint64_t scheduleIndexTx) {
+    // get scheduled control data
+    Ieee8021QCtrl header = currentSchedule->getScheduledObject(scheduleIndexTx % currentSchedule->size());
+
+    // If no sequence number for flow exists create one
+    if (flowIdSeqNums.find(header.flowId) == flowIdSeqNums.end()) {
+        flowIdSeqNums[header.flowId] = 0;
+    }
+
+    // Get and increment sequence number
+    uint64_t flowId = header.flowId;
+    uint64_t seqNum = flowIdSeqNums[header.flowId];
+    flowIdSeqNums[header.flowId]++;
 
     char msgname[40];
-    sprintf(msgname, "pk-%d-%d", getId(), seqNum);
+    sprintf(msgname, "pk-%d-%d-%d", getId(), flowId, seqNum);
 
     // create new packet
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-    long len = currentSchedule->getSize(indexTx % currentSchedule->size());
-    const auto& payload = makeShared<ByteCountChunk>(B(len));
+    long len = currentSchedule->getSize(scheduleIndexTx % currentSchedule->size());
+    auto payload = makeShared<ByteCountChunk>(B(len));
     // set creation time
     auto timeTag = payload->addTag<CreationTimeTag>();
     timeTag->setCreationTime(simTime());
 
-    datapacket->insertAtBack(payload);
-    datapacket->removeTagIfPresent<PacketProtocolTag>();
-    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(
-            &Protocol::ethernetMac);
-    // TODO check if protocol is correct
-    auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
-    sapTag->setSsap(ssap);
-    sapTag->setDsap(dsap);
+    datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(l2Protocol);
 
-    seqNum++;
-
-    // get scheduled control data
-    Ieee8021QCtrl header = currentSchedule->getScheduledObject(
-            indexTx % currentSchedule->size());
     // create mac control info
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(header.macTag.getDestAddress());
@@ -160,30 +126,32 @@ void VlanEtherTrafGenSched::sendPacket() {
     vlanReq->setDe(header.q1Tag.getDe());
     vlanReq->setVlanId(header.q1Tag.getVID());
 
+    // Add flow id to packet meta information
+    auto flowMetaTag = payload->addTagIfAbsent<FlowMetaTag>();
+    flowMetaTag->setFlowId(header.flowId);
+    flowMetaTag->setSeqNum(seqNum);
+
+    datapacket->insertAtBack(payload);
+
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)
                     << endl;
 
-    emit(sentPkIdSignal, datapacket->getTreeId()); // getting tree id, because it doenn't get changed when packet is copied
-    emit(sentPkSignal, datapacket);
-    if(mapping.size() != 0)
-        emit(packetMapSignal, mapping[indexTx % currentSchedule->size()]);
-    else
-        emit(packetMapSignal, -1);
     send(datapacket, "out");
     TSNpacketsSent++;
+    emit(sentPkSignal, datapacket);
+    emit(sentPkTreeIdSignal, datapacket->getTreeId());
 }
 
-void VlanEtherTrafGenSched::receivePacket(Packet *msg) {
-    EV_TRACE << getFullPath() << ": Received packet '" << msg->getName()
-                    << "' with length " << msg->getByteLength() << "B at time "
+void VlanEtherTrafGenSched::receivePacket(Packet *pkt) {
+    EV_TRACE << getFullPath() << ": Received packet '" << pkt->getName()
+                    << "' with length " << pkt->getByteLength() << "B at time "
                     << clock->getTime().inUnit(SIMTIME_US) << endl;
 
     packetsReceived++;
-    emit(rcvdPkIdSignal, msg->getTreeId());
-    emit(rcvdPkSignal, msg);
-
-    delete msg;
+    emit(rcvdPkSignal, pkt);
+    emit(rcvdPkTreeIdSignal, pkt->getTreeId());
+    delete pkt;
 }
 
 void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
@@ -198,37 +166,26 @@ void VlanEtherTrafGenSched::tick(IClock *clock, short kind) {
             nextSchedule.reset();
         }
         indexSchedule = 0;
-        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
+        clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
 
     }
     else {
-        double delay = distribution(generator); // random
-        simtime_t jitter_delay = delay * jitter;
-        // jitter msg to delay schedules packets
-        cMessage* jitterMsg = new cMessage();
+        double delay = *jitter;
+        cMessage* selfMessage = new cMessage();
         // save msg in vector
-        jitterMsgVector.push_back(jitterMsg);
+        sendEvents[selfMessage] = indexSchedule;
         indexSchedule++;
-        scheduleAt(simTime() + jitter_delay, jitterMsg);
-        clock->subscribeTick(this, scheduleNextTickEvent().raw() / clock->getClockRate().raw());
-
+        scheduleAt(simTime() + delay, selfMessage);
+        clock->subscribeTick(this, scheduleNextTickEvent() / clock->getClockRate());
     }
 }
 
 void VlanEtherTrafGenSched::sendDelayed(cMessage *msg) {
-    sendPacket();
-    indexTx++;
-    std::vector<cMessage*>::iterator it = std::find(jitterMsgVector.begin(),
-            jitterMsgVector.end(), msg);
-    if (it != jitterMsgVector.end()) {
-        cMessage* dlMsg = *it;
-        delete dlMsg;
-        // delete msg from vector because delayed packet was sent
-        jitterMsgVector.erase(it);
-    } else {
-        throw cRuntimeError("Jitter message not found in vector!");
-    }
+    sendPacket(sendEvents[msg]);
 
+    assert(!msg->isScheduled()); // msg shouldn't be scheduled atm
+    sendEvents.erase(msg);
+    delete msg;
 }
 
 /* This method returns the timeinterval between

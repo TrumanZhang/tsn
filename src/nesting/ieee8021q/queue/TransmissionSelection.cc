@@ -36,8 +36,7 @@ TransmissionSelection::~TransmissionSelection() {
 
 void TransmissionSelection::initialize() {
     // Get transmission gate vector module
-    TransmissionGate* tgModule = getModuleFromPar<TransmissionGate>(
-            par("transmissionGateVectorModule"), this);
+    TransmissionGate* tgModule = getModuleFromPar<TransmissionGate>(par("transmissionGateVectorModule"), this);
     // Iterate through all sibling modules
     auto it = cModule::SubmoduleIterator(tgModule->getParentModule());
     for (; !it.end(); it++) {

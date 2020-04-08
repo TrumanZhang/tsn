@@ -21,6 +21,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/vlan/VlanTag_m.h"
 
+#include <sstream>
+
 namespace nesting {
 
 Define_Module(ForwardingRelayUnit);
@@ -64,6 +66,7 @@ void ForwardingRelayUnit::handleMessage(cMessage *msg) {
 }
 
 void ForwardingRelayUnit::processBroadcast(Packet* packet, int arrivalInterfaceId) {
+    EV_INFO << "Broadcasting packet " << packet->getName() << std::endl;
     for (int interfacePos = 0; interfacePos < ifTable->getNumInterfaces(); interfacePos++) {
         InterfaceEntry* destInterface = ifTable->getInterface(interfacePos);
         int destInterfaceId = destInterface->getInterfaceId();
@@ -78,27 +81,29 @@ void ForwardingRelayUnit::processBroadcast(Packet* packet, int arrivalInterfaceI
 
 void ForwardingRelayUnit::processMulticast(Packet* packet, int arrivalInterfaceId) {
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
-    int arrivalGate = packet->getArrivalGate()->getIndex();
+    std::vector<int> destInterfaces = fdb->getDestInterfaceIds(frame->getDest(), simTime());
 
-    std::vector<int> forwardingPorts = fdb->getDestInterfaceIds(frame->getDest(), simTime());
-
-    if (forwardingPorts.at(0) == -1) {
-        throw cRuntimeError(
-                "Static multicast forwarding for packet didn't work. Entry in forwarding table was empty!");
+    if (destInterfaces.size() == 0) {
+        EV_WARN << "No configured multicast forwarding entry found for packet "
+                << packet->getName() << ". Falling back to broadcast!" << std::endl;
+        throw cRuntimeError("Static multicast forwarding for packet didn't work. Entry in forwarding table was empty!");
     } else {
-        std::string forwardingPortsString = "";
-        for (auto forwardingPort : forwardingPorts) {
-            // skip arrival gate
-            if (forwardingPort == arrivalGate) {
-                continue;
+        std::ostringstream strBuffer;
+        for (int interfaceIndex = 0; interfaceIndex < destInterfaces.size(); interfaceIndex++) {
+            int destInterfaceId = destInterfaces[interfaceIndex];
+            if (destInterfaceId != arrivalInterfaceId) {
+                Packet* dupPacket = packet->dup();
+                dupPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterfaceId);
+                send(dupPacket, gate("ifOut"));
+                if (interfaceIndex < destInterfaces.size() - 1) {
+                    strBuffer << destInterfaceId << ", ";
+                } else {
+                    strBuffer << destInterfaceId;
+                }
             }
-            Packet* dupPacket = packet->dup();
-            send(dupPacket, gate("out", forwardingPort));
-            forwardingPortsString = forwardingPortsString.append(
-                    std::to_string(forwardingPort));
         }
-        EV_INFO << getFullPath() << ": Forwarding multicast packet `" << packet << "` to ports "
-                << forwardingPortsString << endl;
+        EV_INFO << "Forwarding multicast packet " << packet->getName()
+                << " to interfaces [" << strBuffer.str() << "]" << std::endl;
     }
     delete packet;
 }
@@ -109,12 +114,14 @@ void ForwardingRelayUnit::processUnicast(Packet* packet, int arrivalInterfaceId)
     learn(frame->getSrc(), arrivalInterfaceId);
     int destInterfaceId = fdb->getDestInterfaceId(frame->getDest(), simTime());
 
-    //Routing entry available?
+    //Routing entry available or not?
     if (destInterfaceId == -1) {
-        EV_INFO << getFullPath() << ": Broadcasting packet `" << packet << "` to all ports" << endl;
+        EV_INFO << "No unicast forwarding entry for packet " << packet->getName()
+                << " found. Falling back to broadcast!" << std::endl;
         processBroadcast(packet, arrivalInterfaceId);
     } else {;
-        EV_INFO << getFullPath() << ": Forwarding packet `" << packet << "` to port " << destInterfaceId << endl;
+        EV_INFO << "Forwarding unicast packet " << packet->getName()
+                << " to interface " << destInterfaceId << std::endl;
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterfaceId);
         send(packet, gate("ifOut"));
     }

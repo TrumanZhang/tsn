@@ -1,0 +1,181 @@
+%description:
+Test for length-aware-scheduling. We schedule a flow with the path h0-s0-h1
+with 100B payload. If we assume 2us processing delay we get an upper bound of
+2 * (100+42)*8/1e9s + 2e-6s = 4.272e-6s = 4.272us for the end-to-end delay.
+
+For the test we introduce another flow of best-effort traffic on path h2-s0-h1,
+that can effect the time-sensitive flow if length-aware scheduling isn't
+working correctly.
+
+The test will pass if every packet from the time-sensitive flow (h0 to h1) is
+transmitted within the upper bound for end-to-end delay.
+
+%file: package.ned
+package @TESTNAME@;
+@namespace(nesting);
+
+%file: test.ned
+package @TESTNAME@;
+
+import nesting.node.ethernet.VlanEtherSwitchPreemptable;
+import nesting.node.ethernet.VlanEtherHostSched;
+import nesting.node.ethernet.VlanEtherHostQ;
+
+network Sim
+{
+    parameters:
+        @display("bgb=190,82");
+    submodules:
+        h0: VlanEtherHostSched {
+            @display("p=39.56,21.93");
+        }
+        s0: VlanEtherSwitchPreemptable {
+            parameters:
+                @display("p=95,41");
+            gates:
+                ethg[3];
+        }
+        h1: VlanEtherHostSched {
+            @display("p=153.94,41.280003");
+        }
+        h2: VlanEtherHostQ {
+            @display("p=39.56,61.06");
+        }
+    connections:
+        h0.ethg$o --> {delay = 0s; datarate = 1Gbps;} --> s0.ethg$i[0];
+        h1.ethg$o --> {delay = 0s; datarate = 1Gbps;} --> s0.ethg$i[1];
+        s0.ethg$o[0] --> {delay = 0s; datarate = 1Gbps;} --> h0.ethg$i;
+        s0.ethg$o[1] --> {delay = 0s; datarate = 1Gbps;} --> h1.ethg$i;
+        s0.ethg$o[2] --> { delay = 0s; datarate = 1Gbps; } --> h2.ethg$i;
+        h2.ethg$o --> { delay = 0s; datarate = 1Gbps; } --> s0.ethg$i[2];
+}
+
+%file: routing.xml
+<filteringDatabases>
+  <filteringDatabase id="s0">
+    <static>
+      <forward>
+        <!-- time-sensitive stream to h2 -->
+        <multicastAddress ports="1" macAddress="01:00:00:00:00:01"/>
+        <!-- default route to h2 -->
+        <individualAddress port="1" macAddress="00:00:00:00:00:11"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+</filteringDatabases>
+
+%file: schedule.xml
+<schedule>
+  <defaultcycle>1s</defaultcycle>
+  <host name="h0">
+    <cycle>100us</cycle>
+    <entry>
+      <start>0ns</start>
+      <queue>7</queue>
+      <dest>01:00:00:00:00:01</dest>
+      <size>100B</size>
+      <flowId>1</flowId>
+    </entry>
+  </host>
+  <switch name="s0">
+    <cycle>100000ns</cycle>
+    <port id="1">
+      <entry>
+        <length>3136ns</length>
+        <bitvector>01111111</bitvector>
+      </entry>
+      <entry>
+        <length>1136ns</length>
+        <bitvector>10000000</bitvector>
+      </entry>
+      <entry>
+        <length>95728ns</length>
+        <bitvector>01111111</bitvector>
+      </entry>
+    </port>
+  </switch>
+</schedule>
+
+%inifile: omnetpp.ini
+[General]
+outputvectormanager-class="omnetpp::envir::SqliteOutputVectorManager"
+outputscalarmanager-class="omnetpp::envir::SqliteOutputScalarManager"
+
+network = Sim
+
+check-signals = true
+record-eventlog = false
+debug-on-errors = true
+result-dir = result_dir
+output-vector-file = result_dir/Sim_vec.sqlite
+output-scalar-file = result_dir/Sim_sca.sqlite
+sim-time-limit = 100ms
+
+# Disable all unecessary recordings
+Sim.h1.trafGenApp.scalar-recording = true
+Sim.h1.trafGenApp.vector-recording = true
+
+# Debug
+**.displayAddresses = true
+
+**.oscillator.frequency = 1GHz
+
+# MAC Addresses
+**.h0.eth.address = "00:00:00:00:00:10"
+**.h1.eth.address = "00:00:00:00:00:11"
+**.h2.eth.address = "00:00:00:00:00:12"
+
+# Switches
+**.s0.processingDelay.delay = 2us
+
+**.filteringDatabase.database = xmldoc("routing.xml", "/filteringDatabases/")
+**.filteringDatabase.cycle = xmldoc("schedule.xml", "/schedule/")
+
+**.gateController.initialSchedule = xmldoc("schedule.xml")
+**.gateController.enableHoldAndRelease = false
+**.eth[*].queuing.tsAlgorithms[0].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[1].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[2].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[3].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[4].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[5].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[6].typename = "StrictPriority"
+**.eth[*].queuing.tsAlgorithms[7].typename = "StrictPriority"
+
+# Buffer capacity of queues
+**.queues[*].bufferCapacity = 363360b
+
+# Scheduled traffic
+**.h0.trafGenSchedApp.initialSchedule = xmldoc("schedule.xml")
+**.h1.trafGenSchedApp.initialSchedule = xmldoc("schedule.xml")
+
+# Best effort stream
+Sim.h2.trafGenApp.sendInterval = 8.336us
+Sim.h2.trafGenApp.packetLength = 1kB
+Sim.h2.trafGenApp.startTime = 0
+Sim.h2.trafGenApp.stopTime = 1s
+Sim.h2.trafGenApp.numPacketsPerBurst = 1
+Sim.h2.trafGenApp.destAddress = "00:00:00:00:00:11"
+
+%exitcode: 0
+
+%postrun-command: bash test.sh
+%file: test.sh
+#!/bin/env bash
+
+set -eou pipefail
+
+dir=$(dirname $0)
+
+upper_bound="4.272E-6"
+
+max_end_to_end_delay=$(scavetool x -f "module(Sim.h1.trafGenSchedApp) AND name(pktRcvdDelay:max)" -F CSV-S -o - $dir/result_dir/Sim_sca.sqlite | sed -n 's/.*pktRcvdDelay:max,//p' | sed 's/e/E/')
+
+if (( $(echo "$max_end_to_end_delay>$upper_bound" | bc -l) )); then
+    echo "failed" > test_result.txt
+else
+    echo "passed" > test_result.txt
+fi
+
+%contains: test_result.txt
+passed

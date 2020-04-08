@@ -180,14 +180,20 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                             "ports attribute");
         }
         std::string portsString = multicastAddress->getAttribute("ports");
-        std::vector<int> port;
+        std::vector<int> ports;
         std::stringstream stream(portsString);
         while(1) {
            int n;
            stream >> n;
            if(!stream)
               break;
-           port.push_back(n);
+           ports.push_back(n);
+        }
+
+        std::vector<int> destInterfaces;
+        for (int port : ports) {
+            int interfaceId = ifTable->getInterface(port)->getInterfaceId();
+            destInterfaces.push_back(interfaceId);
         }
 
         uint8_t vid = 0;
@@ -205,8 +211,7 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                 throw new cRuntimeError(
                         "Mac address is not a Multicast address.");
             }
-            adminFdb.insert( { macAddress,
-                    std::pair<simtime_t, std::vector<int>>(0, port) });
+            adminFdb.insert({macAddress, std::pair<simtime_t, std::vector<int>>(0, destInterfaces)});
         } else {
             // TODO
             throw cRuntimeError(
@@ -226,7 +231,7 @@ void FilteringDatabase::tick(IClock *clock, short kind) {
 
         changeDatabase = false;
     }
-    clock->subscribeTick(this, cycle.raw());
+    clock->subscribeTick(this, cycle / clock->getClockRate());
 }
 
 void FilteringDatabase::handleMessage(cMessage *msg) {
@@ -272,8 +277,7 @@ std::vector<int> FilteringDatabase::getDestInterfaceIds(MacAddress macAddress,
     std::vector<int> ports;
 
     if (!macAddress.isMulticast()) {
-        ports.push_back(-1);
-        return ports;
+        throw cRuntimeError("Expected multicast MAC address!");
     }
 
     auto it = operFdb.find(macAddress);
@@ -293,7 +297,6 @@ std::vector<int> FilteringDatabase::getDestInterfaceIds(MacAddress macAddress,
 
     }
 
-    ports.push_back(-1);
     return ports;
 }
 

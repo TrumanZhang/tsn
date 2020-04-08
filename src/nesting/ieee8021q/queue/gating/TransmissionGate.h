@@ -140,7 +140,6 @@ protected:
      * returned.
      */
     virtual uint64_t maxTransferableBits();
-
 public:
     ~TransmissionGate();
 
@@ -172,7 +171,6 @@ public:
     virtual void packetEnqueued();
 
     virtual bool isExpressQueue();
-
 };
 
 } // namespace nesting

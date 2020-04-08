@@ -14,7 +14,6 @@
 // 
 
 #include "nesting/ieee8021q/queue/gating/TransmissionGate.h"
-#define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_TRACE
 
 namespace nesting {
 
@@ -81,14 +80,16 @@ void TransmissionGate::notifyGateStateChanged() {
 }
 
 void TransmissionGate::handleRequestPacketEvent() {
-    EV_INFO << getFullPath() << "Handle request-packet event." << endl;
+    EV_INFO << "Handle request-packet event." << endl;
 
     ASSERT(!isEmpty());
     tsAlgorithm->requestPacket(maxTransferableBits());
 }
 
 void TransmissionGate::handlePacketEnqueuedEvent() {
-    EV_INFO << getFullPath() << "Handle packet-enqueued event." << endl;
+    EV_INFO << "Handle packet-enqueued event. Max " << maxTransferableBits()
+            << "bit transferable at t=" << clock->getTime().inUnit(SIMTIME_US)
+            << "us." << std::endl;
 
     if (gateOpen && (isExpressQueue() || !gateController->currentlyOnHold())) {
         transmissionSelection->packetEnqueued(this);
@@ -96,12 +97,11 @@ void TransmissionGate::handlePacketEnqueuedEvent() {
 }
 
 void TransmissionGate::handleGateStateChangedEvent() {
-    EV_INFO << getFullPath() << ":Handle gate-state-changed event: ";
-    if (this->gateOpen) {
-        EV_INFO << "Gate opened." << endl;
-    } else {
-        EV_INFO << "Gate closed." << endl;
-    }
+    EV_INFO << "Gate state changed to " << (this->gateOpen ? "open" : "closed")
+            << ". Max " << maxTransferableBits()
+            << "bit transferable at t=" << clock->getTime().inUnit(SIMTIME_US)
+            << "us." << std::endl;
+
     emit(gateStateChangedSignal, this->gateOpen);
     // Notify transmission-selection if packet has become ready for transmission
     if (gateOpen && !tsAlgorithm->isEmpty(maxTransferableBits())
@@ -116,10 +116,6 @@ void TransmissionGate::handleGateStateChangedEvent() {
 uint64_t TransmissionGate::maxTransferableBits() {
     if (lengthAwareSchedulingEnabled) {
         unsigned int maxbit = gateController->calculateMaxBit(getIndex());
-        EV_DEBUG << getFullPath() << ": max bit transferable: " << maxbit
-                        << " at time " << clock->getTime().inUnit(SIMTIME_US)
-                        << endl;
-
         return maxbit;
     }
     return kEthernet2MaximumTransmissionUnitBitLength.get();

@@ -28,14 +28,13 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/common/TimeTag_m.h"
 
 #include <memory>
 #include <random>
 #include <iostream>
 #include <vector>
+#include <tuple>
 
 using namespace omnetpp;
 using namespace inet;
@@ -46,7 +45,7 @@ namespace nesting {
  * See the NED file for a detailed description
  */
 class VlanEtherTrafGenSched: public cSimpleModule, public IClockListener {
-private:
+protected:
 
     /** Current schedule. Is never null. */
     std::unique_ptr<HostSchedule<Ieee8021QCtrl>> currentSchedule;
@@ -58,52 +57,43 @@ private:
     std::unique_ptr<HostSchedule<Ieee8021QCtrl>> nextSchedule;
 
     /** Index for the current entry in the schedule. */
-    long int indexSchedule = 0;
-
-    /** Index for the net packet to be sent out. */
-    long int indexTx = 0;
+    uint64_t indexSchedule = 0;
 
     IClock *clock;
 
-protected:
-
     // receive statistics
-    long TSNpacketsSent = 0;
-    long packetsReceived = 0;
-    simsignal_t sentPkIdSignal;
-    simsignal_t rcvdPkIdSignal;
+    uint64_t TSNpacketsSent = 0;
+    uint64_t packetsReceived = 0;
     simsignal_t sentPkSignal;
     simsignal_t rcvdPkSignal;
-    simsignal_t packetMapSignal;
-    int ssap = -1;
-    int dsap = -1;
+    simsignal_t sentPkTreeIdSignal;
+    simsignal_t rcvdPkTreeIdSignal;
 
-    // maximum time scheduled packet can be delayed from ini file
-    simtime_t jitter;
-    // seed to seed the random number generator for random delays bounded by jitter variable
-    int seed;
-    // vector to hold all messages that delays scheduled packets. Msgs need to be saved until delayed packet was sent
-    // ,in order to delete said msg and avoid a memory leak
-    std::vector<cMessage*> jitterMsgVector;
-    // random number generator
-    std::mt19937 generator;
-    std::uniform_real_distribution<double> distribution;
-    // mapping to map packets to streams
-    std::vector<int> mapping;
+    /**
+     * Keeps track of scheduled send events with their respective schedule index
+     */
+    std::map<cMessage*, uint64_t> sendEvents;
 
-    Ieee8022LlcSocket llcSocket;
+    /** Sequence numbers for every flow id. */
+    std::map<uint64_t, uint64_t> flowIdSeqNums;
 
-    int seqNum = 0;
+    cPar* jitter;
+
+    /**
+     * Arbitrary L2 protocol from inet::ProtocolGroup::ethertype, so that the
+     * EtherEncap module will encapsulate frames in Ethernet2 format.
+     */
+    const Protocol* l2Protocol = &Protocol::nextHopForwarding;
+protected:
 
     virtual void initialize(int stage) override;
-    virtual void sendPacket();
+    virtual void sendPacket(uint64_t scheduleIndexTx);
     virtual void receivePacket(Packet *msg);
     virtual void handleMessage(cMessage *msg) override;
     virtual void sendDelayed(cMessage *msg);
 
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
-    std::vector<int> parseMappingString(std::string mappingString);
 public:
     virtual void tick(IClock *clock, short kind) override;
 
