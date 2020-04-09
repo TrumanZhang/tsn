@@ -7,8 +7,8 @@ Test topology consists of four hosts h0, h1, h2, h3 and one switch s0:
     /  \
   h2    h3
 
-To test length-aware scheduling. We schedule a flow (h0, h1) with 100B
-payload. If we assume 2us processing delay we get an upper bound of
+To test length-aware scheduling. We schedule a time-sensiive flow (h0, h1) with
+100B payload. If we assume 2us processing delay we get a lower bound of
 2 * (100+42)*8/1e9s + 2e-6s = 4.272e-6s = 4.272us for the end-to-end delay.
 
 For the test we introduce another flow (h2, h3) with best-effort traffic that
@@ -16,7 +16,7 @@ can effect the time-sensitive flow if length-aware scheduling isn't working
 correctly. We use 1kB of payload and send with 1GBit/s.
 
 The test will pass if every packet from the time-sensitive flow (h0, h1) is
-transmitted within the upper bound for end-to-end delay.
+transmitted exactly within the lower bound for end-to-end delay.
 
 %file: package.ned
 package @TESTNAME@;
@@ -206,7 +206,7 @@ if __name__ == "__main__":
     test_pkt_rcvd_h3_greater_equal_10k = "passed" if count_pkt_rcvd_h3 >= 10e3 else "failed"
 
     upper_bound_delay_h0_h1 = 4.272e-6
-    test_max_delay_less_or_equal_upper_bound_h0_h1 = "passed" if max_delay_h0_h1 <= upper_bound_delay_h0_h1 else "failed"
+    test_max_delay_h0_h1_less_or_equal_lower_bound = "passed" if max_delay_h0_h1 <= upper_bound_delay_h0_h1 else "failed"
 
     file = open("test_evaluation.txt", "w")
 
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     file.write("test_pkt_rcvd_h1_greater_equal_1k = {}\n".format(test_pkt_rcvd_h1_greater_equal_1k))
     file.write("test_pkt_sent_h2_greater_equal_10k = {}\n".format(test_pkt_sent_h2_greater_equal_10k))
     file.write("test_pkt_rcvd_h3_greater_equal_10k = {}\n".format(test_pkt_rcvd_h3_greater_equal_10k))
-    file.write("test_max_delay_less_or_equal_upper_bound_h0_h1 = {}\n".format(test_max_delay_less_or_equal_upper_bound_h0_h1))
+    file.write("test_max_delay_h0_h1_less_or_equal_lower_bound = {}\n".format(test_max_delay_h0_h1_less_or_equal_lower_bound))
 
     file.close()    
 
@@ -249,4 +249,4 @@ test_pkt_sent_h2_greater_equal_10k = passed
 test_pkt_rcvd_h3_greater_equal_10k = passed
 
 %contains: test_evaluation.txt
-test_max_delay_less_or_equal_upper_bound_h0_h1 = passed
+test_max_delay_h0_h1_less_or_equal_lower_bound = passed
