@@ -17,4 +17,24 @@
 
 namespace nesting {
 
+std::ostream& operator<<(std::ostream& os, const ListExecuteState& les)
+{
+    switch(les) {
+    case ListExecuteState::UNDEFINED:
+        return os << "UNDEFINED";
+    case ListExecuteState::NEW_CYCLE:
+        return os << "NEW_CYCLE";
+    case ListExecuteState::INIT:
+        return os << "INIT";
+    case ListExecuteState::EXECUTE_CYCLE:
+        return os << "EXECUTE_CYCLE";
+    case ListExecuteState::DELAY:
+        return os << "DELAY";
+    case ListExecuteState::END_OF_CYCLE:
+        return os << "END_OF_CYCLE";
+    default:
+        return os << "?";
+    }
+}
+
 } // namespace nesting

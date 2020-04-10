@@ -16,6 +16,8 @@
 #ifndef NESTING_COMMON_SCHEDULE_LISTCONFIGSTATE_H_
 #define NESTING_COMMON_SCHEDULE_LISTCONFIGSTATE_H_
 
+#include <iostream>
+
 namespace nesting {
 
 enum class ListConfigState {
@@ -24,6 +26,8 @@ enum class ListConfigState {
     UPDATE_CONFIG,
     CONFIG_IDLE
 };
+
+std::ostream& operator<<(std::ostream& os, const ListConfigState& lcs);
 
 } // namespace nesting
 

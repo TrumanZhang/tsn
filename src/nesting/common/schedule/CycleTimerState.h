@@ -16,6 +16,8 @@
 #ifndef NESTING_COMMON_SCHEDULE_CYCLETIMERSTATE_H_
 #define NESTING_COMMON_SCHEDULE_CYCLETIMERSTATE_H_
 
+#include <iostream>
+
 namespace nesting {
 
 enum class CycleTimerState {
@@ -25,6 +27,8 @@ enum class CycleTimerState {
     WAIT_TO_START_CYCLE, // additional state to model waiting period
     START_CYCLE
 };
+
+std::ostream& operator<<(std::ostream& os, const CycleTimerState& cts);
 
 } // namespace nesting
 

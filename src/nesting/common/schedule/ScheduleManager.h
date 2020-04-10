@@ -41,9 +41,9 @@ public:
     public:
         virtual ~IScheduleManagerListener() {};
         virtual void onStateChange(T oldState, T newState) = 0;
-        virtual void onCycleTimerStateChanged(CycleTimerState cycleTimerState) = 0;
-        virtual void onListExecuteStateChanged(ListExecuteState listExecuteState) = 0;
-        virtual void onListConfigStateChanged(ListConfigState listConfigState) = 0;
+        virtual void onCycleTimerStateChanged(CycleTimerState cycleTimerState) {};
+        virtual void onListExecuteStateChanged(ListExecuteState listExecuteState) {};
+        virtual void onListConfigStateChanged(ListConfigState listConfigState) {};
     };
 protected:
     // Type values to differentiate different timestamp events from the clock module.
@@ -133,38 +133,35 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextCycleTimerUpdate);
         }
 
+        EV_INFO << "Handle CycleTimerState " << cycleTimerState << "." << std::endl;
+
         if (enabled) {
             if (cycleTimerState == CycleTimerState::CYCLE_IDLE) {
                 setCycleStart(false);
                 setNewConfigCT(false);
                 cycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
                 scheduleAt(simTime(), &updateCycleTimerMsg);
-                EV_INFO << "CycleTimer transitioned to SET_CYCLE_START_TIME state." << std::endl;
+                
              } else if (cycleTimerState == CycleTimerState::SET_CYCLE_START_TIME) {
                 setCycleStartTime();
                 simtime_t idleTime = cycleStartTime - clock->updateAndGetLocalTime();
                 if (idleTime <= SimTime::ZERO) {
                     cycleTimerState = CycleTimerState::START_CYCLE;
                     scheduleAt(simTime(), &updateCycleTimerMsg);
-                    EV_INFO << "CycleTimer transitioned to START_CYCLE state." << std::endl;
                 } else {
                     cycleTimerState = CycleTimerState::WAIT_TO_START_CYCLE;
                     nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER_EVENT);
-                    EV_INFO << "CycleTimer transitioned to WAIT_TO_START_CYCLE state until t="
-                            << nextCycleTimerUpdate->getLocalTime() << " (local time)." << std::endl;
                 }
             } else if (cycleTimerState == CycleTimerState::WAIT_TO_START_CYCLE) {
                 cycleTimerState = CycleTimerState::START_CYCLE;
                 scheduleAt(simTime(), &updateCycleTimerMsg);
-                EV_INFO << "CycleTimer transitioned to START_CYCLE state." << std::endl;
             } else if (cycleTimerState == CycleTimerState::START_CYCLE) {
                 setCycleStart(true);
                 cycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
                 simtime_t minClockInterval = SimTime(1, SIMTIME_S) / clock->getClockRate();
                 nextCycleTimerUpdate = clock->subscribeDelta(*this, minClockInterval, CYCLE_TIMER_EVENT);
-                EV_INFO << "CycleTimer transitioned to SET_CYCLE_START_TIME state." << std::endl;
             }
-        }
+        }  
     }
 
     virtual void updateListExecuteState()
@@ -174,13 +171,14 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextListExecuteUpdate);
         }
 
+        EV_INFO << "Handle ListExecuteState " << listExecuteState << "." << std::endl;
+
         if (enabled) {
             if (listExecuteState == ListExecuteState::NEW_CYCLE) {
                 setCycleStart(false);
                 listPointer = 0;
                 listExecuteState = ListExecuteState::EXECUTE_CYCLE;
                 scheduleAt(simTime(), &updateListExecuteMsg);
-                EV_INFO << "ListExecute transitioned to EXECUTE_CYCLE state." << std::endl;
             } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
                 T oldState = operState;
                 executeOperation(listPointer);
@@ -191,21 +189,17 @@ protected:
                     simtime_t minClockInterval = SimTime(1, SIMTIME_S) / clock->getClockRate();
                     listExecuteState = ListExecuteState::EXECUTE_CYCLE;
                     nextListExecuteUpdate = clock->subscribeDelta(*this, minClockInterval, LIST_EXECUTE_EVENT);
-                    EV_INFO << "ListExecute transitioned to EXECUTE_CYCLE state." << std::endl;
                 } else if (exitTimer > SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
                     listExecuteState = ListExecuteState::DELAY;
                     nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE_EVENT);
-                    EV_INFO << "ListExecute transitioned to DELAY state." << std::endl;
                 } else {
                     assert(listPointer >= operSchedule->getControlListLength());
                     listExecuteState = ListExecuteState::END_OF_CYCLE;
                     scheduleAt(simTime(), &updateListExecuteMsg);
-                    EV_INFO << "ListExecute transitioned to END_OF_CYCLE state." << std::endl;
                 }
             } else if (listExecuteState == ListExecuteState::DELAY) {
                 listExecuteState = ListExecuteState::EXECUTE_CYCLE;
                 scheduleAt(simTime(), &updateListExecuteMsg);
-                EV_INFO << "ListExecute transitioned to EXECUTE_CYCLE state." << std::endl;
             } else if (listExecuteState == ListExecuteState::INIT) {
                 T oldState = operState;
                 operState = adminState;
@@ -214,7 +208,6 @@ protected:
                 listPointer = 0;
                 listExecuteState = ListExecuteState::END_OF_CYCLE;
                 scheduleAt(simTime(), &updateListExecuteMsg);
-                EV_INFO << "ListExecute transitioned to END_OF_CYCLE state." << std::endl;
             }
         }
     }
@@ -226,8 +219,23 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextListConfigUpdate);
         }
 
+        EV_INFO << "Handle ListConfigState " << listConfigState << "." << std::endl;
+
         if (enabled) {
-            // TODO
+            if (listConfigState == ListConfigState::CONFIG_PENDING) {
+                setConfigChange(false);
+                setConfigChangeTime();
+                configPending = true;
+                listConfigState = ListConfigState::UPDATE_CONFIG;
+                nextListConfigUpdate = clock->subscribeTimestamp(*this, configChangeTime, LIST_CONFIG_EVENT);
+            } else if (listConfigState == ListConfigState::UPDATE_CONFIG) {
+                operSchedule = adminSchedule;
+                setNewConfigCT(true);
+                listConfigState = ListConfigState::CONFIG_IDLE;
+                scheduleAt(simTime(), &updateListConfigMsg);
+            } else if (listConfigState == ListConfigState::CONFIG_IDLE) {
+                configPending = false;
+            }
         }
     }
 
@@ -315,6 +323,11 @@ protected:
     }
 
     virtual void notifyStateChanged(T oldState, T newState)
+    {
+        // TODO
+    }
+
+    virtual void setConfigChangeTime()
     {
         // TODO
     }

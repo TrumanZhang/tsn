@@ -17,4 +17,20 @@
 
 namespace nesting {
 
+std::ostream& operator<<(std::ostream& os, const ListConfigState& lcs)
+{
+    switch (lcs) {
+    case ListConfigState::UNDEFINED:
+        return os << "UNDEFINED";
+    case ListConfigState::CONFIG_PENDING:
+        return os << "CONFIG_PENDING";
+    case ListConfigState::UPDATE_CONFIG:
+        return os << "UPDATE_CONFIG";
+    case ListConfigState::CONFIG_IDLE:
+        return os << "CONFIG_IDLE";
+    default:
+        return os << "?";
+    }
+}
+
 } // namespace nesting

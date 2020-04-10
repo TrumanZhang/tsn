@@ -16,6 +16,8 @@
 #ifndef NESTING_COMMON_SCHEDULE_LISTEXECUTESTATE_H_
 #define NESTING_COMMON_SCHEDULE_LISTEXECUTESTATE_H_
 
+#include <iostream>
+
 namespace nesting {
 
 enum class ListExecuteState {
@@ -26,6 +28,8 @@ enum class ListExecuteState {
     DELAY,
     END_OF_CYCLE
 };
+
+std::ostream& operator<<(std::ostream& os, const ListExecuteState& les);
 
 } // namespace nesting
 
