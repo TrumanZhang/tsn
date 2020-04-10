@@ -43,7 +43,6 @@ simple TestGateScheduleManager
         string gateScheduleManagerModule;
 }
 
-
 %file: TestGateScheduleManager.h
 #ifndef __@TESTNAME@_TESTGATESCHEDULEMANAGER_H_
 #define __@TESTNAME@_TESTGATESCHEDULEMANAGER_H_
@@ -52,18 +51,20 @@ simple TestGateScheduleManager
 
 #include "nesting/common/time/IClock2.h"
 #include "nesting/common/schedule/GateScheduleManager.h"
+#include "nesting/ieee8021q/Ieee8021q.h"
 
 using namespace omnetpp;
 using namespace nesting;
 
 namespace @TESTNAME@ {
 
-class TestGateScheduleManager : public cSimpleModule
+class TestGateScheduleManager : public cSimpleModule, public GateScheduleManager::IStateListener
 {
 protected:
     GateScheduleManager* gateScheduleManager;
 protected:
     virtual void initialize() override;
+    void onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector) override;
 };
 
 } // namespace @TESTNAME@
@@ -84,6 +85,13 @@ Define_Module(TestGateScheduleManager);
 void TestGateScheduleManager::initialize()
 {
     gateScheduleManager = check_and_cast<GateScheduleManager*>(getModuleByPath(par("gateScheduleManagerModule")));
+    gateScheduleManager->subscribeStateChanges(*this);
+}
+
+void TestGateScheduleManager::onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector)
+{
+    Enter_Method("GateBitvector");
+    EV_INFO << "New GateBitvector " << newBitvector << std::endl;
 }
 
 } // namespace @TESTNAME@

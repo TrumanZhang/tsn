@@ -28,6 +28,7 @@
 
 #include <string>
 #include <memory>
+#include <set>
 
 using namespace omnetpp;
 using namespace inet;
@@ -37,9 +38,9 @@ namespace nesting {
 template<typename T>
 class ScheduleManager : public cSimpleModule, public IClock2::TimestampListener {
 public:
-    class IScheduleManagerListener {
+    class IStateListener {
     public:
-        virtual ~IScheduleManagerListener() {};
+        virtual ~IStateListener() {};
         virtual void onStateChange(T oldState, T newState) = 0;
         virtual void onCycleTimerStateChanged(CycleTimerState cycleTimerState) {};
         virtual void onListExecuteStateChanged(ListExecuteState listExecuteState) {};
@@ -91,7 +92,7 @@ protected:
     bool cycleStart = false;
     bool newConfigCT = false;
 
-    std::vector<IScheduleManagerListener*> listeners;
+    std::set<IStateListener*> listeners;
 protected:
     virtual void initialize() override
     {
@@ -326,14 +327,17 @@ protected:
 
     virtual void notifyStateChanged(T oldState, T newState)
     {
-        // TODO
+        for (auto listener : listeners) {
+            listener->onStateChange(oldState, newState);
+        }
     }
 
     virtual void setConfigChangeTime()
     {
         // TODO
+        throw cRuntimeError("Not implemented yet!");
     }
-    
+
     virtual const T defaultAdminState() = 0;
 
     virtual std::shared_ptr<const Schedule<T>> defaultAdminSchedule() = 0;
@@ -421,6 +425,16 @@ public:
         default:
             throw cRuntimeError("Invalid timestamp event.");
         }
+    }
+
+    virtual void subscribeStateChanges(IStateListener& listener)
+    {
+        listeners.insert(&listener);
+    }
+
+    virtual void unsubscribeStateChanges(IStateListener& listener)
+    {
+        listeners.erase(&listener);
     }
 };
 
