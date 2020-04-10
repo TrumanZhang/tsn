@@ -73,7 +73,7 @@ protected:
     ListConfigState listConfigState = ListConfigState::UNDEFINED;
     bool configPending = false;
     simtime_t configChangeTime = SimTime::ZERO;
-    int configChangeErrorCounter = 0;
+    uint64_t configChangeErrorCounter = 0;
     std::shared_ptr<const Schedule<T>> operSchedule = nullptr;
 
     // Variables belonging to CycleTimer state machine
@@ -272,18 +272,18 @@ protected:
         else if (!configPending && operBaseTime < currentTime) {
             uint64_t n = static_cast<uint64_t>(std::ceil((currentTime - operBaseTime) / operCycleTime));
             cycleStartTime = operBaseTime + n * operCycleTime;
-            assert(cycleStartTime >= currentTime);
         }
         // IEEE 802.1Q 8.6.9.1.1 case c)
         else if (configPending && configChangeTime > (currentTime + operCycleTime + operCycleTimeExtension)) {
             unsigned n = static_cast<uint64_t>(std::ceil((currentTime - operBaseTime) / operCycleTime));
             cycleStartTime = operBaseTime + n * operCycleTime;
-            assert(cycleStartTime >= currentTime);
         }
         // IEEE 802.1Q 8.6.9.1.1 case d)
         else if (configPending && configChangeTime <= (currentTime + operCycleTime + operCycleTimeExtension)) {
             cycleStartTime = configChangeTime;
         }
+
+        assert(cycleStartTime >= currentTime);
     }
 
     virtual void setCycleStart(bool cycleStart)
@@ -334,8 +334,27 @@ protected:
 
     virtual void setConfigChangeTime()
     {
-        // TODO
-        throw cRuntimeError("Not implemented yet!");
+        simtime_t currentTime = clock->updateAndGetLocalTime();
+        simtime_t adminBaseTime = adminSchedule->getBaseTime();
+        simtime_t adminCycleTime = adminSchedule->getCycleTime();
+
+        // IEEE 802.1Q 8.6.9.3.1 case a)
+        if (adminBaseTime >= currentTime) {
+            configChangeTime = adminSchedule->getBaseTime();
+        }
+        // IEEE 802.1Q 8.6.9.3.1 case b)
+        else if (adminBaseTime < currentTime && !enabled) {
+            uint64_t n = static_cast<uint64_t>(std::ceil((currentTime - adminBaseTime) / adminCycleTime));
+            configChangeTime = adminBaseTime + n * adminCycleTime;
+        }
+        // IEEE 802.1Q 8.6.9.3.1 case c)
+        else if (adminBaseTime < currentTime && enabled) {
+            configChangeErrorCounter++;
+            uint64_t n = static_cast<uint64_t>(std::ceil((currentTime - adminBaseTime) / adminCycleTime));
+            configChangeTime = adminBaseTime + n * adminCycleTime;
+        }
+
+        assert(configChangeTime >= currentTime);
     }
 
     virtual const T defaultAdminState() = 0;
@@ -407,6 +426,11 @@ public:
     virtual bool isConfigChange()
     {
         return configChange;
+    }
+
+    virtual uint64_t getConfigChangeErrorCounter()
+    {
+        return configChangeErrorCounter;
     }
 
     virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2::Timestamp> timestamp) override
