@@ -18,6 +18,9 @@
 
 #include "nesting/common/time/IClock2.h"
 #include "nesting/common/schedule/Schedule.h"
+#include "nesting/common/schedule/CycleTimerState.h"
+#include "nesting/common/schedule/ListExecuteState.h"
+#include "nesting/common/schedule/ListConfigState.h"
 
 #include "inet/common/ModuleAccess.h"
 
@@ -30,30 +33,6 @@ using namespace omnetpp;
 using namespace inet;
 
 namespace nesting {
-
-enum class CycleTimerState {
-    UNDEFINED,
-    CYCLE_IDLE,
-    SET_CYCLE_START_TIME,
-    WAIT_TO_START_CYCLE, // additional state to model waiting period
-    START_CYCLE
-};
-
-enum class ListExecuteState {
-    UNDEFINED,
-    NEW_CYCLE,
-    INIT,
-    EXECUTE_CYCLE,
-    DELAY,
-    END_OF_CYCLE
-};
-
-enum class ListConfigState {
-    UNDEFINED,
-    CONFIG_PENDING,
-    UPDATE_CONFIG,
-    CONFIG_IDLE
-};
 
 template<typename T>
 class ScheduleManager : public cSimpleModule, public IClock2::TimestampListener {

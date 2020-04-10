@@ -13,26 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef NESTING_COMMON_SCHEDULE_GATESCHEDULEMANAGER_H_
-#define NESTING_COMMON_SCHEDULE_GATESCHEDULEMANAGER_H_
-
-#include "nesting/common/schedule/ScheduleManager.h"
-#include "nesting/common/schedule/Schedule.h"
-#include "nesting/ieee8021q/Ieee8021q.h"
-
-#include <memory>
+#include "nesting/common/schedule/ListConfigState.h"
 
 namespace nesting {
 
-class GateScheduleManager : public ScheduleManager<GateBitvector> {
-public:
-    GateScheduleManager();
-protected:
-    virtual const GateBitvector defaultAdminState() override;
-    virtual std::shared_ptr<const Schedule<GateBitvector>> defaultAdminSchedule() override;
-    virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
-};
-
 } // namespace nesting
-
-#endif
