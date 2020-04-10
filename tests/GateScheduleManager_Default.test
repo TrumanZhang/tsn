@@ -1,0 +1,96 @@
+%description:
+TODO
+
+%file: package.ned
+package @TESTNAME@;
+@namespace(@TESTNAME@);
+
+%file: test.ned
+package @TESTNAME@;
+
+import nesting.common.time.IdealOscillator;
+import nesting.common.time.RealtimeClock;
+import nesting.common.schedule.GateScheduleManager;
+
+network Test
+{
+    @display("bgb=153.72,222.04001");
+    submodules:
+        oscillator: IdealOscillator {
+            @display("p=76.25,28.67");
+            frequency = 1MHz;
+        }
+        clock: RealtimeClock {
+            @display("p=76.25,76.25");
+            oscillatorModule = "^.oscillator";
+        }
+        gateScheduleManager: GateScheduleManager {
+            clockModule = "^.clock";
+            @display("p=76.25,125.66");
+        }
+        testGateScheduleManager: TestGateScheduleManager {
+            gateScheduleManagerModule = "^.gateScheduleManager";
+            @display("p=76.25,175.68001");
+        }
+}
+
+%file: TestGateScheduleManager.ned
+package @TESTNAME@;
+
+simple TestGateScheduleManager
+{
+    parameters:
+        string gateScheduleManagerModule;
+}
+
+
+%file: TestGateScheduleManager.h
+#ifndef __@TESTNAME@_TESTGATESCHEDULEMANAGER_H_
+#define __@TESTNAME@_TESTGATESCHEDULEMANAGER_H_
+
+#include <omnetpp.h>
+
+#include "nesting/common/time/IClock2.h"
+#include "nesting/common/schedule/GateScheduleManager.h"
+
+using namespace omnetpp;
+using namespace nesting;
+
+namespace @TESTNAME@ {
+
+class TestGateScheduleManager : public cSimpleModule
+{
+protected:
+    GateScheduleManager* gateScheduleManager;
+protected:
+    virtual void initialize() override;
+};
+
+} // namespace @TESTNAME@
+
+#endif
+
+%file: TestGateScheduleManager.cc
+#include "TestGateScheduleManager.h"
+
+#include "inet/common/ModuleAccess.h"
+
+#include <iostream>
+
+namespace @TESTNAME@ {
+
+Define_Module(TestGateScheduleManager);
+
+void TestGateScheduleManager::initialize()
+{
+    gateScheduleManager = check_and_cast<GateScheduleManager*>(getModuleByPath(par("gateScheduleManagerModule")));
+}
+
+} // namespace @TESTNAME@
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 1s
+
+%exitcode: 0

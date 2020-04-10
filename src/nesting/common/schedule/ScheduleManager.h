@@ -16,355 +16,303 @@
 #ifndef NESTING_COMMON_SCHEDULE_SCHEDULEMANAGER_H_
 #define NESTING_COMMON_SCHEDULE_SCHEDULEMANAGER_H_
 
+#include "nesting/common/time/IClock2.h"
+#include "nesting/common/schedule/Schedule.h"
+
+#include "inet/common/ModuleAccess.h"
+
 #include <omnetpp.h>
 
-#include <vector>
-#include <cmath>
-#ifdef LOGLEVEL_DEBUG
 #include <string>
-#include <map>
-#endif
+#include <memory>
 
-#include "nesting/common/schedule/Schedule.h"
-#include "nesting/common/schedule/IScheduleManagerListener.h"
-#include "nesting/ieee8021q/clock/IClock.h"
-#include "nesting/ieee8021q/clock/IClockListener.h"
+using namespace omnetpp;
+using namespace inet;
 
 namespace nesting {
 
-enum CycleTimerState {
+enum class CycleTimerState {
+    UNDEFINED,
     CYCLE_IDLE,
     SET_CYCLE_START_TIME,
+    WAIT_TO_START_CYCLE, // additional state to model waiting period
     START_CYCLE
 };
 
 // DELAY state merged with EXECUTE_CYCLE state
-enum ListExecuteState {
+enum class ListExecuteState {
+    UNDEFINED,
     NEW_CYCLE,
     INIT,
     EXECUTE_CYCLE,
     END_OF_CYCLE
 };
 
-enum ListConfigState {
+enum class ListConfigState {
+    UNDEFINED,
     CONFIG_PENDING,
     UPDATE_CONFIG,
     CONFIG_IDLE
 };
 
 template<typename T>
-class ScheduleManager : public IClockListener {
-protected:
-    struct ScheduleManagerState {
-        CycleTimerState cycleTimerState = CYCLE_IDLE;
-        ListExecuteState listExecuteState = NEW_CYCLE;
-        ListConfigState listConfigState = CONFIG_PENDING;
-    };
-    enum StateMachine {
-        CYCLE_TIMER_STATE_MACHINE,
-        LIST_EXECUTE_STATE_MACHINE,
-        LIST_CONFIG_STATE_MACHINE
+class ScheduleManager : public cSimpleModule, public IClock2::TimestampListener {
+public:
+    class IScheduleManagerListener {
+    public:
+        virtual ~IScheduleManagerListener() {};
+        virtual void onExecuteOperation(T operation) = 0;
+        virtual void onCycleTimerStateChanged(CycleTimerState cycleTimerState) = 0;
+        virtual void onListExecuteStateChanged(ListExecuteState listExecuteState) = 0;
+        virtual void onListConfigStateChanged(ListConfigState listConfigState) = 0;
     };
 protected:
-    IClock* clock;
-    T adminStates;
-    T operStates;
-    Schedule<T>* operSchedule;
-    Schedule<T>* adminSchedule;
-    unsigned listPointer;
-    simtime_t cycleStartTime;
-    simtime_t configChangeTime;
-    ScheduleManagerState stateMachine;
+    CycleTimerState cycleTimerState = CycleTimerState::UNDEFINED;
+    ListExecuteState listExecuteState = ListExecuteState::UNDEFINED;
+    ListConfigState listConfigState = ListConfigState::UNDEFINED;
+
+    // Type values to differentiate different timestamp events
+    static const uint64_t CYCLE_TIMER_EVENT = 0;
+    static const uint64_t LIST_EXECUTE_EVENT = 1;
+    static const uint64_t LIST_CONFIG_EVENT = 2;
+
+    std::shared_ptr<const IClock2::Timestamp> nextCycleTimerUpdate = nullptr;
+    std::shared_ptr<const IClock2::Timestamp> nextListExecuteUpdate = nullptr;
+    std::shared_ptr<const IClock2::Timestamp> nextListConfigUpdate = nullptr;
+
+    cMessage updateCycleTimerMsg = cMessage("updateCycleTimerStateMachine");
+    cMessage updateListExecuteMsg = cMessage("updateListExecuteStateMachine");
+    cMessage updateListConfigMsg = cMessage("updateListConfigStateMachine");
+
+    IClock2* clock;
+
+    T adminState;
+    T operState;
+
+    std::shared_ptr<const Schedule<T>> operSchedule = nullptr;
+    std::shared_ptr<const Schedule<T>> adminSchedule = nullptr;
+
+    uint64_t listPointer;
+
+    simtime_t cycleStartTime = SimTime::ZERO;
+    simtime_t configChangeTime = SimTime::ZERO;
     bool cycleStart = false;
     bool newConfigCT = false;
     bool enabled = true;
     bool configChange = false;
     bool configPending = false;
     int configChangeErrorCounter = 0;
-    std::vector<IScheduleManagerListener<T>*> listeners;
-public:
-    ScheduleManager(IClock* clock, T adminStates) {
-        this.adminStates = adminStates;
-        this.operStates = adminStates;
-    }
 
-    virtual ~ScheduleManager() {}
-
-    virtual void begin() {
-        setCycleTimerState(CYCLE_IDLE);
-        setListExecuteState(INIT);
-        setListConfigState(CONFIG_IDLE);
-        clock->subscribeTick(this, 0);
-    }
-
-    virtual void setEnabled(bool enabled) {
-        this->enabled = enabled;
-        if (enabled && configChange) {
-            setListConfigState(CONFIG_PENDING);
-            clock->subscribeTick(this, 0);
-        } else if (!enabled) {
-            setCycleTimerState(CYCLE_IDLE);
-            setListExecuteState(INIT);
-            setListConfigState(CONFIG_IDLE);
-            clock->subscribeTick(this, 0);
-        }
-    }
-
-    // Equivalent to getOperGateStates
-    virtual void getOperStates() {
-        return operStates;
-    }
-
-    // Equivalent to getAdminGateStates
-    virtual void getAdminStates() {
-        return adminStates;
-    }
-
-    virtual int getConfigChangeErrorCounter() {
-        return configChangeErrorCounter;
-    }
+    std::vector<IScheduleManagerListener*> listeners;
 protected:
-    virtual void setConfigChange(bool configChange) {
-        this.configChange = configChange;
-        if (configChange && enabled) {
-            setListConfigState(CONFIG_PENDING);
-            clock->subscribeTick(this, 0);
+    virtual void initialize() override
+    {
+        clock = getModuleFromPar<IClock2>(par("clockModule"), this);
+
+        adminState = defaultAdminState();
+        operState = defaultAdminState();
+
+        operSchedule = defaultAdminSchedule();
+        adminSchedule = defaultAdminSchedule();
+        
+        begin();
+    }
+
+    virtual void finish() override
+    {
+        cancelEvent(&updateCycleTimerMsg);
+        cancelEvent(&updateListExecuteMsg);
+        cancelEvent(&updateListConfigMsg);
+    }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        if (msg == &updateListConfigMsg) {
+            updateListConfigState();
+        } else if (msg == &updateListExecuteMsg) {
+            updateListExecuteState();
+        } else if (msg == &updateCycleTimerMsg) {
+            updateCycleTimerState();
+        } else {
+            throw cRuntimeError("Can't handle this type of messages.");
         }
     }
 
-    virtual void setConfigPending(bool configPending) {
-        this.configPending = configPending;
+    virtual void updateCycleTimerState()
+    {
+        if (nextCycleTimerUpdate != nullptr) {
+            clock->unsubscribeTimestamp(*this, *nextCycleTimerUpdate);
+        }
+
+        if (enabled) {
+            if (cycleTimerState == CycleTimerState::CYCLE_IDLE) {
+                setCycleStart(false);
+                setNewConfigCT(false);
+                cycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
+                scheduleAt(simTime(), &updateCycleTimerMsg);
+                EV_INFO << "CycleTimer transitioned to SET_CYCLE_START_TIME state." << std::endl;
+             } else if (cycleTimerState == CycleTimerState::SET_CYCLE_START_TIME) {
+                EV_INFO << "LocalTime: " << clock->updateAndGetLocalTime() << std::endl;
+                setCycleStartTime();
+                simtime_t idleTime = cycleStartTime - clock->updateAndGetLocalTime();
+                if (idleTime <= SimTime::ZERO) {
+                    cycleTimerState = CycleTimerState::START_CYCLE;
+                    scheduleAt(simTime(), &updateCycleTimerMsg);
+                    EV_INFO << "CycleTimer transitioned to START_CYCLE state." << std::endl;
+                } else {
+                    cycleTimerState = CycleTimerState::WAIT_TO_START_CYCLE;
+                    nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER_EVENT);
+                    EV_INFO << "CycleTimer transitioned to WAIT_TO_START_CYCLE state until t="
+                            << nextCycleTimerUpdate->getLocalTime() << std::endl;
+                }
+            } else if (cycleTimerState == CycleTimerState::WAIT_TO_START_CYCLE) {
+                cycleTimerState = CycleTimerState::START_CYCLE;
+                scheduleAt(simTime(), &updateCycleTimerMsg);
+                EV_INFO << "CycleTimer transitioned to START_CYCLE state." << std::endl;
+            } else if (cycleTimerState == CycleTimerState::START_CYCLE) {
+                setCycleStart(true);
+                cycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
+                scheduleAt(simTime() + SimTime(1, SIMTIME_S) / clock->getClockRate(), &updateCycleTimerMsg);
+                EV_INFO << "CycleTimer transitioned to SET_CYCLE_START_TIME state." << std::endl;
+            }
+        }
     }
 
-    /**
-     * @see IEEE802.1Q standard chapter 8.6.9.1.1 SetCycleStartTime()
-     */
-    virtual void setCycleStartTime() {
-        simtime_t currentTime = clock->getTime();
+    virtual void updateListExecuteState()
+    {
+        if (enabled) {
+            // TODO
+        }
+    }
+
+    virtual void updateListConfigState()
+    {
+        if (enabled) {
+            // TODO
+        }
+    }
+
+    virtual void begin()
+    {
+        cycleTimerState = CycleTimerState::CYCLE_IDLE;
+        scheduleAt(simTime(), &updateCycleTimerMsg);
+
+        listExecuteState = ListExecuteState::INIT;
+        scheduleAt(simTime(), &updateListExecuteMsg);
+
+        listConfigState = ListConfigState::CONFIG_IDLE;
+        scheduleAt(simTime(), &updateListConfigMsg);
+    }
+
+    virtual void setCycleStartTime()
+    {
+        assert(operSchedule != nullptr);
+
+        simtime_t currentTime = clock->updateAndGetLocalTime();
         simtime_t operBaseTime = operSchedule->getBaseTime();
         simtime_t operCycleTime = operSchedule->getCycleTime();
         simtime_t operCycleTimeExtension = operSchedule->getCycleTimeExtension();
 
         // IEEE 802.1Q 8.6.9.1.1 case a)
         if (!configPending && operBaseTime >= currentTime) {
+            EV_INFO << "Case a)" << std::endl;
             cycleStartTime = operBaseTime;
         }
         // IEEE 802.1Q 8.6.9.1.1 case b)
         else if (!configPending && operBaseTime < currentTime) {
-            unsigned n = std::ceil((currentTime - operBaseTime) / operCycleTime);
+            EV_INFO << "Case b)" << std::endl;
+            uint64_t n = static_cast<uint64_t>(std::ceil((currentTime - operBaseTime) / operCycleTime));
+            EV_INFO << "n=" << n << std::endl;
             cycleStartTime = operBaseTime + n * operCycleTime;
             assert(cycleStartTime >= currentTime);
         }
         // IEEE 802.1Q 8.6.9.1.1 case c)
         else if (configPending && configChangeTime > (currentTime + operCycleTime + operCycleTimeExtension)) {
+            EV_INFO << "Case c)" << std::endl;
             unsigned n = std::ceil((currentTime - operBaseTime) / operCycleTime);
             cycleStartTime = operBaseTime + n * operCycleTime;
             assert(cycleStartTime >= currentTime);
         }
         // IEEE 802.1Q 8.6.9.1.1 case d)
         else if (configPending && configChangeTime <= (currentTime + operCycleTime + operCycleTimeExtension)) {
+            EV_INFO << "Case d)" << std::endl;
             cycleStartTime = configChangeTime;
         }
     }
 
-    /**
-     * @see IEEE802.1Q standard chapter 8.6.9.3.1 SetConfigChangeTime()
-     */
-    virtual void setConfigChangeTime() {
-        simtime_t currentTime = clock->getTime();
-        simtime_t adminBaseTime = adminSchedule->getBaseTime();
-
-        // IEEE 802.1Q 8.6.9.3.1 case a)
-        if (adminBaseTime >= currentTime) {
-            configChangeTime = adminBaseTime;
-        }
-        // IEEE 802.1Q 8.6.9.3.1 case b)
-        else if (adminBaseTime < currentTime && !enabled) {
-            unsigned n = std::ceil((currentTime - adminBaseTime) / adminCycleTime);
-            configChangeTime = adminBaseTime + n * adminCycleTime;
-            assert(configChangeTime >= currentTime);
-        }
-        // IEEE 802.1Q 8.6.9.3.1 case c)
-        else if (adminBaseTime < currentTime && enabled) {
-            unsigned n = std::ceil((currentTime - adminBaseTime) / adminCycleTime);
-            configChangeTime = adminBaseTime + n * adminCycleTime;
-            configChangeErrorCounter++;
-            assert(configChangeTime >= currentTime);
-        }
-    }
-
-    virtual void setNewConfigCT(bool newConfigCT) {
-        this->newConfigCT = newConfigCT;
-        if (newConfigCT) {
-            setCycleTimerState(CYCLE_IDLE);
-            clock->subscribeTick(this, 0);
-        }
-    }
-
-    virtual void setCycleStart(bool cycleStart) {
+    virtual void setCycleStart(bool cycleStart)
+    {
+        // TODO
         this->cycleStart = cycleStart;
-        if (cycleStart) {
-            setListExecuteState(NEW_CYCLE);
-        }
-        clock->subscribeTick(this, 0);
     }
 
-    virtual void setCycleTimerState(CycleTimerState cycleTimerState) {
-        stateMachine.cycleTimerState = cycleTimerState;
-        notifyCycleTimerStateChanged(cycleTimerState);
-#ifdef LOGLEVEL_DEBUG
-        std::map<CycleTimerState, String> stateStringRepr = {
-                {CYCLE_IDLE, "CYCLE_IDLE"},
-                {SET_CYCLE_START_TIME, "SET_CYCLE_START_TIME"},
-                {START_CYCLE, "START_CYCLE"}
-        };
-        EV_DEBUG << "ScheduleManager: Changed Cycle Timer state: " << stateStringRepr[cycleTimerState] << std::endl;
-#endif
+    virtual void setNewConfigCT(bool newConfigCT)
+    {
+        // TODO
+        this->newConfigCT = newConfigCT;
     }
 
-    virtual void notifyCycleTimerStateChanged(CycleTimerState cycleTimerState) {
-        for (IScheduleManagerListener<T>* listener : listeners) {
-            listener->onCycleTimerStateChanged(cycleTimerState);
-        }
+    virtual void setConfigChange(bool configChange)
+    {
+        // TODO
+        this->configChange = configChange;
+    }
+    
+    virtual const T defaultAdminState() = 0;
+
+    virtual std::shared_ptr<const Schedule<T>> defaultAdminSchedule() = 0;
+public:
+    virtual ~ScheduleManager() {}
+
+    virtual void setAdminState(T adminState)
+    {
+        this->adminState = adminState;
     }
 
-    virtual void setListExecuteState(ListExecuteState listExecuteState) {
-        stateMachine.listExecuteState = listExecuteState;
-        notifyListExecuteStateChanged(listExecuteState);
-#ifdef LOGLEVEL_DEBUG
-        std::map<ListExecuteState, String> stateStringRepr = {
-                {NEW_CYCLE, "NEW_CYCLE"},
-                {INIT, "INIT"},
-                {EXECUTE_CYCLE, "EXECUTE_CYCLE"},
-                {END_OF_CYCLE, "END_OF_CYCLE"}
-        };
-        EV_DEBUG << "ScheduleManager: Changed List Execute state: " << stateStringRepr[listExecuteState] << std::endl;
-#endif
+    virtual const T& getAdminState() const
+    {
+        return this->adminState;
     }
 
-    virtual void notifyListExecuteStateChanged(ListExecuteState listExecuteState) {
-        for (IScheduleManagerListener<T>* listener : listeners) {
-            listener->onListExecuteStateChanged(listExecuteState);
-        }
+    virtual const T& getOperState() const
+    {
+        return this->operState;
     }
 
-    virtual void setListConfigState(ListConfigState listConfigState) {
-        stateMachine.listConfigState = listConfigState;
-        notifyListConfigStateChanged(listConfigState);
-#ifdef LOGLEVEL_DEBUG
-        std::map<ListConfigState, String> stateStringRepr = {
-                {CONFIG_PENDING, "CONFIG_PENDING"},
-                {UPDATE_CONFIG, "UPDATE_CONFIG"},
-                {START_CYCLE, "START_CYCLE"}
-        };
-        EV_DEBUG << "ScheduleManager: Changed Cycle Timer state: " << stateStringRepr[listConfigState] << std::endl;
-#endif
+    virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
+    {
+        this->adminSchedule = adminSchedule;
     }
 
-    virtual void notifyListConfigStateChanged(ListConfigState listConfigState) {
-        for (IScheduleManagerListener<T>* listener : listeners) {
-            listener->onListConfigStateChanged(listConfigState);
-        }
+    virtual void setEnabled(bool enabled)
+    {
+        // TODO
     }
 
-    // Equivalent to setGateStates
-    virtual void executeOperation() {
-        for (IScheduleManagerListener<T>* listener : listeners) {
-            listener->onExecuteOperation(operStates);
-        }
+    virtual bool isEnabled()
+    {
+        return enabled;
     }
 
-    virtual void tick(IClock* clock) override {
-        // Don't change state while state machine is disabled
-        if (!enabled) {
-            assert(stateMachine.cycleTimerState == CYCLE_IDLE);
-            assert(stateMachine.listExecuteState == INIT);
-            assert(stateMachine.listConfigState == CONFIG_IDLE);
-            return;
-        }
-
-        // Update Cycle Timer state machine
-        switch(stateMachine.cycleTimerState) {
-        case CYCLE_IDLE:
-            setCycleTimerState(SET_CYCLE_START_TIME);
-            clock->subscribeTick(this, 0);
+    virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2::Timestamp> timestamp) override
+    {
+        Enter_Method("timestamp");
+        switch (timestamp->getKind()) {
+        case CYCLE_TIMER_EVENT:
+            scheduleAt(simTime(), &updateCycleTimerMsg);
             break;
-        case SET_CYCLE_START_TIME:
-            setCycleStartTime();
-            if (cycleStartTime <= clock->getTime()) {
-                setCycleTimerState(START_CYCLE);
-                clock->subscribeTick(this, 0);
-            } else {
-                unsigned ticksTillCycleStart = std::ceil((cycleStartTime - clock->getTime()) / clock->getClockRate());
-                clock->subscribeTick(this, ticksTillCycleStart);
-            }
+        case LIST_EXECUTE_EVENT:
+            scheduleAt(simTime(), &updateListExecuteMsg);
             break;
-        case START_CYCLE:
-            setCycleStart(true);
-            setCycleTimerState(SET_CYCLE_START_TIME);
-            clock->subscribeTick(this, 0);
+        case LIST_CONFIG_EVENT:
+            scheduleAt(simTime(), &updateListConfigMsg);
             break;
-        }
-
-        // Update List Execute state machine
-        switch(stateMachine.listExecuteState) {
-        case NEW_CYCLE:
-            setCycleStart(false);
-            listPointer = 0;
-            setListExecuteState(EXECUTE_CYCLE);
-            clock->subscribeTick(this, 0);
-            break;
-        case INIT:
-            operStates = adminStates;
-            listPointer = 0;
-            setListExecuteState(END_OF_CYCLE);
-            clock->subscribeTick(this, 0);
-            break;
-        case EXECUTE_CYCLE:
-            operStates = operSchedule->getControlListEntry(listPointer);
-            simtime_t exitTimer = operSchedule->getTimeInterval(listPointer);
-            listPointer++;
-            executeOperation();
-            if (listPointer >= operSchedule->getControlListLength()) {
-                setListExecuteState(END_OF_CYCLE);
-                clock->subscribeTick(this, 0);
-            } else {
-                unsigned exitTimerTicks = std::ceil(exitTimer / clock->getClockRate());
-                setListExecuteState(EXECUTE_CYCLE);
-                clock->subscribeTick(this, exitTimerTicks);
-            }
-            break;
-        case END_OF_CYCLE:
-            // Do nothing
-            break;
-        }
-
-        // Update List Config state machine
-        switch(stateMachine.listConfigState) {
-        case CONFIG_PENDING:
-            setConfigChange(false);
-            setConfigChangeTime();
-            setConfigPending(true);
-            setListConfigState(UPDATE_CONFIG);
-            unsigned ticksTillUpdateConfig = 0;
-            if (configChangeTime > clock->getTime()) {
-                ticksTillUpdateConfig = std::ceil((clock->getTime() - configChangeTime) / clock->getClockRate());
-            }
-            clock->subscribeTick(this, 0);
-            break;
-        case UPDATE_CONFIG:
-            operSchedule = adminSchedule;
-            setNewConfigCT(true);
-            setListConfigState(CONFIG_IDLE);
-            clock->subscribeTick(this, 0);
-            break;
-        case CONFIG_IDLE:
-            setConfigPending(false);
-            break;
+        default:
+            throw cRuntimeError("Invalid timestamp event.");
         }
     }
 };
 
-} /* namespace nesting */
+} // namespace nesting
 
-#endif /* NESTING_COMMON_SCHEDULE_SCHEDULEMANAGER_H_ */
+#endif
