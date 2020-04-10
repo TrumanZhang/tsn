@@ -113,12 +113,12 @@ uint64_t OscillatorBase::updateAndGetTickCount()
 {
     Enter_Method_Silent();
 
-    uint64_t currentTick;
-    if (tickEventNow) { // Check tick event flag to prevent numeric errors. TODO: Might not be necessary. Flag can potentially be removed.
-        currentTick = lastTick;
-    } else {
-        uint64_t elapsedTicks = std::floor((simTime() - timeOfLastTick) / tickInterval());
-        currentTick = lastTick + elapsedTicks;
+    uint64_t currentTick = tickFromGlobalTime(simTime());
+    if (lastTick != currentTick) {
+        assert(tickFromGlobalTime(globalTimeFromTick(currentTick)) == currentTick);
+        uint64_t elapsedTicks = currentTick - lastTick;
+        timeOfLastTick = globalTimeFromTick(currentTick);
+        lastTick = currentTick;
     }
 
     // Postcondition: Monotonic increasing tick count
@@ -140,7 +140,7 @@ std::shared_ptr<const IOscillator::Tick> OscillatorBase::subscribeTick(IOscillat
             listener,
             tick,
             kind,
-            globalSchedulingTimeForTick(tick));
+            globalTimeFromTick(tick));
 
     // Find insert position of tick event with binary search.
     auto it = std::lower_bound(
@@ -240,9 +240,12 @@ void OscillatorBase::setFrequency(double newFrequency)
     double oldFrequency = this->frequency;
     this->frequency = newFrequency;
 
+    // Update tick count
+    updateAndGetTickCount();
+
     // Update scheduling times for each tick
     for (std::shared_ptr<OscillatorBase::TickImpl> tickEvent : scheduledEvents) {
-        simtime_t updatedSchedulingTime = globalSchedulingTimeForTick(tickEvent->getTick());
+        simtime_t updatedSchedulingTime = globalTimeFromTick(tickEvent->getTick());
         tickEvent->setGlobalSchedulingTime(updatedSchedulingTime);
     }
 
