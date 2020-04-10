@@ -242,15 +242,15 @@ protected:
     virtual void begin()
     {
         cycleTimerState = CycleTimerState::CYCLE_IDLE;
-        EV_INFO << "Set CycleTimer to CYLE_IDLE state." << std::endl;
+        EV_INFO << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
         scheduleAt(simTime(), &updateCycleTimerMsg);
 
         listExecuteState = ListExecuteState::INIT;
-        EV_INFO << "Set ListExecute state to INIT state." << std::endl;
+        EV_INFO << "Set ListExecute state to " << listExecuteState << "." << std::endl;
         scheduleAt(simTime(), &updateListExecuteMsg);
 
         listConfigState = ListConfigState::CONFIG_IDLE;
-        EV_INFO << "Set ListConfig state to CONFIG_IDLE state." << std::endl;
+        EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
         scheduleAt(simTime(), &updateListConfigMsg);
     }
 
@@ -287,20 +287,22 @@ protected:
 
     virtual void setCycleStart(bool cycleStart)
     {
-        // TODO
         this->cycleStart = cycleStart;
+        if (cycleStart) {
+            listExecuteState = ListExecuteState::NEW_CYCLE;
+            EV_INFO << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+            scheduleAt(simTime(), &updateListExecuteMsg);
+        }
     }
 
     virtual void setNewConfigCT(bool newConfigCT)
     {
-        // TODO
         this->newConfigCT = newConfigCT;
-    }
-
-    virtual void setConfigChange(bool configChange)
-    {
-        // TODO
-        this->configChange = configChange;
+        if (newConfigCT) {
+            cycleTimerState = CycleTimerState::CYCLE_IDLE;
+            scheduleAt(simTime(), &updateCycleTimerMsg);
+            EV_INFO << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
+        }
     }
 
     virtual void executeOperation(uint64_t listPointer)
@@ -363,12 +365,44 @@ public:
 
     virtual void setEnabled(bool enabled)
     {
-        // TODO
+        this->enabled = enabled;
+        if (!enabled) {
+            cycleTimerState = CycleTimerState::CYCLE_IDLE;
+            scheduleAt(simTime(), &updateCycleTimerMsg);
+            EV_INFO << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
+
+            listExecuteState = ListExecuteState::INIT;
+            scheduleAt(simTime(), &updateListExecuteMsg);
+            EV_INFO << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+
+            listConfigState = ListConfigState::CONFIG_IDLE;
+            scheduleAt(simTime(), &updateListConfigMsg);
+            EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+        } else {
+            listConfigState = ListConfigState::CONFIG_PENDING;
+            scheduleAt(simTime(), &updateListConfigMsg);
+            EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+        }
     }
 
     virtual bool isEnabled()
     {
         return enabled;
+    }
+
+    virtual void setConfigChange(bool configChange)
+    {
+        this->configChange = configChange;
+        if (configChange) {
+            listConfigState = ListConfigState::CONFIG_PENDING;
+            scheduleAt(simTime(), &updateListConfigMsg);
+            EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+        }
+    }
+
+    virtual bool isConfigChange()
+    {
+        return configChange;
     }
 
     virtual void onTimestamp(IClock2& clock, std::shared_ptr<const IClock2::Timestamp> timestamp) override
