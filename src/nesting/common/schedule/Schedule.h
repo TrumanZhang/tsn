@@ -108,6 +108,9 @@ public:
     }
 
     virtual void addControlListEntry(simtime_t timeInterval, T scheduledObject) {
+        if (timeInterval < SimTime::ZERO) {
+            throw cRuntimeError("Control list entries only allow positive time intervals.");
+        }
         sumTimeIntervals += timeInterval;
         ControlListEntry entry;
         entry.timeInterval = timeInterval;

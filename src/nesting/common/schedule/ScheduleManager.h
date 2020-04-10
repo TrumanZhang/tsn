@@ -208,12 +208,12 @@ protected:
                 simtime_t exitTimer = timeInterval;
                 notifyStateChanged(oldState, operState);
                 listPointer++;
-                if (exitTimer > SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
+                if (exitTimer <= SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
                     simtime_t minClockInterval = SimTime(1, SIMTIME_S) / clock->getClockRate();
                     listExecuteState = ListExecuteState::EXECUTE_CYCLE;
                     nextListExecuteUpdate = clock->subscribeDelta(*this, minClockInterval, LIST_EXECUTE_EVENT);
                     EV_INFO << "ListExecute transitioned to EXECUTE_CYCLE state." << std::endl;
-                } else if (exitTimer <= SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
+                } else if (exitTimer > SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
                     listExecuteState = ListExecuteState::DELAY;
                     nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE_EVENT);
                     EV_INFO << "ListExecute transitioned to DELAY state." << std::endl;
@@ -233,6 +233,7 @@ protected:
                 notifyStateChanged(oldState, operState);
                 exitTimer = SimTime::ZERO;
                 listPointer = 0;
+                listExecuteState = ListExecuteState::END_OF_CYCLE;
                 scheduleAt(simTime(), &updateListExecuteMsg);
                 EV_INFO << "ListExecute transitioned to END_OF_CYCLE state." << std::endl;
             }
@@ -317,7 +318,21 @@ protected:
 
     virtual void executeOperation(uint64_t listPointer)
     {
-        // TODO
+        if (operSchedule->getControlListLength() <= 0) {
+            // If control list has no entries we have to fall back on default values.
+            operState = adminState;
+            timeInterval = operSchedule->getCycleTime();
+        } else {
+            assert(listPointer < operSchedule->getControlListLength());
+            operState = operSchedule->getScheduledObject(listPointer);
+            timeInterval = operSchedule->getTimeInterval(listPointer);
+            // According to IEEE 802.1Qbv chapter 8.6.9.2.1 case a) time
+            // interval values of zero will be set to one time unit.
+            if (timeInterval <= SimTime::ZERO) {
+                simtime_t minClockInterval = SimTime(1, SIMTIME_S) / clock->getClockRate();
+                timeInterval = minClockInterval;
+            }
+        }
     }
 
     virtual void notifyStateChanged(T oldState, T newState)
@@ -348,6 +363,9 @@ public:
 
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
     {
+        if (adminSchedule->getCycleTime() <= SimTime::ZERO) {
+            throw cRuntimeError("Can't load schedule with cycle time of zero.");
+        }
         this->adminSchedule = adminSchedule;
     }
 

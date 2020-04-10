@@ -37,8 +37,8 @@ std::shared_ptr<const Schedule<GateBitvector>> GateScheduleManager::defaultAdmin
 
 void GateScheduleManager::setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule)
 {
-    if (adminSchedule->getCycleTime() <= SimTime::ZERO) {
-        throw cRuntimeError("Can't load schedule with cycle time of zero.");
+    if (adminSchedule->getControlListLength() == 0) {
+        EV_WARN << "Loading a schedule with controlListLenth of 0." << std::endl;
     }
     ScheduleManager<GateBitvector>::setAdminSchedule(adminSchedule);
 }
