@@ -17,8 +17,8 @@
 
 namespace nesting {
 
-Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
-        cXMLElement *xml) {
+Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(cXMLElement *xml)
+{
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 
     std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
@@ -44,8 +44,44 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(
     return schedule;
 }
 
-Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
-        cXMLElement *xml) {
+Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorScheduleV2(cXMLElement *xml)
+{
+    Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
+
+    // Parse BaseTime
+    const char* baseTime = xml->getAttribute("BaseTime");
+    if (baseTime == nullptr) {
+        throw cRuntimeError("No \"BaseTime\" attribute defined in schedule XML element!");
+    }
+    schedule->setBaseTime(SimTime::parse(baseTime));
+
+    // Parse CycleTime
+    const char* cycleTime = xml->getAttribute("CycleTime");
+    if (cycleTime == nullptr) {
+        throw cRuntimeError("No \"CycleTime\" attribute defined in schedule XML element!");
+    }
+    schedule->setCycleTime(SimTime::parse(cycleTime));
+
+    // Parse schedule entries
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    for (cXMLElement* entry : entries) {
+        // Parse TimeInterval and GateStates
+        const char* gateStates = entry->getAttribute("GateStates");
+        if (gateStates == nullptr) {
+            throw cRuntimeError("No \"GateStates\" attribute defined in schedule entry XML element!");
+        }
+        const char* timeInterval = entry->getAttribute("TimeInterval");
+        if (timeInterval == nullptr) {
+            throw cRuntimeError("No \"TimeInterval\" attribute defined in schedule entry XML element!");
+        }
+        schedule->addControlListEntry(SimTime::parse(timeInterval), GateBitvector(gateStates));
+    }
+
+    return schedule;
+}
+
+Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(cXMLElement *xml)
+{
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
     const char* lengthCString =
             xml->getFirstChildWithTag("defaultcycle")->getNodeValue();
@@ -56,4 +92,5 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(
     schedule->setCycleTime(length);
     return schedule;
 }
+
 } // namespace nesting

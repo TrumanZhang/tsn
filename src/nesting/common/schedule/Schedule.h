@@ -20,6 +20,7 @@
 #include <bitset>
 #include <vector>
 #include <iostream>
+#include <memory>
 
 using namespace omnetpp;
 
@@ -138,6 +139,12 @@ template<typename T>
 std::ostream& operator<<(std::ostream& stream, const Schedule<T>& schedule)
 {
     return stream << "Schedule[" << schedule.str() << "]";
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<const Schedule<T>>& schedule)
+{
+    return stream << *schedule;
 }
 
 } // namespace nesting

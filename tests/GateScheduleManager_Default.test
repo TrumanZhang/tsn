@@ -26,6 +26,8 @@ network Test
         }
         gateScheduleManager: GateScheduleManager {
             clockModule = "^.clock";
+            initialAdminSchedule = xmldoc("schedule.xml");
+            gateEnabled = true;
             @display("p=76.25,125.66");
         }
         testGateScheduleManager: TestGateScheduleManager {
@@ -95,6 +97,14 @@ void TestGateScheduleManager::onStateChange(GateBitvector oldBitvector, GateBitv
 }
 
 } // namespace @TESTNAME@
+
+%file: schedule.xml
+<schedule BaseTime="0s" CycleTime="100us">
+    <entry GateStates="01111111" TimeInterval="10us"/>
+    <entry GateStates="10000000" TimeInterval="20us"/>
+    <entry GateStates="01111111" TimeInterval="30us"/>
+    <entry GateStates="10000000" TimeInterval="40us"/>
+</schedule>
 
 %inifile: omnetpp.ini
 [General]

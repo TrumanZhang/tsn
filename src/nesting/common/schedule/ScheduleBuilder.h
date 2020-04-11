@@ -37,14 +37,14 @@ public:
      *
      * TODO link to XML file specification
      */
-    static Schedule<GateBitvector>* createGateBitvectorSchedule(
-            cXMLElement *xml);
+    static Schedule<GateBitvector>* createGateBitvectorSchedule(cXMLElement *xml);
+
+    static Schedule<GateBitvector>* createGateBitvectorScheduleV2(cXMLElement *xml);
 
     /**
      * Creates a schedule containing one entry that opens all gates for the whole cycle duration
      */
-    static Schedule<GateBitvector>* createDefaultBitvectorSchedule(
-            cXMLElement *xml);
+    static Schedule<GateBitvector>* createDefaultBitvectorSchedule(cXMLElement *xml);
 };
 
 } // namespace nesting

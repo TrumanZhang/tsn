@@ -28,8 +28,8 @@ class GateScheduleManager : public ScheduleManager<GateBitvector> {
 public:
     GateScheduleManager();
 protected:
-    virtual const GateBitvector defaultAdminState() override;
-    virtual std::shared_ptr<const Schedule<GateBitvector>> defaultAdminSchedule() override;
+    virtual const GateBitvector initialAdminState() override;
+    virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() override;
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
 };
 

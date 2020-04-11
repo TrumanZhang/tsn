@@ -82,7 +82,7 @@ protected:
 
     // Variables belonging to ListExecute state machine
     ListExecuteState listExecuteState = ListExecuteState::UNDEFINED;
-    uint64_t listPointer;
+    uint64_t listPointer = 0;
     simtime_t exitTimer = SimTime::ZERO;
     T operState;
     simtime_t timeInterval;
@@ -98,20 +98,30 @@ protected:
     {
         clock = getModuleFromPar<IClock2>(par("clockModule"), this);
 
-        adminState = defaultAdminState();
-        operState = defaultAdminState();
+        adminState = initialAdminState();
+        operState = initialAdminState();
 
-        operSchedule = defaultAdminSchedule();
-        adminSchedule = defaultAdminSchedule();
+        operSchedule = initialAdminSchedule();
+        adminSchedule = initialAdminSchedule();
         
         begin();
-    }
 
-    virtual void finish() override
-    {
-        cancelEvent(&updateCycleTimerMsg);
-        cancelEvent(&updateListExecuteMsg);
-        cancelEvent(&updateListConfigMsg);
+        // Variables
+        WATCH(enabled);
+        WATCH(adminSchedule);
+        WATCH(operSchedule);
+        WATCH(adminState);
+        WATCH(operState);
+        WATCH(listPointer);
+        WATCH(timeInterval);
+        WATCH(cycleStartTime);
+        WATCH(configChangeTime);
+        WATCH(configChangeErrorCounter);
+
+        // State machines
+        WATCH(cycleTimerState);
+        WATCH(listExecuteState);
+        WATCH(listConfigState);
     }
 
     virtual void handleMessage(cMessage *msg) override
@@ -134,7 +144,7 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextCycleTimerUpdate);
         }
 
-        EV_INFO << "Handle CycleTimerState " << cycleTimerState << "." << std::endl;
+        EV_DEBUG << "Handle CycleTimerState " << cycleTimerState << "." << std::endl;
 
         if (enabled) {
             if (cycleTimerState == CycleTimerState::CYCLE_IDLE) {
@@ -172,7 +182,7 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextListExecuteUpdate);
         }
 
-        EV_INFO << "Handle ListExecuteState " << listExecuteState << "." << std::endl;
+        EV_DEBUG << "Handle ListExecuteState " << listExecuteState << "." << std::endl;
 
         if (enabled) {
             if (listExecuteState == ListExecuteState::NEW_CYCLE) {
@@ -220,7 +230,7 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextListConfigUpdate);
         }
 
-        EV_INFO << "Handle ListConfigState " << listConfigState << "." << std::endl;
+        EV_DEBUG << "Handle ListConfigState " << listConfigState << "." << std::endl;
 
         if (enabled) {
             if (listConfigState == ListConfigState::CONFIG_PENDING) {
@@ -243,15 +253,15 @@ protected:
     virtual void begin()
     {
         cycleTimerState = CycleTimerState::CYCLE_IDLE;
-        EV_INFO << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
+        EV_DEBUG << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
         scheduleAt(simTime(), &updateCycleTimerMsg);
 
         listExecuteState = ListExecuteState::INIT;
-        EV_INFO << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+        EV_DEBUG << "Set ListExecute state to " << listExecuteState << "." << std::endl;
         scheduleAt(simTime(), &updateListExecuteMsg);
 
         listConfigState = ListConfigState::CONFIG_IDLE;
-        EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+        EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         scheduleAt(simTime(), &updateListConfigMsg);
     }
 
@@ -291,7 +301,7 @@ protected:
         this->cycleStart = cycleStart;
         if (cycleStart) {
             listExecuteState = ListExecuteState::NEW_CYCLE;
-            EV_INFO << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+            EV_DEBUG << "Set ListExecute state to " << listExecuteState << "." << std::endl;
             scheduleAt(simTime(), &updateListExecuteMsg);
         }
     }
@@ -302,7 +312,7 @@ protected:
         if (newConfigCT) {
             cycleTimerState = CycleTimerState::CYCLE_IDLE;
             scheduleAt(simTime(), &updateCycleTimerMsg);
-            EV_INFO << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
+            EV_DEBUG << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
         }
     }
 
@@ -357,11 +367,15 @@ protected:
         assert(configChangeTime >= currentTime);
     }
 
-    virtual const T defaultAdminState() = 0;
+    virtual const T initialAdminState() = 0;
 
-    virtual std::shared_ptr<const Schedule<T>> defaultAdminSchedule() = 0;
+    virtual std::shared_ptr<const Schedule<T>> initialAdminSchedule() = 0;
 public:
-    virtual ~ScheduleManager() {}
+    virtual ~ScheduleManager() {
+        cancelEvent(&updateCycleTimerMsg);
+        cancelEvent(&updateListExecuteMsg);
+        cancelEvent(&updateListConfigMsg);
+    }
 
     virtual void setAdminState(T adminState)
     {
@@ -392,19 +406,19 @@ public:
         if (!enabled) {
             cycleTimerState = CycleTimerState::CYCLE_IDLE;
             scheduleAt(simTime(), &updateCycleTimerMsg);
-            EV_INFO << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
+            EV_DEBUG << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
 
             listExecuteState = ListExecuteState::INIT;
             scheduleAt(simTime(), &updateListExecuteMsg);
-            EV_INFO << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+            EV_DEBUG << "Set ListExecute state to " << listExecuteState << "." << std::endl;
 
             listConfigState = ListConfigState::CONFIG_IDLE;
             scheduleAt(simTime(), &updateListConfigMsg);
-            EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+            EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         } else {
             listConfigState = ListConfigState::CONFIG_PENDING;
             scheduleAt(simTime(), &updateListConfigMsg);
-            EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+            EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         }
     }
 
@@ -419,7 +433,7 @@ public:
         if (configChange) {
             listConfigState = ListConfigState::CONFIG_PENDING;
             scheduleAt(simTime(), &updateListConfigMsg);
-            EV_INFO << "Set ListConfig state to " << listConfigState << "." << std::endl;
+            EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         }
     }
 
