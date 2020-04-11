@@ -32,5 +32,4 @@ echo
 echo
 echo "=== Running tests ==="
 echo
-opp_test run -v -w $NESTING/work -p $NESTING/work/nesting$D $NESTING/tests/*.test \
-    -a "-n $NESTING/work:$NESTING/src:$INET/src"
+opp_test run -v -w $NESTING/work -p $NESTING/work/nesting$D $NESTING/tests/*.test -a "-n .:$NESTING/src:$INET/src"

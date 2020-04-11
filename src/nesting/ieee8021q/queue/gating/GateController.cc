@@ -100,8 +100,6 @@ void GateController::initialize(int stage) {
             }
         }
         clock->subscribeTick(this, 0);
-
-        WATCH_PTR(currentSchedule);
     }
 }
 

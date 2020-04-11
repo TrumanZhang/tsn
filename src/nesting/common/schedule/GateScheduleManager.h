@@ -28,11 +28,13 @@ class GateScheduleManager : public ScheduleManager<GateBitvector> {
 public:
     GateScheduleManager();
 protected:
-    virtual const GateBitvector initialAdminState() override;
-    virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() override;
+    virtual const GateBitvector initialAdminState() const override;
+    virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() const override;
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
+    virtual simtime_t timeUntilGateCloseEvent(uint64_t gateIndex, uint64_t listPointerStart,
+            const Schedule<GateBitvector>& schedule) const;
 public:
-    virtual simtime_t timeUntilGateCloseEvent(uint64_t gateIndex, simtime_t maxLookahead);
+    virtual simtime_t timeUntilGateCloseEvent(uint64_t gateIndex) const;
 };
 
 } // namespace nesting

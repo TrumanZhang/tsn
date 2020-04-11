@@ -368,9 +368,9 @@ protected:
         scheduleAt(t, msg);
     }
 
-    virtual const T initialAdminState() = 0;
+    virtual const T initialAdminState() const = 0;
 
-    virtual std::shared_ptr<const Schedule<T>> initialAdminSchedule() = 0;
+    virtual std::shared_ptr<const Schedule<T>> initialAdminSchedule() const = 0;
 public:
     virtual ~ScheduleManager() {
         cancelEvent(&updateCycleTimerMsg);
