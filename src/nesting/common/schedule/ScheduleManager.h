@@ -52,10 +52,12 @@ protected:
     static const uint64_t LIST_EXECUTE_EVENT = 1;
     static const uint64_t LIST_CONFIG_EVENT = 2;
 
+    // Keep track of subscribed timestamp events for each state machine
     std::shared_ptr<const IClock2::Timestamp> nextCycleTimerUpdate = nullptr;
     std::shared_ptr<const IClock2::Timestamp> nextListExecuteUpdate = nullptr;
     std::shared_ptr<const IClock2::Timestamp> nextListConfigUpdate = nullptr;
 
+    // Self-messages used to update state machines
     cMessage updateCycleTimerMsg = cMessage("updateCycleTimerStateMachine");
     cMessage updateListExecuteMsg = cMessage("updateListExecuteStateMachine");
     cMessage updateListConfigMsg = cMessage("updateListConfigStateMachine");
@@ -117,7 +119,6 @@ protected:
         WATCH(operState);
         WATCH(listPointer);
         WATCH(timeInterval);
-        WATCH(exitTimer);
         WATCH(cycleStartTime);
         WATCH(configChangeTime);
         WATCH(configChangeErrorCounter);
