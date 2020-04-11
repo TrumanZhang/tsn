@@ -71,6 +71,7 @@ protected:
     
     // Variables belonging to ListConfig state machine
     ListConfigState listConfigState = ListConfigState::UNDEFINED;
+    ListConfigState nextListConfigState = ListConfigState::UNDEFINED;
     bool configPending = false;
     simtime_t configChangeTime = SimTime::ZERO;
     uint64_t configChangeErrorCounter = 0;
@@ -78,10 +79,12 @@ protected:
 
     // Variables belonging to CycleTimer state machine
     CycleTimerState cycleTimerState = CycleTimerState::UNDEFINED;
+    CycleTimerState nextCycleTimerState = CycleTimerState::UNDEFINED;
     simtime_t cycleStartTime = SimTime::ZERO;
 
     // Variables belonging to ListExecute state machine
     ListExecuteState listExecuteState = ListExecuteState::UNDEFINED;
+    ListExecuteState nextListExecuteState = ListExecuteState::UNDEFINED;
     uint64_t listPointer = 0;
     simtime_t exitTimer = SimTime::ZERO;
     T operState;
@@ -114,6 +117,7 @@ protected:
         WATCH(operState);
         WATCH(listPointer);
         WATCH(timeInterval);
+        WATCH(exitTimer);
         WATCH(cycleStartTime);
         WATCH(configChangeTime);
         WATCH(configChangeErrorCounter);
@@ -144,34 +148,27 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextCycleTimerUpdate);
         }
 
-        EV_DEBUG << "Handle CycleTimerState " << cycleTimerState << "." << std::endl;
+        cycleTimerState = nextCycleTimerState;
+        EV_DEBUG << "CycleTimerState transitioned to " << cycleTimerState << "." << std::endl;
 
         if (enabled) {
             if (cycleTimerState == CycleTimerState::CYCLE_IDLE) {
                 setCycleStart(false);
                 setNewConfigCT(false);
-                cycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
+                nextCycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
                 rescheduleAt(simTime(), &updateCycleTimerMsg);  
              } else if (cycleTimerState == CycleTimerState::SET_CYCLE_START_TIME) {
                 setCycleStartTime();
                 simtime_t idleTime = cycleStartTime - clock->updateAndGetLocalTime();
-                if (idleTime <= SimTime::ZERO) {
-                    cycleTimerState = CycleTimerState::START_CYCLE;
-                    rescheduleAt(simTime(), &updateCycleTimerMsg);
-                } else {
-                    cycleTimerState = CycleTimerState::WAIT_TO_START_CYCLE;
-                    nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER_EVENT);
-                }
-            } else if (cycleTimerState == CycleTimerState::WAIT_TO_START_CYCLE) {
-                cycleTimerState = CycleTimerState::START_CYCLE;
-                rescheduleAt(simTime(), &updateCycleTimerMsg);
+                nextCycleTimerState = CycleTimerState::START_CYCLE;
+                nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER_EVENT);
             } else if (cycleTimerState == CycleTimerState::START_CYCLE) {
                 setCycleStart(true);
-                cycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
-                simtime_t minClockInterval = SimTime(1, SIMTIME_S) / clock->getClockRate();
-                nextCycleTimerUpdate = clock->subscribeDelta(*this, minClockInterval, CYCLE_TIMER_EVENT);
+                nextCycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
+                simtime_t minClockResolution = SimTime(1, SIMTIME_S) / clock->getClockRate();
+                nextCycleTimerUpdate = clock->subscribeDelta(*this, minClockResolution, CYCLE_TIMER_EVENT);
             }
-        }  
+        }
     }
 
     virtual void updateListExecuteState()
@@ -181,42 +178,42 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextListExecuteUpdate);
         }
 
-        EV_DEBUG << "Handle ListExecuteState " << listExecuteState << "." << std::endl;
+        listExecuteState = nextListExecuteState;
+        EV_DEBUG << "ListExecuteState transitioned to " << listExecuteState << "." << std::endl;
 
         if (enabled) {
             if (listExecuteState == ListExecuteState::NEW_CYCLE) {
                 setCycleStart(false);
                 listPointer = 0;
-                listExecuteState = ListExecuteState::EXECUTE_CYCLE;
+                nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
                 rescheduleAt(simTime(), &updateListExecuteMsg);
             } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
                 T oldState = operState;
                 executeOperation(listPointer);
-                simtime_t exitTimer = timeInterval;
+                exitTimer = timeInterval;
                 notifyStateChanged(oldState, operState);
                 listPointer++;
                 if (exitTimer <= SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
-                    simtime_t minClockInterval = SimTime(1, SIMTIME_S) / clock->getClockRate();
-                    listExecuteState = ListExecuteState::EXECUTE_CYCLE;
-                    nextListExecuteUpdate = clock->subscribeDelta(*this, minClockInterval, LIST_EXECUTE_EVENT);
+                    nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
+                    rescheduleAt(simTime(), &updateListExecuteMsg);
                 } else if (exitTimer > SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
-                    listExecuteState = ListExecuteState::DELAY;
-                    nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE_EVENT);
+                    nextListExecuteState = ListExecuteState::DELAY;
+                    rescheduleAt(simTime(), &updateListExecuteMsg);
                 } else {
                     assert(listPointer >= operSchedule->getControlListLength());
-                    listExecuteState = ListExecuteState::END_OF_CYCLE;
+                    nextListExecuteState = ListExecuteState::END_OF_CYCLE;
                     rescheduleAt(simTime(), &updateListExecuteMsg);
                 }
             } else if (listExecuteState == ListExecuteState::DELAY) {
-                listExecuteState = ListExecuteState::EXECUTE_CYCLE;
-                rescheduleAt(simTime(), &updateListExecuteMsg);
+                nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
+                nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE_EVENT);
             } else if (listExecuteState == ListExecuteState::INIT) {
                 T oldState = operState;
                 operState = adminState;
                 notifyStateChanged(oldState, operState);
                 exitTimer = SimTime::ZERO;
                 listPointer = 0;
-                listExecuteState = ListExecuteState::END_OF_CYCLE;
+                nextListExecuteState = ListExecuteState::END_OF_CYCLE;
                 rescheduleAt(simTime(), &updateListExecuteMsg);
             }
         }
@@ -229,19 +226,20 @@ protected:
             clock->unsubscribeTimestamp(*this, *nextListConfigUpdate);
         }
 
-        EV_DEBUG << "Handle ListConfigState " << listConfigState << "." << std::endl;
+        listConfigState = nextListConfigState;
+        EV_DEBUG << "ListConfigState transitioned to " << listConfigState << "." << std::endl;
 
         if (enabled) {
             if (listConfigState == ListConfigState::CONFIG_PENDING) {
                 setConfigChange(false);
                 setConfigChangeTime();
                 configPending = true;
-                listConfigState = ListConfigState::UPDATE_CONFIG;
+                nextListConfigState = ListConfigState::UPDATE_CONFIG;
                 nextListConfigUpdate = clock->subscribeTimestamp(*this, configChangeTime, LIST_CONFIG_EVENT);
             } else if (listConfigState == ListConfigState::UPDATE_CONFIG) {
                 operSchedule = adminSchedule;
                 setNewConfigCT(true);
-                listConfigState = ListConfigState::CONFIG_IDLE;
+                nextListConfigState = ListConfigState::CONFIG_IDLE;
                 rescheduleAt(simTime(), &updateListConfigMsg);
             } else if (listConfigState == ListConfigState::CONFIG_IDLE) {
                 configPending = false;
@@ -251,16 +249,13 @@ protected:
 
     virtual void begin()
     {
-        cycleTimerState = CycleTimerState::CYCLE_IDLE;
-        EV_DEBUG << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
+        nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
         rescheduleAt(simTime(), &updateCycleTimerMsg);
 
-        listExecuteState = ListExecuteState::INIT;
-        EV_DEBUG << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+        nextListExecuteState = ListExecuteState::INIT;
         rescheduleAt(simTime(), &updateListExecuteMsg);
 
-        listConfigState = ListConfigState::CONFIG_IDLE;
-        EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
+        nextListConfigState = ListConfigState::CONFIG_IDLE;
         rescheduleAt(simTime(), &updateListConfigMsg);
     }
 
@@ -299,8 +294,7 @@ protected:
     {
         this->cycleStart = cycleStart;
         if (cycleStart) {
-            listExecuteState = ListExecuteState::NEW_CYCLE;
-            EV_DEBUG << "Set ListExecute state to " << listExecuteState << "." << std::endl;
+            nextListExecuteState = ListExecuteState::NEW_CYCLE;
             rescheduleAt(simTime(), &updateListExecuteMsg);
         }
     }
@@ -309,9 +303,8 @@ protected:
     {
         this->newConfigCT = newConfigCT;
         if (newConfigCT) {
-            cycleTimerState = CycleTimerState::CYCLE_IDLE;
+            nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
             rescheduleAt(simTime(), &updateCycleTimerMsg);
-            EV_DEBUG << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
         }
     }
 
@@ -401,9 +394,15 @@ public:
 
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
     {
-        if (adminSchedule->getCycleTime() <= SimTime::ZERO) {
+        const simtime_t adminCycleTime = adminSchedule->getCycleTime();
+        const simtime_t minClockResolution = SimTime(1, SIMTIME_S) / clock->getClockRate();
+
+        if (adminCycleTime <= SimTime::ZERO) {
             throw cRuntimeError("Can't load schedule with cycle time of zero.");
+        } else if (adminCycleTime < minClockResolution) {
+            EV_WARN << "AdminCycleTime is smaller than minimum clock resolution." << std::endl;
         }
+
         this->adminSchedule = adminSchedule;
     }
 
@@ -411,21 +410,17 @@ public:
     {
         this->enabled = enabled;
         if (!enabled) {
-            cycleTimerState = CycleTimerState::CYCLE_IDLE;
+            nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
             rescheduleAt(simTime(), &updateCycleTimerMsg);
-            EV_DEBUG << "Set CycleTimer state to " << cycleTimerState << "." << std::endl;
 
-            listExecuteState = ListExecuteState::INIT;
+            nextListExecuteState = ListExecuteState::INIT;
             rescheduleAt(simTime(), &updateListExecuteMsg);
-            EV_DEBUG << "Set ListExecute state to " << listExecuteState << "." << std::endl;
 
-            listConfigState = ListConfigState::CONFIG_IDLE;
+            nextListConfigState = ListConfigState::CONFIG_IDLE;
             rescheduleAt(simTime(), &updateListConfigMsg);
-            EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         } else {
-            listConfigState = ListConfigState::CONFIG_PENDING;
+            nextListConfigState = ListConfigState::CONFIG_PENDING;
             rescheduleAt(simTime(), &updateListConfigMsg);
-            EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         }
     }
 
@@ -438,9 +433,8 @@ public:
     {
         this->configChange = configChange;
         if (configChange) {
-            listConfigState = ListConfigState::CONFIG_PENDING;
+            nextListConfigState = ListConfigState::CONFIG_PENDING;
             rescheduleAt(simTime(), &updateListConfigMsg);
-            EV_DEBUG << "Set ListConfig state to " << listConfigState << "." << std::endl;
         }
     }
 

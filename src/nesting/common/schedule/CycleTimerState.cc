@@ -26,8 +26,6 @@ std::ostream& operator<<(std::ostream& os, const CycleTimerState& cts)
         return os << "CYCLE_IDLE";
     case CycleTimerState::SET_CYCLE_START_TIME:
         return os << "SET_CYCLE_START_TIME";
-    case CycleTimerState::WAIT_TO_START_CYCLE:
-        return os << "WAIT_TO_START_CYCLE";
     case CycleTimerState::START_CYCLE:
         return os << "START_CYCLE";
     default:

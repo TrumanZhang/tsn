@@ -43,4 +43,39 @@ void GateScheduleManager::setAdminSchedule(std::shared_ptr<const Schedule<GateBi
     ScheduleManager<GateBitvector>::setAdminSchedule(adminSchedule);
 }
 
+simtime_t GateScheduleManager::timeUntilGateCloseEvent(uint64_t gateIndex, simtime_t maxLookahead)
+{
+    // Preconditions
+    assert(gateIndex >= 0 && gateIndex < 8);
+    assert(maxLookahead >= 0);
+
+    const simtime_t currentTime = clock->updateAndGetLocalTime();
+    const uint64_t operControlListLength = operSchedule->getControlListLength();
+
+    // TODO what if controlListLength == 0
+
+    // Case 1: If gating is disabled we only have to check the current
+    // operState and neither the operSchedule or adminSchedule.
+    if (!enabled) {
+        return operState.test(gateIndex) ? maxLookahead : SimTime::ZERO;
+    }
+    // Case 2: Gating is enabled and no schedule swap will be executed within
+    // the maxLookahead time interval.
+    else if (enabled && (!configPending || configChangeTime > currentTime + maxLookahead)) {
+        simtime_t timeUntilGateCloseEvent = SimTime::ZERO;
+        uint64_t lookaheadListPointer = listPointer;
+        GateBitvector lookaheadOperState = operState;
+        while (timeUntilGateCloseEvent <= maxLookahead && lookaheadOperState.test(gateIndex)) {
+            // Update time to gate close event.
+            timeUntilGateCloseEvent += operSchedule->getTimeInterval(lookaheadListPointer);
+            // Update lookahead- listPointer and operState.
+            lookaheadListPointer = (lookaheadListPointer + 1) % operControlListLength;
+            GateBitvector lookaheadOperState = operSchedule->getScheduledObject(lookaheadListPointer);
+        }
+
+        return timeUntilGateCloseEvent > maxLookahead ? maxLookahead : timeUntilGateCloseEvent;
+    }
+    // Case 3: Gating is
+}
+
 } // namespace nesting

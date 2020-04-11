@@ -31,6 +31,8 @@ protected:
     virtual const GateBitvector initialAdminState() override;
     virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() override;
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
+public:
+    virtual simtime_t timeUntilGateCloseEvent(uint64_t gateIndex, simtime_t maxLookahead);
 };
 
 } // namespace nesting

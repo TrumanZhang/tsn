@@ -24,7 +24,6 @@ enum class CycleTimerState {
     UNDEFINED,
     CYCLE_IDLE,
     SET_CYCLE_START_TIME,
-    WAIT_TO_START_CYCLE, // additional state to model waiting period
     START_CYCLE
 };
 
