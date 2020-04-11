@@ -90,7 +90,6 @@ simtime_t GateScheduleManager::timeUntilGateCloseEvent(uint64_t gateIndex) const
 {
     // Preconditions
     assert(gateIndex >= 0 && gateIndex < 8);
-    assert(maxLookahead >= 0);
 
     const simtime_t currentTime = clock->updateAndGetLocalTime();
     const uint64_t operControlListLength = operSchedule->getControlListLength();
