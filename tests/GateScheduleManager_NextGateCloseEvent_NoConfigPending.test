@@ -159,7 +159,7 @@ result-dir = result_dir
 
 %exitcode: 0
 
-%postrun-command: sed -e '/^[^-].*/d' -e 's/- \(.*\)/\1/g' result_dir/General-#0.elog > log.txt
+%postrun-command: sed -e '/^[^-].*/d' -e 's/- \(.*\)/\1/g' -e '/^\s*$/d' result_dir/General-#0.elog > log.txt
 
 %contains: log.txt
 Gate #0 is opened indefinitely at t=0us (local time).
