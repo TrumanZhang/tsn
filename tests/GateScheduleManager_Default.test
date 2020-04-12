@@ -25,14 +25,14 @@ network Test
             oscillatorModule = "^.oscillator";
         }
         gateScheduleManager: GateScheduleManager {
+            @display("p=76.25,125.66");
             clockModule = "^.clock";
             initialAdminSchedule = xmldoc("schedule.xml");
             gateEnabled = true;
-            @display("p=76.25,125.66");
         }
         testGateScheduleManager: TestGateScheduleManager {
-            gateScheduleManagerModule = "^.gateScheduleManager";
             @display("p=76.25,175.68001");
+            gateScheduleManagerModule = "^.gateScheduleManager";
         }
 }
 

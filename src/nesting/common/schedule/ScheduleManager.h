@@ -395,12 +395,21 @@ public:
 
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
     {
+        // Schedule must not be nullptr.
+        if (adminSchedule == nullptr) {
+            throw cRuntimeError("adminSchedule must not be nullptr");
+        }
+
         const simtime_t adminCycleTime = adminSchedule->getCycleTime();
         const simtime_t minClockResolution = SimTime(1, SIMTIME_S) / clock->getClockRate();
 
+        // Cycle time must not be zero.
         if (adminCycleTime <= SimTime::ZERO) {
             throw cRuntimeError("Can't load schedule with cycle time of zero.");
-        } else if (adminCycleTime < minClockResolution) {
+        }
+        // If cycle time is smaller than clock resolution it effectively has a
+        // cycle time of zero which can lead to unexpected behaviour.
+        if (adminCycleTime < minClockResolution) {
             EV_WARN << "AdminCycleTime is smaller than minimum clock resolution." << std::endl;
         }
 

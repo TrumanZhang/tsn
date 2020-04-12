@@ -31,10 +31,10 @@ protected:
     virtual const GateBitvector initialAdminState() const override;
     virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() const override;
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
-    virtual simtime_t timeUntilGateCloseEvent(uint64_t gateIndex, uint64_t listPointerStart,
+    virtual simtime_t nextGateCloseEventInSchedule(uint64_t gateIndex, uint64_t listPointerStart,
             const Schedule<GateBitvector>& schedule) const;
 public:
-    virtual simtime_t timeUntilGateCloseEvent(uint64_t gateIndex) const;
+    virtual simtime_t nextGateCloseEvent(uint64_t gateIndex) const;
 };
 
 } // namespace nesting

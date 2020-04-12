@@ -146,7 +146,7 @@ public:
      *
      * @see Schedule::normalize()
      */
-    virtual bool isNormalized()
+    virtual bool isNormalized() const
     {
         return sumTimeIntervals == cycleTime;
     }

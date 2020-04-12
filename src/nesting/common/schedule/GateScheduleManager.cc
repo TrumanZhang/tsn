@@ -32,20 +32,30 @@ std::shared_ptr<const Schedule<GateBitvector>> GateScheduleManager::initialAdmin
     cXMLElement* xml = par("initialAdminSchedule");
     Schedule<GateBitvector>* scheduleRawPtr = ScheduleBuilder::createGateBitvectorScheduleV2(xml);
     std::shared_ptr<Schedule<GateBitvector>> schedule(scheduleRawPtr);
+    schedule->normalize();
     return schedule;
 }
 
 void GateScheduleManager::setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule)
 {
+    // Only allow normalized schedules.
+    if (!adminSchedule->isNormalized()) {
+        throw cRuntimeError("Gate schedule isn't normalized!.");
+    }
+    // Schedules with no entries don't make sense.
     if (adminSchedule->getControlListLength() == 0) {
         EV_WARN << "Loading a schedule with controlListLenth of 0." << std::endl;
     }
     ScheduleManager<GateBitvector>::setAdminSchedule(adminSchedule);
 }
 
-simtime_t GateScheduleManager::timeUntilGateCloseEvent(uint64_t gateIndex, uint64_t listPointerStart,
+simtime_t GateScheduleManager::nextGateCloseEventInSchedule(uint64_t gateIndex, uint64_t listPointerStart,
         const Schedule<GateBitvector>& schedule) const
 {
+    // Precondition
+    assert(schedule.isNormalized());
+    assert(gateIndex >= 0 && gateIndex < 8);
+
     uint64_t controlListLength = schedule.getControlListLength();
     uint64_t cycleTime = schedule.getControlListLength();
     simtime_t sumTimeIntervals = schedule.getSumTimeIntervals();
@@ -64,12 +74,6 @@ simtime_t GateScheduleManager::timeUntilGateCloseEvent(uint64_t gateIndex, uint6
         if (gateBitvector.test(gateIndex)) {
             timeUntilGateCloseEvent += timeInterval;
             listPointer++;
-            // Special case: If the sum of all time intervals is smaller than
-            // CycleTime, the last time interval must be extended so that the
-            // sum is equal to CycleTime.
-            if (listPointer == controlListLength - 1 && sumTimeIntervals < cycleTime) {
-                timeUntilGateCloseEvent += cycleTime - sumTimeIntervals;
-            }
         } else {
             break;
         }
@@ -80,47 +84,65 @@ simtime_t GateScheduleManager::timeUntilGateCloseEvent(uint64_t gateIndex, uint6
         return SimTime::getMaxTime();
     }
 
-    // Special case: Aggregated time intervals != CycleTime
-
     // Return aggregated gate open intervals
     return timeUntilGateCloseEvent;
 }
 
-simtime_t GateScheduleManager::timeUntilGateCloseEvent(uint64_t gateIndex) const
+simtime_t GateScheduleManager::nextGateCloseEvent(uint64_t gateIndex) const
 {
     // Preconditions
     assert(gateIndex >= 0 && gateIndex < 8);
+    assert(operSchedule->isNormalized());
 
     const simtime_t currentTime = clock->updateAndGetLocalTime();
     const uint64_t operControlListLength = operSchedule->getControlListLength();
 
-    // TODO what if controlListLength == 0
-
-    // Case 1: If gating is disabled we only have to check the current
-    // operState and neither the operSchedule or adminSchedule.
+    // If gating is disabled we only have to check the current operState and
+    // neither the operSchedule or adminSchedule.
     if (!enabled) {
         return operState.test(gateIndex) ? SimTime::getMaxTime() : SimTime::ZERO;
     }
-    // Case 2: Gating is enabled
-    else {
-        simtime_t timeUntilGateCloseEvent = SimTime::ZERO;
 
-        switch (listExecuteState) {
-        case ListExecuteState::INIT:
+    simtime_t timeUntilGateCloseEvent = SimTime::ZERO;
+    uint64_t lookaheadListPointer;
 
-            break;
-        case ListExecuteState::END_OF_CYCLE:
-            break;
-        case ListExecuteState::NEW_CYCLE:
-            break;
-        case ListExecuteState::EXECUTE_CYCLE:
-            break;
-        case ListExecuteState::DELAY:
-            break;
-        default:
-            throw cRuntimeError("ListExecute state machine is in invalid state.");
+    // To determine how long the current operGateStates (operState) is valid we
+    // have to consider the state of the ListExecute state machine.
+    if (!operState.test(gateIndex)) {
+        return SimTime::ZERO;
+    } else {
+        if (listExecuteState == ListExecuteState::INIT || listExecuteState == ListExecuteState::END_OF_CYCLE) {
+            assert(cycleStartTime >= currentTime); // TODO: Is this always the case?
+            timeUntilGateCloseEvent += cycleStartTime - currentTime;
+            lookaheadListPointer = 0;
+        } else if (listExecuteState == ListExecuteState::NEW_CYCLE) {
+            lookaheadListPointer = 0;
+        } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
+            assert(listPointer >= 1);
+            lookaheadListPointer = listPointer - 1;
+        } else if (listExecuteState == ListExecuteState::DELAY) {
+            simtime_t timeOfNextExecuteCycleEvent = nextListExecuteUpdate->getLocalTime();
+            assert(timeOfNextExecuteCycleEvent >= currentTime);
+            simtime_t remainingTimeInterval = timeOfNextExecuteCycleEvent - currentTime;
+            timeUntilGateCloseEvent += remainingTimeInterval;
+            lookaheadListPointer = listPointer;
+        } else {
+            throw cRuntimeError("ListExecute state machine is in invalid state!");
         }
     }
+    
+    // After we evaluated the current operGateStates (operState), we have to
+    // look at the future operGateStates by examining the operSchedule and
+    // adminSchedule.
+    if (!configPending) {
+        timeUntilGateCloseEvent += nextGateCloseEventInSchedule(gateIndex, lookaheadListPointer, *operSchedule);
+    } else {
+        // TODO: Implement lookahead in combination with schedule swaps. This
+        // requires a deeper understanding of operCycleTimeExtension.
+        throw cRuntimeError("Length-aware scheduling not implemented yet in combination with schedule swaps!");
+    }
+
+    return timeUntilGateCloseEvent;
 }
 
 } // namespace nesting
