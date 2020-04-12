@@ -1,5 +1,6 @@
 %description:
-TODO
+Tests the nextGateCloseEvent method of the GateScheduleManager module in a
+situation where no schedule swap is in progress (configPending is false).
 
 %file: package.ned
 package @TESTNAME@;
@@ -32,6 +33,7 @@ network Test
         }
         testGateScheduleManager: TestGateScheduleManager {
             @display("p=76.25,175.68001");
+            clockModule = "^.clock";
             gateScheduleManagerModule = "^.gateScheduleManager";
         }
 }
@@ -43,6 +45,7 @@ simple TestGateScheduleManager
 {
     parameters:
         string gateScheduleManagerModule;
+        string clockModule;
 }
 
 %file: TestGateScheduleManager.h
@@ -64,9 +67,13 @@ class TestGateScheduleManager : public cSimpleModule, public GateScheduleManager
 {
 protected:
     GateScheduleManager* gateScheduleManager;
+    IClock2* clock;
 protected:
+    virtual ~TestGateScheduleManager();
     virtual void initialize() override;
-    void onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector) override;
+    virtual void onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector) override;
+    virtual void handleMessage(cMessage* msg) override;
+    virtual void logGateClosingTimes() const;
 };
 
 } // namespace @TESTNAME@
@@ -84,26 +91,63 @@ namespace @TESTNAME@ {
 
 Define_Module(TestGateScheduleManager);
 
+TestGateScheduleManager::~TestGateScheduleManager()
+{
+    // TODO cancelAndDelete self-messages in eventqueue
+}
+
 void TestGateScheduleManager::initialize()
 {
     gateScheduleManager = check_and_cast<GateScheduleManager*>(getModuleByPath(par("gateScheduleManagerModule")));
     gateScheduleManager->subscribeStateChanges(*this);
+    clock = check_and_cast<IClock2*>(getModuleByPath(par("clockModule")));
+    
+    scheduleAt(SimTime(5, SIMTIME_US), new cMessage());
+    scheduleAt(SimTime(15, SIMTIME_US), new cMessage());
+    scheduleAt(SimTime(35, SIMTIME_US), new cMessage());
+    scheduleAt(SimTime(55, SIMTIME_US), new cMessage());
 }
 
 void TestGateScheduleManager::onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector)
 {
     Enter_Method("GateBitvector");
-    EV_INFO << "New GateBitvector " << newBitvector << std::endl;
+    simtime_t localTime = clock->updateAndGetLocalTime();
+    EV_INFO << "Set new bitvector " << newBitvector << " at t="
+            << localTime.inUnit(SIMTIME_US) << "us." << std::endl;
+    logGateClosingTimes();
+}
+
+void TestGateScheduleManager::handleMessage(cMessage* msg)
+{
+    logGateClosingTimes();
+    delete msg;
+}
+
+void TestGateScheduleManager::logGateClosingTimes() const
+{
+    simtime_t localTime = clock->updateAndGetLocalTime();
+    for (uint64_t gateIndex = 0; gateIndex < 8; gateIndex++) {
+        simtime_t nextGateCloseEvent = gateScheduleManager->nextGateCloseEvent(gateIndex);
+        if (nextGateCloseEvent == SimTime::getMaxTime()) {
+            EV_INFO << "Gate #" << gateIndex << " is opened indefinitely"
+                    << " at t=" << localTime.inUnit(SIMTIME_US)
+                    << "us (local time)." << std::endl;
+        } else {
+            EV_INFO << "Gate #" << gateIndex << " will close in "
+                    << nextGateCloseEvent.inUnit(SIMTIME_US) << "us at t="
+                    << localTime.inUnit(SIMTIME_US) << "us (local time)."
+                    << std::endl;
+        }
+    }
 }
 
 } // namespace @TESTNAME@
 
 %file: schedule.xml
-<schedule BaseTime="0s" CycleTime="100us">
-    <entry GateStates="01111111" TimeInterval="10us"/>
-    <entry GateStates="10000000" TimeInterval="20us"/>
-    <entry GateStates="01111111" TimeInterval="30us"/>
-    <entry GateStates="10000000" TimeInterval="40us"/>
+<schedule BaseTime="0s" CycleTime="60us">
+    <entry GateStates="00000011" TimeInterval="10us"/>
+    <entry GateStates="00000101" TimeInterval="20us"/>
+    <entry GateStates="00000111" TimeInterval="30us"/>
 </schedule>
 
 %inifile: omnetpp.ini

@@ -67,20 +67,21 @@ simtime_t GateScheduleManager::nextGateCloseEventInSchedule(uint64_t gateIndex, 
 
     // Count gate open intervals.
     simtime_t timeUntilGateCloseEvent = SimTime::ZERO;
-    uint64_t listPointer = listPointerStart;
-    while (listPointer != listPointerStart) {
+    bool wraparound = true;
+    for (uint64_t listPointerOffset = 0; listPointerOffset < controlListLength; listPointerOffset++) {
+        uint64_t listPointer = (listPointerStart + listPointerOffset) % controlListLength;
         GateBitvector gateBitvector = schedule.getScheduledObject(listPointer);
         simtime_t timeInterval = schedule.getTimeInterval(listPointer);
         if (gateBitvector.test(gateIndex)) {
             timeUntilGateCloseEvent += timeInterval;
-            listPointer++;
         } else {
+            wraparound = false;
             break;
         }
     }
 
     // Special case: Gate is opened in all GateVectors (wraparound) => gate is opened indefinitely.
-    if (listPointer == listPointerStart) {
+    if (wraparound) {
         return SimTime::getMaxTime();
     }
 
@@ -119,13 +120,14 @@ simtime_t GateScheduleManager::nextGateCloseEvent(uint64_t gateIndex) const
             lookaheadListPointer = 0;
         } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
             assert(listPointer >= 1);
-            lookaheadListPointer = listPointer - 1;
+            // lookaheadListPointer = listPointer - 1;
+            lookaheadListPointer = listPointer % operControlListLength;
         } else if (listExecuteState == ListExecuteState::DELAY) {
             simtime_t timeOfNextExecuteCycleEvent = nextListExecuteUpdate->getLocalTime();
             assert(timeOfNextExecuteCycleEvent >= currentTime);
             simtime_t remainingTimeInterval = timeOfNextExecuteCycleEvent - currentTime;
             timeUntilGateCloseEvent += remainingTimeInterval;
-            lookaheadListPointer = listPointer;
+            lookaheadListPointer = listPointer % operControlListLength;
         } else {
             throw cRuntimeError("ListExecute state machine is in invalid state!");
         }
@@ -135,7 +137,13 @@ simtime_t GateScheduleManager::nextGateCloseEvent(uint64_t gateIndex) const
     // look at the future operGateStates by examining the operSchedule and
     // adminSchedule.
     if (!configPending) {
-        timeUntilGateCloseEvent += nextGateCloseEventInSchedule(gateIndex, lookaheadListPointer, *operSchedule);
+        simtime_t gateOpeningTime = nextGateCloseEventInSchedule(gateIndex, lookaheadListPointer, *operSchedule);
+        // We can't just add the time because we have prevent overflows
+        if (gateOpeningTime == SimTime::getMaxTime()) {
+            timeUntilGateCloseEvent = SimTime::getMaxTime();
+        } else {
+            timeUntilGateCloseEvent += gateOpeningTime;
+        }
     } else {
         // TODO: Implement lookahead in combination with schedule swaps. This
         // requires a deeper understanding of operCycleTimeExtension.
