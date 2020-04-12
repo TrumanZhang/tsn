@@ -30,10 +30,29 @@ public:
 protected:
     virtual const GateBitvector initialAdminState() const override;
     virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() const override;
+
+    /**
+     * Valid admin schedules must (1) not be nullptr, (2) have a cycleTime
+     * greater than SimTime::ZERO and (3) be normalized.
+     */
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
+
+    /**
+     * Returns the time interval after a gate will be closed, by eaxamining
+     * a given schedule starting from the listPointerStart index. If the
+     * controlListLength of the schedule is zero (the schedule is empty) this
+     * method will return SimTime::getMaxTime(). This method will also return
+     * SimTime::getMaxTime() if the gate specified by gateIndex will never be
+     * closed.
+     */
     virtual simtime_t nextGateCloseEventInSchedule(uint64_t gateIndex, uint64_t listPointerStart,
             const Schedule<GateBitvector>& schedule) const;
 public:
+    /**
+     * Returns the time interval after a gate will be closed. If the gate is
+     * closed at the beginning, this method will return SimTime::ZERO and if
+     * the gate will never close, it will return SimTime::getMaxTime().
+     */
     virtual simtime_t nextGateCloseEvent(uint64_t gateIndex) const;
 };
 
