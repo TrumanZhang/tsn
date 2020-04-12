@@ -119,9 +119,8 @@ simtime_t GateScheduleManager::nextGateCloseEvent(uint64_t gateIndex) const
         } else if (listExecuteState == ListExecuteState::NEW_CYCLE) {
             lookaheadListPointer = 0;
         } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
-            assert(listPointer >= 1);
-            // lookaheadListPointer = listPointer - 1;
-            lookaheadListPointer = listPointer % operControlListLength;
+            assert(listPointer < operControlListLength);
+            lookaheadListPointer = listPointer;
         } else if (listExecuteState == ListExecuteState::DELAY) {
             simtime_t timeOfNextExecuteCycleEvent = nextListExecuteUpdate->getLocalTime();
             assert(timeOfNextExecuteCycleEvent >= currentTime);
