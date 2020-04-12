@@ -63,7 +63,7 @@ using namespace nesting;
 
 namespace @TESTNAME@ {
 
-class TestGateScheduleManager : public cSimpleModule, public GateScheduleManager::IStateListener
+class TestGateScheduleManager : public cSimpleModule, public GateScheduleManager::IOperStateListener
 {
 protected:
     GateScheduleManager* gateScheduleManager;
@@ -71,7 +71,7 @@ protected:
 protected:
     virtual ~TestGateScheduleManager();
     virtual void initialize() override;
-    virtual void onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector) override;
+    virtual void onOperStateChange(GateBitvector oldBitvector, GateBitvector newBitvector) override;
     virtual void handleMessage(cMessage* msg) override;
     virtual void logGateClosingTimes() const;
 };
@@ -99,7 +99,7 @@ TestGateScheduleManager::~TestGateScheduleManager()
 void TestGateScheduleManager::initialize()
 {
     gateScheduleManager = check_and_cast<GateScheduleManager*>(getModuleByPath(par("gateScheduleManagerModule")));
-    gateScheduleManager->subscribeStateChanges(*this);
+    gateScheduleManager->subscribeOperStateChanges(*this);
     clock = check_and_cast<IClock2*>(getModuleByPath(par("clockModule")));
     
     scheduleAt(SimTime(5, SIMTIME_US), new cMessage());
@@ -108,7 +108,7 @@ void TestGateScheduleManager::initialize()
     scheduleAt(SimTime(55, SIMTIME_US), new cMessage());
 }
 
-void TestGateScheduleManager::onStateChange(GateBitvector oldBitvector, GateBitvector newBitvector)
+void TestGateScheduleManager::onOperStateChange(GateBitvector oldBitvector, GateBitvector newBitvector)
 {
     Enter_Method("GateBitvector");
     simtime_t localTime = clock->updateAndGetLocalTime();

@@ -38,13 +38,10 @@ namespace nesting {
 template<typename T>
 class ScheduleManager : public cSimpleModule, public IClock2::TimestampListener {
 public:
-    class IStateListener {
+    class IOperStateListener {
     public:
-        virtual ~IStateListener() {};
-        virtual void onStateChange(T oldState, T newState) = 0;
-        virtual void onCycleTimerStateChanged(CycleTimerState cycleTimerState) {};
-        virtual void onListExecuteStateChanged(ListExecuteState listExecuteState) {};
-        virtual void onListConfigStateChanged(ListConfigState listConfigState) {};
+        virtual ~IOperStateListener() {};
+        virtual void onOperStateChange(T oldState, T newState) = 0;
     };
 protected:
     // Type values to differentiate different timestamp events from the clock module.
@@ -97,7 +94,7 @@ protected:
     bool cycleStart = false;
     bool newConfigCT = false;
 
-    std::set<IStateListener*> listeners;
+    std::set<IOperStateListener*> listeners;
 protected:
     virtual void initialize() override
     {
@@ -331,7 +328,7 @@ protected:
     virtual void notifyStateChanged(T oldState, T newState)
     {
         for (auto listener : listeners) {
-            listener->onStateChange(oldState, newState);
+            listener->onOperStateChange(oldState, newState);
         }
     }
 
@@ -476,14 +473,41 @@ public:
         }
     }
 
-    virtual void subscribeStateChanges(IStateListener& listener)
+    virtual void subscribeOperStateChanges(IOperStateListener& listener)
     {
         listeners.insert(&listener);
     }
 
-    virtual void unsubscribeStateChanges(IStateListener& listener)
+    virtual void unsubscribeOperStateChanges(IOperStateListener& listener)
     {
         listeners.erase(&listener);
+    }
+
+    /**
+     * Returns the current state of the CycleTimer state machine. Useful for
+     * debugging or testing.
+     */
+    virtual CycleTimerState getCycleTimerState()
+    {
+        return cycleTimerState;
+    }
+
+    /**
+     * Returns the current state of the ListExecute state machine. Useful for
+     * debugging or testing.
+     */
+    virtual ListExecuteState getListExecuteState()
+    {
+        return listExecuteState;
+    }
+
+    /**
+     * Returns the current state of the ListConfig state machine. Useful for
+     * debugging or testing.
+     */
+    virtual ListConfigState getListConfigState()
+    {
+        return listConfigState;
     }
 };
 
