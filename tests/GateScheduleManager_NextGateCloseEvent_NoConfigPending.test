@@ -105,7 +105,7 @@ void TestGateScheduleManager::initialize()
     scheduleAt(SimTime(5, SIMTIME_US), new cMessage());
     scheduleAt(SimTime(15, SIMTIME_US), new cMessage());
     scheduleAt(SimTime(35, SIMTIME_US), new cMessage());
-    scheduleAt(SimTime(55, SIMTIME_US), new cMessage());
+    scheduleAt(SimTime(65, SIMTIME_US), new cMessage());
 }
 
 void TestGateScheduleManager::onOperStateChange(GateBitvector oldBitvector, GateBitvector newBitvector)
@@ -153,6 +153,50 @@ void TestGateScheduleManager::logGateClosingTimes() const
 %inifile: omnetpp.ini
 [General]
 network = Test
-sim-time-limit = 1s
+sim-time-limit = 100us
+record-eventlog = true
+result-dir = result_dir
 
 %exitcode: 0
+
+%postrun-command: sed -e '/^[^-].*/d' -e 's/- \(.*\)/\1/g' result_dir/General-#0.elog > log.txt
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=0us (local time).
+Gate #1 will close in 10us at t=0us (local time).
+Gate #2 will close in 0us at t=0us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=5us (local time).
+Gate #1 will close in 5us at t=5us (local time).
+Gate #2 will close in 0us at t=5us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=10us (local time).
+Gate #1 will close in 0us at t=10us (local time).
+Gate #2 will close in 50us at t=10us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=15us (local time).
+Gate #1 will close in 0us at t=15us (local time).
+Gate #2 will close in 45us at t=15us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=30us (local time).
+Gate #1 will close in 40us at t=30us (local time).
+Gate #2 will close in 30us at t=30us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=35us (local time).
+Gate #1 will close in 35us at t=35us (local time).
+Gate #2 will close in 25us at t=35us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=60us (local time).
+Gate #1 will close in 10us at t=60us (local time).
+Gate #2 will close in 0us at t=60us (local time).
+
+%contains: log.txt
+Gate #0 is opened indefinitely at t=65us (local time).
+Gate #1 will close in 5us at t=65us (local time).
+Gate #2 will close in 0us at t=65us (local time).
