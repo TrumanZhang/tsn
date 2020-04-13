@@ -23,35 +23,23 @@
 #include "inet/networklayer/common/L3Address.h"
 
 #include "nesting/common/schedule/Schedule.h"
+#include "nesting/common/schedule/DatagramScheduleManager.h"
 
 using namespace omnetpp;
 
 namespace nesting {
 
-/**
- * TODO - Generated class
- */
-class UdpScheduledTrafficGenerator : public inet::ApplicationBase, public inet::UdpSocket::ICallback
+class UdpScheduledTrafficGenerator : public inet::ApplicationBase, public inet::UdpSocket::ICallback,
+        public DatagramScheduleManager::IOperStateListener
 {
-public:
-    struct SendEvent {
-        inet::L3Address destAddress;
-        int destPort;
-        int pcp;
-        int vid;
-        int payloadSize;
-        int maxPayloadFragmentSize;
-    };
 protected:
+    DatagramScheduleManager* scheduleManager;
     int localPort = -1;
-    Schedule<SendEvent> schedule;
     // statistics
     int numSent = 0;
     int numReceived = 0;
-public:
-    static Schedule<SendEvent> buildSchedule(cXMLElement *xml);
 protected:
-    virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
+    virtual int numInitStages() const override;
     virtual void initialize(int stage);
     virtual void finish() override;
 
@@ -64,8 +52,9 @@ protected:
     virtual void socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication) override;
     virtual void socketClosed(inet::UdpSocket *socket) override;
 
+    virtual void onOperStateChange(SendDatagramEvent sendDatagramEvent) override;
 };
 
-} //namespace
+} // namespace nesting
 
 #endif

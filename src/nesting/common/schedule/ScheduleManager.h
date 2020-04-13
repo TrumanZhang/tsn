@@ -43,7 +43,8 @@ public:
     public:
         virtual ~IOperStateListener() {};
     protected:
-        virtual void onOperStateChange(T oldState, T newState) = 0;
+        virtual void onOperStateChange(T newState) {};
+        virtual void onOperStateChange(T newState, T oldState) {};
     };
 protected:
     // Type values to differentiate different timestamp events from the clock module.
@@ -330,6 +331,7 @@ protected:
     virtual void notifyStateChanged(T oldState, T newState)
     {
         for (auto listener : listeners) {
+            listener->onOperStateChange(newState);
             listener->onOperStateChange(oldState, newState);
         }
     }
