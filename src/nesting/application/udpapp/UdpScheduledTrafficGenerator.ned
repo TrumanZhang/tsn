@@ -21,7 +21,7 @@ import inet.applications.contract.IApp;
 //
 // TODO auto-generated module
 //
-simple UdpScheduledTrafficApp like IApp
+simple UdpScheduledTrafficGenerator like IApp
 {
     parameters:
         @display("i=block/app");
