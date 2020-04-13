@@ -13,23 +13,23 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "nesting/common/schedule/SendDatagramScheduleManager.h"
+#include "nesting/common/schedule/DatagramScheduleManager.h"
 #include "nesting/common/schedule/ScheduleFactory.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace nesting {
 
-Define_Module(SendDatagramScheduleManager);
+Define_Module(DatagramScheduleManager);
 
-const SendDatagramEvent SendDatagramScheduleManager::initialAdminState() const
+const SendDatagramEvent DatagramScheduleManager::initialAdminState() const
 {
     SendDatagramEvent evt;
     evt.setPayloadSize(B(0));
     return evt;
 }
 
-std::shared_ptr<const Schedule<SendDatagramEvent>> SendDatagramScheduleManager::initialAdminSchedule() const
+std::shared_ptr<const Schedule<SendDatagramEvent>> DatagramScheduleManager::initialAdminSchedule() const
 {
     Schedule<SendDatagramEvent>* scheduleRawPtr = ScheduleFactory::createDatagramSchedule(par("initialAdminSchedule"));
     return std::shared_ptr<const Schedule<SendDatagramEvent>>(scheduleRawPtr);

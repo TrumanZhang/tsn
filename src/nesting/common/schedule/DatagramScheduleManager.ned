@@ -15,7 +15,7 @@
 
 package nesting.common.schedule;
 
-simple SendDatagramScheduleManager
+simple DatagramScheduleManager
 {
     parameters:
         @display("i=block/table2");

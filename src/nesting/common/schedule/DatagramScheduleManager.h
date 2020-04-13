@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef NESTING_COMMON_SCHEDULE_SENDDATAGRAMSCHEDULEMANAGER_H_
-#define NESTING_COMMON_SCHEDULE_SENDDATAGRAMSCHEDULEMANAGER_H_
+#ifndef NESTING_COMMON_SCHEDULE_DATAGRAMSCHEDULEMANAGER_H_
+#define NESTING_COMMON_SCHEDULE_DATAGRAMSCHEDULEMANAGER_H_
 
 #include <omnetpp.h>
 
@@ -27,7 +27,7 @@ using namespace omnetpp;
 
 namespace nesting {
 
-class SendDatagramScheduleManager : public ScheduleManager<SendDatagramEvent>
+class DatagramScheduleManager : public ScheduleManager<SendDatagramEvent>
 {
 protected:
     /** @copydoc Schedule::initialAdminState() */
