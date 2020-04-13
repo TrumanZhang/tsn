@@ -39,8 +39,10 @@ template<typename T>
 class ScheduleManager : public cSimpleModule, public IClock2::TimestampListener {
 public:
     class IOperStateListener {
+        friend ScheduleManager;
     public:
         virtual ~IOperStateListener() {};
+    protected:
         virtual void onOperStateChange(T oldState, T newState) = 0;
     };
 protected:
