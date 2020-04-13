@@ -29,9 +29,9 @@ class SendDatagramEvent {
 protected:
     L3Address destAddress;
     uint64_t destPort = 0;
-    uint64_t priorityCodePoint = 0;
-    bool dropEligible = 0;
-    uint64_t vlanId = 0;
+    uint64_t priorityCodePoint = 1;
+    bool dropEligible = false;
+    uint64_t vlanId = 1;
     b payloadSize = B(0);
 public:
     void setDestAddress(const L3Address& destAddress);
