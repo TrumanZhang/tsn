@@ -130,7 +130,7 @@ simtime_t ScheduleFactory::getCycleTimeAttribute(cXMLElement* xml)
 
 simtime_t ScheduleFactory::getCycleTimeExtensionAttribute(cXMLElement* xml)
 {
-    const char* cycleTimeExtension = xml->getAttribute("CycleTimeExtension");
+    const char* cycleTimeExtension = xml->getAttribute("cycleTimeExtension");
     if (cycleTimeExtension != nullptr) {
         return SimTime::parse(cycleTimeExtension);
     } else {
@@ -180,7 +180,7 @@ uint64_t ScheduleFactory::getPriorityCodePointAttribute(cXMLElement* xml)
     if (pcp != nullptr) {
         return atoi(pcp);
     } else {
-        return 0;
+        return SendDatagramEvent().getPriorityCodePoint();
     }
 }
 
@@ -190,7 +190,7 @@ bool ScheduleFactory::getDropEligibleIndicatorAttribute(cXMLElement* xml)
     if (de != nullptr) {
         return parseBool(de);
     } else {
-        return false;
+        return SendDatagramEvent().isDropEligible();
     }
 }
 
@@ -200,7 +200,7 @@ uint64_t ScheduleFactory::getVlanIdAttribute(cXMLElement* xml)
     if (vid != nullptr) {
         return atoi(vid);
     } else {
-        return 0;
+        return SendDatagramEvent().getVlanId();
     }
 }
 
