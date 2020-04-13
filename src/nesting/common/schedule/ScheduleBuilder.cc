@@ -15,6 +15,12 @@
 
 #include "nesting/common/schedule/ScheduleBuilder.h"
 
+#include "inet/networklayer/common/L3AddressResolver.h"
+
+#include <cstring>
+#include <stdexcept>
+#include <sstream>
+
 namespace nesting {
 
 Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(cXMLElement *xml)
@@ -48,33 +54,17 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorScheduleV2(cXMLElem
 {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 
-    // Parse BaseTime
-    const char* baseTime = xml->getAttribute("BaseTime");
-    if (baseTime == nullptr) {
-        throw cRuntimeError("No \"BaseTime\" attribute defined in schedule XML element!");
-    }
-    schedule->setBaseTime(SimTime::parse(baseTime));
-
-    // Parse CycleTime
-    const char* cycleTime = xml->getAttribute("CycleTime");
-    if (cycleTime == nullptr) {
-        throw cRuntimeError("No \"CycleTime\" attribute defined in schedule XML element!");
-    }
-    schedule->setCycleTime(SimTime::parse(cycleTime));
+    // Parse BaseTime, CycleTime, CycleTimeExtension
+    schedule->setBaseTime(getBaseTimeAttribute(xml));
+    schedule->setCycleTime(getCycleTimeAttribute(xml));
+    schedule->setCycleTimeExtension(getCycleTimeExtensionAttribute(xml));
 
     // Parse schedule entries
     std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
     for (cXMLElement* entry : entries) {
-        // Parse TimeInterval and GateStates
-        const char* gateStates = entry->getAttribute("GateStates");
-        if (gateStates == nullptr) {
-            throw cRuntimeError("No \"GateStates\" attribute defined in schedule entry XML element!");
-        }
-        const char* timeInterval = entry->getAttribute("TimeInterval");
-        if (timeInterval == nullptr) {
-            throw cRuntimeError("No \"TimeInterval\" attribute defined in schedule entry XML element!");
-        }
-        schedule->addControlListEntry(SimTime::parse(timeInterval), GateBitvector(gateStates));
+        GateBitvector gateBitvector = getGateBitvectorAttribute(entry);
+        simtime_t timeInterval = getTimeIntervalAttribute(entry);
+        schedule->addControlListEntry(timeInterval, gateBitvector);
     }
 
     return schedule;
@@ -91,6 +81,149 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(cXMLEle
     schedule->addControlListEntry(length, bitvector);
     schedule->setCycleTime(length);
     return schedule;
+}
+
+Schedule<SendDatagramEvent>* ScheduleBuilder::createDatagramSchedule(cXMLElement *xml)
+{
+    Schedule<SendDatagramEvent>* schedule = new Schedule<SendDatagramEvent>();
+
+    // Parse BaseTime, CycleTime, CycleTimeExtension
+    schedule->setBaseTime(getBaseTimeAttribute(xml));
+    schedule->setCycleTime(getCycleTimeAttribute(xml));
+    schedule->setCycleTimeExtension(getCycleTimeExtensionAttribute(xml));
+
+    // Parse schedule entries
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    for (cXMLElement* entry : entries) {
+        SendDatagramEvent evt;
+        evt.setDestAddress(getDestAddressAttribute(entry));
+        evt.setDestPort(getDestPortAttribute(entry));
+        evt.setPriorityCodePoint(getPriorityCodePointAttribute(entry));
+        evt.setDropEligible(getDropEligibleIndicatorAttribute(entry));
+        evt.setVlanId(getVlanIdAttribute(entry));
+        evt.setPayloadSize(getPayloadSizeAttribute(entry));
+        simtime_t timeInterval = getTimeIntervalAttribute(entry);
+        schedule->addControlListEntry(timeInterval, evt);
+    }
+
+    return schedule;
+}
+
+simtime_t ScheduleBuilder::getBaseTimeAttribute(cXMLElement* xml)
+{
+    const char* baseTime = xml->getAttribute("baseTime");
+    if (baseTime != nullptr) {
+        return SimTime::parse(baseTime);
+    } else {
+        return SimTime::ZERO;
+    }
+}
+
+simtime_t ScheduleBuilder::getCycleTimeAttribute(cXMLElement* xml)
+{
+    const char* cycleTime = xml->getAttribute("cycleTime");
+    if (cycleTime == nullptr) {
+        throw cRuntimeError("No \"CycleTime\" attribute defined in XML element!");
+    }
+    return SimTime::parse(cycleTime);
+}
+
+simtime_t ScheduleBuilder::getCycleTimeExtensionAttribute(cXMLElement* xml)
+{
+    const char* cycleTimeExtension = xml->getAttribute("CycleTimeExtension");
+    if (cycleTimeExtension != nullptr) {
+        return SimTime::parse(cycleTimeExtension);
+    } else {
+        return SimTime::ZERO;
+    }
+}
+
+GateBitvector ScheduleBuilder::getGateBitvectorAttribute(cXMLElement* xml)
+{
+    const char* gateStates = xml->getAttribute("gateStates");
+    if (gateStates == nullptr) {
+        throw cRuntimeError("No \"GateStates\" attribute defined in XML element!");
+    }
+    return GateBitvector(gateStates);
+}
+
+simtime_t ScheduleBuilder::getTimeIntervalAttribute(cXMLElement* xml)
+{
+    const char* timeInterval = xml->getAttribute("timeInterval");
+    if (timeInterval == nullptr) {
+        throw cRuntimeError("No \"TimeInterval\" attribute defined in XML element!");
+    }
+    return SimTime::parse(timeInterval);
+}
+
+L3Address ScheduleBuilder::getDestAddressAttribute(cXMLElement* xml)
+{
+    const char* destAddress = xml->getAttribute("destAddress");
+    if (destAddress == nullptr) {
+        throw cRuntimeError("No \"DestAddress\" attribute defined in XML element!");
+    }
+    return L3AddressResolver().resolve(destAddress);
+}
+
+uint64_t ScheduleBuilder::getDestPortAttribute(cXMLElement* xml)
+{
+    const char* destPort = xml->getAttribute("destPort");
+    if (destPort == nullptr) {
+        throw cRuntimeError("No \"DestPort\" attribute defined in XML element!");
+    }
+    return atoi(destPort);
+}
+
+uint64_t ScheduleBuilder::getPriorityCodePointAttribute(cXMLElement* xml)
+{
+    const char* pcp = xml->getAttribute("pcp");
+    if (pcp != nullptr) {
+        return atoi(pcp);
+    } else {
+        return 0;
+    }
+}
+
+bool ScheduleBuilder::getDropEligibleIndicatorAttribute(cXMLElement* xml)
+{
+    const char* de = xml->getAttribute("de");
+    if (de != nullptr) {
+        return parseBool(de);
+    } else {
+        return false;
+    }
+}
+
+uint64_t ScheduleBuilder::getVlanIdAttribute(cXMLElement* xml)
+{
+    const char* vid = xml->getAttribute("vid");
+    if (vid != nullptr) {
+        return atoi(vid);
+    } else {
+        return 0;
+    }
+}
+
+b ScheduleBuilder::getPayloadSizeAttribute(cXMLElement* xml)
+{
+    const char* payloadSize = xml->getAttribute("payloadSize");
+    if (payloadSize == nullptr) {
+        throw cRuntimeError("No \"PayloadSize\" attribute defined in XML element!");
+    } 
+    return b(static_cast<int64_t>(std::ceil(cNedValue::parseQuantity(payloadSize, "b"))));
+}
+
+bool ScheduleBuilder::parseBool(const char* cstring)
+{
+    if (strcmp(cstring, "True") == 0 || strcmp(cstring, "true") || strcmp(cstring, "1")) {
+        return true;
+    } else if (strcmp(cstring, "false") == 0 || strcmp(cstring, "False") || strcmp(cstring, "0")) {
+        return false;
+    } else {
+        std::ostringstream buffer;
+        buffer << "Failed to parse bool value from string \"" << cstring << "\".";
+        throw cRuntimeError(buffer.str().c_str());
+    }
 }
 
 } // namespace nesting
