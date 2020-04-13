@@ -50,7 +50,7 @@ Schedule<GateBitvector>* ScheduleFactory::createGateBitvectorSchedule(cXMLElemen
     return schedule;
 }
 
-Schedule<GateBitvector>* ScheduleFactory::createGateBitvectorScheduleV2(cXMLElement *xml)
+Schedule<GateBitvector>* ScheduleFactory::createGateSchedule(cXMLElement *xml)
 {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 

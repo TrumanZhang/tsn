@@ -21,7 +21,7 @@ simple Test
 }
 
 %activity:
-std::shared_ptr<Schedule<GateBitvector>> gateSchedule(nesting::ScheduleFactory::createGateBitvectorScheduleV2(par("gateSchedule")));
+std::shared_ptr<Schedule<GateBitvector>> gateSchedule(nesting::ScheduleFactory::createGateSchedule(par("gateSchedule")));
 ASSERT_NOT_EQUAL(gateSchedule, nullptr);
 ASSERT_EQUAL(gateSchedule->getControlListLength(), 2);
 ASSERT_EQUAL(gateSchedule->getBaseTime(), SimTime(3, SIMTIME_US));

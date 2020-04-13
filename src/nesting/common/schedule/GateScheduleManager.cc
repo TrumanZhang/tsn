@@ -30,7 +30,7 @@ const GateBitvector GateScheduleManager::initialAdminState() const
 std::shared_ptr<const Schedule<GateBitvector>> GateScheduleManager::initialAdminSchedule() const
 {
     cXMLElement* xml = par("initialAdminSchedule");
-    Schedule<GateBitvector>* scheduleRawPtr = ScheduleFactory::createGateBitvectorScheduleV2(xml);
+    Schedule<GateBitvector>* scheduleRawPtr = ScheduleFactory::createGateSchedule(xml);
     std::shared_ptr<Schedule<GateBitvector>> schedule(scheduleRawPtr);
     schedule->normalize();
     return schedule;

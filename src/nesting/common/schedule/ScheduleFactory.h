@@ -41,7 +41,7 @@ public:
      */
     static Schedule<GateBitvector>* createGateBitvectorSchedule(cXMLElement *xml);
 
-    static Schedule<GateBitvector>* createGateBitvectorScheduleV2(cXMLElement *xml);
+    static Schedule<GateBitvector>* createGateSchedule(cXMLElement *xml);
 
     /**
      * Creates a schedule containing one entry that opens all gates for the whole cycle duration
