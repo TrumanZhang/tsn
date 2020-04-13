@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef NESTING_COMMON_SCHEDULE_SCHEDULEBUILDER_H_
-#define NESTING_COMMON_SCHEDULE_SCHEDULEBUILDER_H_
+#ifndef NESTING_COMMON_SCHEDULE_SCHEDULEFACTORY_H_
+#define NESTING_COMMON_SCHEDULE_SCHEDULEFACTORY_H_
 
 #include <omnetpp.h>
 
@@ -31,7 +31,7 @@ namespace nesting {
 /**
  * Utility class to build schedules from e.g. XML files.
  */
-class ScheduleBuilder final {
+class ScheduleFactory final {
 public:
     /**
      * Creates a schedule for containing bit vectors for transmission gates
@@ -81,4 +81,4 @@ private:
 
 } // namespace nesting
 
-#endif /* NESTING_COMMON_SCHEDULE_SCHEDULEBUILDER_H_ */
+#endif

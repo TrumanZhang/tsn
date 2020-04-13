@@ -14,7 +14,7 @@
 //
 
 #include "nesting/common/schedule/GateScheduleManager.h"
-#include "nesting/common/schedule/ScheduleBuilder.h"
+#include "nesting/common/schedule/ScheduleFactory.h"
 
 namespace nesting {
 
@@ -30,7 +30,7 @@ const GateBitvector GateScheduleManager::initialAdminState() const
 std::shared_ptr<const Schedule<GateBitvector>> GateScheduleManager::initialAdminSchedule() const
 {
     cXMLElement* xml = par("initialAdminSchedule");
-    Schedule<GateBitvector>* scheduleRawPtr = ScheduleBuilder::createGateBitvectorScheduleV2(xml);
+    Schedule<GateBitvector>* scheduleRawPtr = ScheduleFactory::createGateBitvectorScheduleV2(xml);
     std::shared_ptr<Schedule<GateBitvector>> schedule(scheduleRawPtr);
     schedule->normalize();
     return schedule;

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "nesting/common/schedule/ScheduleBuilder.h"
+#include "nesting/common/schedule/ScheduleFactory.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -23,7 +23,7 @@
 
 namespace nesting {
 
-Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(cXMLElement *xml)
+Schedule<GateBitvector>* ScheduleFactory::createGateBitvectorSchedule(cXMLElement *xml)
 {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 
@@ -50,7 +50,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorSchedule(cXMLElemen
     return schedule;
 }
 
-Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorScheduleV2(cXMLElement *xml)
+Schedule<GateBitvector>* ScheduleFactory::createGateBitvectorScheduleV2(cXMLElement *xml)
 {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
 
@@ -70,7 +70,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createGateBitvectorScheduleV2(cXMLElem
     return schedule;
 }
 
-Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(cXMLElement *xml)
+Schedule<GateBitvector>* ScheduleFactory::createDefaultBitvectorSchedule(cXMLElement *xml)
 {
     Schedule<GateBitvector>* schedule = new Schedule<GateBitvector>();
     const char* lengthCString =
@@ -83,7 +83,7 @@ Schedule<GateBitvector>* ScheduleBuilder::createDefaultBitvectorSchedule(cXMLEle
     return schedule;
 }
 
-Schedule<SendDatagramEvent>* ScheduleBuilder::createDatagramSchedule(cXMLElement *xml)
+Schedule<SendDatagramEvent>* ScheduleFactory::createDatagramSchedule(cXMLElement *xml)
 {
     Schedule<SendDatagramEvent>* schedule = new Schedule<SendDatagramEvent>();
 
@@ -109,7 +109,7 @@ Schedule<SendDatagramEvent>* ScheduleBuilder::createDatagramSchedule(cXMLElement
     return schedule;
 }
 
-simtime_t ScheduleBuilder::getBaseTimeAttribute(cXMLElement* xml)
+simtime_t ScheduleFactory::getBaseTimeAttribute(cXMLElement* xml)
 {
     const char* baseTime = xml->getAttribute("baseTime");
     if (baseTime != nullptr) {
@@ -119,7 +119,7 @@ simtime_t ScheduleBuilder::getBaseTimeAttribute(cXMLElement* xml)
     }
 }
 
-simtime_t ScheduleBuilder::getCycleTimeAttribute(cXMLElement* xml)
+simtime_t ScheduleFactory::getCycleTimeAttribute(cXMLElement* xml)
 {
     const char* cycleTime = xml->getAttribute("cycleTime");
     if (cycleTime == nullptr) {
@@ -128,7 +128,7 @@ simtime_t ScheduleBuilder::getCycleTimeAttribute(cXMLElement* xml)
     return SimTime::parse(cycleTime);
 }
 
-simtime_t ScheduleBuilder::getCycleTimeExtensionAttribute(cXMLElement* xml)
+simtime_t ScheduleFactory::getCycleTimeExtensionAttribute(cXMLElement* xml)
 {
     const char* cycleTimeExtension = xml->getAttribute("CycleTimeExtension");
     if (cycleTimeExtension != nullptr) {
@@ -138,7 +138,7 @@ simtime_t ScheduleBuilder::getCycleTimeExtensionAttribute(cXMLElement* xml)
     }
 }
 
-GateBitvector ScheduleBuilder::getGateBitvectorAttribute(cXMLElement* xml)
+GateBitvector ScheduleFactory::getGateBitvectorAttribute(cXMLElement* xml)
 {
     const char* gateStates = xml->getAttribute("gateStates");
     if (gateStates == nullptr) {
@@ -147,7 +147,7 @@ GateBitvector ScheduleBuilder::getGateBitvectorAttribute(cXMLElement* xml)
     return GateBitvector(gateStates);
 }
 
-simtime_t ScheduleBuilder::getTimeIntervalAttribute(cXMLElement* xml)
+simtime_t ScheduleFactory::getTimeIntervalAttribute(cXMLElement* xml)
 {
     const char* timeInterval = xml->getAttribute("timeInterval");
     if (timeInterval == nullptr) {
@@ -156,7 +156,7 @@ simtime_t ScheduleBuilder::getTimeIntervalAttribute(cXMLElement* xml)
     return SimTime::parse(timeInterval);
 }
 
-L3Address ScheduleBuilder::getDestAddressAttribute(cXMLElement* xml)
+L3Address ScheduleFactory::getDestAddressAttribute(cXMLElement* xml)
 {
     const char* destAddress = xml->getAttribute("destAddress");
     if (destAddress == nullptr) {
@@ -165,7 +165,7 @@ L3Address ScheduleBuilder::getDestAddressAttribute(cXMLElement* xml)
     return L3AddressResolver().resolve(destAddress);
 }
 
-uint64_t ScheduleBuilder::getDestPortAttribute(cXMLElement* xml)
+uint64_t ScheduleFactory::getDestPortAttribute(cXMLElement* xml)
 {
     const char* destPort = xml->getAttribute("destPort");
     if (destPort == nullptr) {
@@ -174,7 +174,7 @@ uint64_t ScheduleBuilder::getDestPortAttribute(cXMLElement* xml)
     return atoi(destPort);
 }
 
-uint64_t ScheduleBuilder::getPriorityCodePointAttribute(cXMLElement* xml)
+uint64_t ScheduleFactory::getPriorityCodePointAttribute(cXMLElement* xml)
 {
     const char* pcp = xml->getAttribute("pcp");
     if (pcp != nullptr) {
@@ -184,7 +184,7 @@ uint64_t ScheduleBuilder::getPriorityCodePointAttribute(cXMLElement* xml)
     }
 }
 
-bool ScheduleBuilder::getDropEligibleIndicatorAttribute(cXMLElement* xml)
+bool ScheduleFactory::getDropEligibleIndicatorAttribute(cXMLElement* xml)
 {
     const char* de = xml->getAttribute("de");
     if (de != nullptr) {
@@ -194,7 +194,7 @@ bool ScheduleBuilder::getDropEligibleIndicatorAttribute(cXMLElement* xml)
     }
 }
 
-uint64_t ScheduleBuilder::getVlanIdAttribute(cXMLElement* xml)
+uint64_t ScheduleFactory::getVlanIdAttribute(cXMLElement* xml)
 {
     const char* vid = xml->getAttribute("vid");
     if (vid != nullptr) {
@@ -204,7 +204,7 @@ uint64_t ScheduleBuilder::getVlanIdAttribute(cXMLElement* xml)
     }
 }
 
-b ScheduleBuilder::getPayloadSizeAttribute(cXMLElement* xml)
+b ScheduleFactory::getPayloadSizeAttribute(cXMLElement* xml)
 {
     const char* payloadSize = xml->getAttribute("payloadSize");
     if (payloadSize == nullptr) {
@@ -213,7 +213,7 @@ b ScheduleBuilder::getPayloadSizeAttribute(cXMLElement* xml)
     return b(static_cast<int64_t>(std::ceil(cNedValue::parseQuantity(payloadSize, "b"))));
 }
 
-bool ScheduleBuilder::parseBool(const char* cstring)
+bool ScheduleFactory::parseBool(const char* cstring)
 {
     if (strcmp(cstring, "True") == 0 || strcmp(cstring, "true") || strcmp(cstring, "1")) {
         return true;
