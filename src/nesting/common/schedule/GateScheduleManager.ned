@@ -22,5 +22,5 @@ simple GateScheduleManager
         string clockModule; // Path to clock module implementing IClock2 interface
         bool gateEnabled = default(false); // If gateEnabled is true, then operGateStates will be set from the current schedule (operSchedule).
         string initialAdminGateStates = default("11111111"); // Default bitvector (8bit) for operGateStates if gateEnabled is false.
-        xml initialAdminSchedule = default(xml("<schedule BaseTime=\"0s\" CycleTime=\"100us\"><entry GateStates=\"11111111\" TimeInterval=\"100us\"/></schedule>")); // schedule that will be loaded initially if gateEnabled is true.
+        xml initialAdminSchedule = default(xml("<schedule CycleTime=\"1h\"><entry GateStates=\"11111111\" TimeInterval=\"1h\"/></schedule>")); // schedule that will be loaded initially if gateEnabled is true.
 }
