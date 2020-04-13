@@ -158,7 +158,9 @@ protected:
      */
     virtual void scheduleNextTick();
 
-    virtual simtime_t globalSchedulingTimeForTick(uint64_t idleTicks) = 0;
+    virtual simtime_t globalTimeFromTick(uint64_t idleTicks) = 0;
+
+    virtual uint64_t tickFromGlobalTime(simtime_t globalTime) = 0;
 };
 
 // Useful for logging oscillator ticks

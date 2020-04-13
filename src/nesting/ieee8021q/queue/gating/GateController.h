@@ -28,7 +28,7 @@
 
 #include "nesting/linklayer/framePreemption/EtherMACFullDuplexPreemptable.h"
 #include "nesting/common/schedule/Schedule.h"
-#include "nesting/common/schedule/ScheduleBuilder.h"
+#include "nesting/common/schedule/ScheduleFactory.h"
 #include "nesting/ieee8021q/Ieee8021q.h"
 #include "nesting/ieee8021q/queue/TransmissionSelection.h"
 #include "nesting/ieee8021q/queue/gating/TransmissionGate.h"

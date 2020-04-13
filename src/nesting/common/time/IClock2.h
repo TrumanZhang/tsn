@@ -69,7 +69,7 @@ public:
     public:
         virtual ~TimestampListener() {};
 
-        virtual void onTimestamp(IClock2& clock, std::shared_ptr<const Timestamp>) = 0;
+        virtual void onTimestamp(IClock2& clock, std::shared_ptr<const Timestamp> timestamp) = 0;
     };
 
     class ConfigListener {

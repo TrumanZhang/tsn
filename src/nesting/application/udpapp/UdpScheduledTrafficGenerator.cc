@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "nesting/application/udpapp/UdpScheduledTrafficApp.h"
+#include "nesting/application/udpapp/UdpScheduledTrafficGenerator.h"
 
 namespace nesting {
 
-Define_Module(UdpScheduledTrafficApp);
+Define_Module(UdpScheduledTrafficGenerator);
 
-void UdpScheduledTrafficApp::initialize(int stage)
+void UdpScheduledTrafficGenerator::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == inet::INITSTAGE_LOCAL) {
@@ -31,47 +31,47 @@ void UdpScheduledTrafficApp::initialize(int stage)
     }
 }
 
-void UdpScheduledTrafficApp::finish()
+void UdpScheduledTrafficGenerator::finish()
 {
     // TODO - Generated method body
 }
 
-void UdpScheduledTrafficApp::handleMessageWhenUp(cMessage *msg)
+void UdpScheduledTrafficGenerator::handleMessageWhenUp(cMessage *msg)
 {
     // TODO
 }
 
-void UdpScheduledTrafficApp::handleStartOperation(inet::LifecycleOperation *operation)
+void UdpScheduledTrafficGenerator::handleStartOperation(inet::LifecycleOperation *operation)
 {
     // TODO
 }
 
-void UdpScheduledTrafficApp::handleStopOperation(inet::LifecycleOperation *operation)
+void UdpScheduledTrafficGenerator::handleStopOperation(inet::LifecycleOperation *operation)
 {
     // TODO
 }
 
-void UdpScheduledTrafficApp::handleCrashOperation(inet::LifecycleOperation *operation)
+void UdpScheduledTrafficGenerator::handleCrashOperation(inet::LifecycleOperation *operation)
 {
     // TODO
 }
 
-void UdpScheduledTrafficApp::socketDataArrived(inet::UdpSocket *socket, inet::Packet *packet)
+void UdpScheduledTrafficGenerator::socketDataArrived(inet::UdpSocket *socket, inet::Packet *packet)
 {
     // TODO
 }
 
-void UdpScheduledTrafficApp::socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication)
+void UdpScheduledTrafficGenerator::socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication)
 {
     // TODO
 }
 
-void UdpScheduledTrafficApp::socketClosed(inet::UdpSocket *socket)
+void UdpScheduledTrafficGenerator::socketClosed(inet::UdpSocket *socket)
 {
     // TODO
 }
 
-Schedule<UdpScheduledTrafficApp::SendEvent> UdpScheduledTrafficApp::buildSchedule(cXMLElement *xml)
+Schedule<UdpScheduledTrafficGenerator::SendEvent> UdpScheduledTrafficGenerator::buildSchedule(cXMLElement *xml)
 {
     // TODO
     return Schedule<SendEvent>();

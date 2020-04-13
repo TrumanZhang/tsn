@@ -16,28 +16,42 @@
 #ifndef NESTING_COMMON_SCHEDULE_SCHEDULE_H_
 #define NESTING_COMMON_SCHEDULE_SCHEDULE_H_
 
-#include <omnetpp.h>
-#include <bitset>
 #include <vector>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
 
 using namespace omnetpp;
 
 namespace nesting {
 
 /**
- * A schedule is more or less a list consisting of tuples of scheduled objects and time intervals.
- * For more information about terminologies and context see chapters 8.6.8.4 and 8.6.9 of the IEEE802.1Q standard.
+ * A schedule is more or less a list consisting of tuples of scheduled objects
+ * and time intervals. We call this the control list. There is also a cycle
+ * time, base time and cycle time extension attribute associated with the
+ * schedule.
+ *
+ * For more information about terminologies and context see chapters 8.6.8.4
+ * and 8.6.9 of the IEEE802.1Q standard.
+ *
+ * If the sum of all time intervals for the entries in the control list exceeds
+ * the cycle time, then for scheduling purposes only the entries must be
+ * considered that fit within the cycle time and the last valid entry might be
+ * shortened. Similarly, in schedules where the cycle time is shorter that the
+ * sum of all time intervals, the last entry must be extended.
  */
 template<typename T>
-class Schedule : public cObject {
+class Schedule {
     /** Tuple consisting of a time interval and a scheduled object. */
     struct ControlListEntry {
         simtime_t timeInterval;
         T scheduledObject;
     };
 protected:
-    /** The control list contains tuples of time intervals and scheduled objects. */
+    /**
+     * The control list contains tuples of time intervals and scheduled
+     * objects.
+     */
     std::vector<ControlListEntry> controlList;
 
     /**
@@ -47,6 +61,7 @@ protected:
      */
     simtime_t baseTime;
 
+    /** Time period of one cycle. After each cycle the schedule is repeated. */
     simtime_t cycleTime;
 
     simtime_t cycleTimeExtension;
@@ -108,6 +123,9 @@ public:
     }
 
     virtual void addControlListEntry(simtime_t timeInterval, T scheduledObject) {
+        if (timeInterval < SimTime::ZERO) {
+            throw cRuntimeError("Control list entries only allow positive time intervals.");
+        }
         sumTimeIntervals += timeInterval;
         ControlListEntry entry;
         entry.timeInterval = timeInterval;
@@ -115,26 +133,87 @@ public:
         controlList.push_back(entry);
     }
 
+    /** Returns the sum of all time intervals from all entries. */
     virtual simtime_t getSumTimeIntervals() const {
         return sumTimeIntervals;
     }
 
-    virtual std::string str() const override
+    /**
+     * Returns true if sumTimeIntervals is equal to cycleTime. Every schedule
+     * can be transformed into a normalized schedule by (1) either extending
+     * the last entry so that sumTimeIntervals is equal to cycleTime or (2) by
+     * removing/shortening the last entries.
+     *
+     * @see Schedule::normalize()
+     */
+    virtual bool isNormalized() const
     {
-        std::ostringstream buffer;
-        buffer << "baseTime=" << getBaseTime() 
-            << ", cycleTime=" << getCycleTime()
-            << ", cycleTimeExtension=" << getCycleTimeExtension()
-            << ", controlListLength=" << getControlListLength()
-            << ", sumTimeIntervals=" << getSumTimeIntervals();
-        return buffer.str();
+        return sumTimeIntervals == cycleTime;
+    }
+
+    /**
+     * Normalizes the schedule so that sumTimeIntervals is equal to cycleTime.
+     * Therefore entries in controlList will be prolonged or
+     * shortended/removed. A normalized schedule semantically stays the same,
+     * but is easier to work with, because it allow to get rid of some special
+     * cases.
+     */
+    virtual void normalize()
+    {
+        // Case 1: Last entry has to be extended.
+        if (sumTimeIntervals < cycleTime) {
+            ControlListEntry& lastEntry = controlList[controlList.size() - 1];
+            simtime_t timeIntervalExtension = cycleTime - sumTimeIntervals;
+            lastEntry.timeInterval += timeIntervalExtension;
+            sumTimeIntervals += timeIntervalExtension;
+        }
+        // Case 2: Entries have to be removed/shortened.
+        else if (sumTimeIntervals > cycleTime) {
+            simtime_t timeReduction = sumTimeIntervals - cycleTime;
+            for (int i = controlList.size() - 1; i >= 0; i--) {
+                ControlListEntry& lastEntry = controlList[i];
+                // Remove entry
+                if (lastEntry.timeInterval <= timeReduction) {
+                    sumTimeIntervals -= lastEntry.timeInterval;
+                    timeReduction -= lastEntry.timeInterval;
+                    controlList.resize(i);
+                    // We can stop if timeReduction is equal to zero.
+                    if (timeReduction <= SimTime::ZERO) {
+                        assert(timeReduction == SimTime::ZERO);
+                        break;
+                    }
+                }
+                // … or shorten it.
+                else {
+                    lastEntry.timeInterval -= timeReduction;
+                    sumTimeIntervals -= timeReduction;
+                    // timeReduction = SimTime::ZERO;
+                    break;
+                }
+            }
+        }
+
+        // Postcondition: Schedule is normalized
+        assert(isNormalized());
     }
 };
 
+// Overload stream operator for schedule objects.
 template<typename T>
 std::ostream& operator<<(std::ostream& stream, const Schedule<T>& schedule)
 {
-    return stream << "Schedule[" << schedule.str() << "]";
+    return stream << "Schedule[baseTime=" << schedule.getBaseTime() 
+            << ", cycleTime=" << schedule.getCycleTime()
+            << ", cycleTimeExtension=" << schedule.getCycleTimeExtension()
+            << ", controlListLength=" << schedule.getControlListLength()
+            << ", sumTimeIntervals=" << schedule.getSumTimeIntervals() << "]";
+}
+
+// Overload stream operator for schedule objects wrapped in smart pointers.
+template<typename T>
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<const Schedule<T>>& schedule)
+{
+    return stream << *schedule;
 }
 
 } // namespace nesting

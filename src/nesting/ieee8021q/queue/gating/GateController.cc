@@ -100,8 +100,6 @@ void GateController::initialize(int stage) {
             }
         }
         clock->subscribeTick(this, 0);
-
-        WATCH_PTR(currentSchedule);
     }
 }
 
@@ -279,7 +277,7 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
                     && host->getAttribute("name") == switchString) {
                 for (cXMLElement* port : host->getChildrenByTagName("port")) {
                     if (port->getAttribute("id") == portString) {
-                        schedule = ScheduleBuilder::createGateBitvectorSchedule(
+                        schedule = ScheduleFactory::createGateBitvectorSchedule(
                                 port);
                         realScheduleFound = true;
                         break;
@@ -296,12 +294,12 @@ void GateController::loadScheduleOrDefault(cXMLElement* xml) {
 //if the schedule xml does not contain scheduling information for this port,
 //create a schedule that has the same cycle as the others, but opens all gates the entire time
         if (!realScheduleFound) {
-            schedule = ScheduleBuilder::createDefaultBitvectorSchedule(xml);
+            schedule = ScheduleFactory::createDefaultBitvectorSchedule(xml);
         }
     } else {
 //use the default xml that has no entry, but a default cycle defined
         cXMLElement* defaultXml = par("emptySchedule").xmlValue();
-        schedule = ScheduleBuilder::createGateBitvectorSchedule(defaultXml);
+        schedule = ScheduleFactory::createGateBitvectorSchedule(defaultXml);
     }
 
     EV_DEBUG << getFullPath() << ": Loading schedule. Cycle is "
