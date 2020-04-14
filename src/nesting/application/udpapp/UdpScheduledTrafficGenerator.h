@@ -40,6 +40,7 @@ protected:
     int numReceived = 0;
     UdpSocket socket;
     cMessage selfMsg;
+    bool dontFragment = false;
     enum SelfMsgKinds {
         START = 1,
         SEND,

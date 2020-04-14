@@ -1,6 +1,71 @@
 %description:
 TODO
 
+%file: package.ned
+package @TESTNAME@;
+@namespace(nesting);
+
+%file: test.ned
+package @TESTNAME@;
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EtherSwitch;
+import nesting.node.nesting.NestingStandardHost;
+import ned.DatarateChannel;
+
+
+channel cable extends DatarateChannel
+{
+    parameters:
+        delay = 0;
+        datarate = 1Gbps;
+}
+
+network Sim
+{
+    parameters:
+        @display("bgb=196.64334,121.1");
+    submodules:
+        s0: EtherSwitch {
+            @display("p=121.67667,58.82");
+        }
+        h0: NestingStandardHost {
+            @display("p=88.80666,23.643333");
+        }
+        h1: NestingStandardHost {
+            @display("p=155.12334,23.643333");
+        }
+        h2: NestingStandardHost {
+            @display("p=88.80666,93.996666");
+        }
+        h3: NestingStandardHost {
+            @display("p=155.12334,93.996666");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            @display("is=s;p=30.563334,23.643333");
+        }
+    connections:
+        h0.ethg++ <--> cable <--> s0.ethg++;
+        h1.ethg++ <--> cable <--> s0.ethg++;
+        h2.ethg++ <--> cable <--> s0.ethg++;
+        h3.ethg++ <--> cable <--> s0.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+outputvectormanager-class="omnetpp::envir::SqliteOutputVectorManager"
+outputscalarmanager-class="omnetpp::envir::SqliteOutputScalarManager"
+
+network = Sim
+
+check-signals = true
+record-eventlog = false
+debug-on-errors = true
+result-dir = result_dir
+output-vector-file = result_dir/Sim_vec.sqlite
+output-scalar-file = result_dir/Sim_sca.sqlite
+sim-time-limit = 100ms
+
 %file: datagramSchedule.xml
 TODO
 

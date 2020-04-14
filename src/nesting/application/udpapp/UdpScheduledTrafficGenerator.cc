@@ -16,6 +16,7 @@
 #include "nesting/application/udpapp/UdpScheduledTrafficGenerator.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace nesting {
 
@@ -23,7 +24,7 @@ Define_Module(UdpScheduledTrafficGenerator);
 
 UdpScheduledTrafficGenerator::~UdpScheduledTrafficGenerator()
 {
-    cancelEvent(selfMsg);
+    cancelEvent(&selfMsg);
 }
 
 int UdpScheduledTrafficGenerator::numInitStages() const {
@@ -34,10 +35,12 @@ void UdpScheduledTrafficGenerator::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == inet::INITSTAGE_LOCAL) {
-        localPort = par("localPort").intValue();
+        localPort = par("localPort");
+        dontFragment = par("dontFragment");
+
         scheduleManager = getModuleFromPar<DatagramScheduleManager>(par("datagramScheduleManagerModule"), this);
         scheduleManager->subscribeOperStateChanges(*this);
-        // statistics
+
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -49,7 +52,7 @@ void UdpScheduledTrafficGenerator::finish()
     ApplicationBase::finish();
 }
 
-void UdpBasicApp::setSocketOptions()
+void UdpScheduledTrafficGenerator::setSocketOptions()
 {
     int timeToLive = par("timeToLive");
     if (timeToLive != -1)
@@ -116,7 +119,8 @@ void UdpScheduledTrafficGenerator::handleMessageWhenUp(cMessage *msg)
         case SEND:
             processSend();
         default:
-            throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
+            throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
+        }
     } else {
         socket.processMessage(msg);
     }

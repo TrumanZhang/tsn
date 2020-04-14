@@ -24,6 +24,8 @@ module NestingStandardHost extends StandardHost
 {
     parameters:
         @display("i=device/pc2");
+        **.clockModule = default(absPath(".clock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
     submodules:
         oscillator: <default("IdealOscillator")> like IOscillator {
             @display("p=196,211;is=s");
