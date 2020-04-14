@@ -38,10 +38,25 @@ protected:
     // statistics
     int numSent = 0;
     int numReceived = 0;
+    UdpSocket socket;
+    cMessage selfMsg;
+    enum SelfMsgKinds {
+        START = 1,
+        SEND,
+        STOP
+    };
+public:
+    virtual ~UdpScheduledTrafficGenerator();
 protected:
     virtual int numInitStages() const override;
     virtual void initialize(int stage);
     virtual void finish() override;
+    virtual void setSocketOptions();
+
+    virtual void processStart();
+    virtual void processSend();
+    virtual void processStop();
+    virtual void processPacket(Packet *msg);
 
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void handleStartOperation(inet::LifecycleOperation *operation) override;

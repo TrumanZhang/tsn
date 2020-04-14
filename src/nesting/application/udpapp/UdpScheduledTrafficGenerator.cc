@@ -21,6 +21,11 @@ namespace nesting {
 
 Define_Module(UdpScheduledTrafficGenerator);
 
+UdpScheduledTrafficGenerator::~UdpScheduledTrafficGenerator()
+{
+    cancelEvent(selfMsg);
+}
+
 int UdpScheduledTrafficGenerator::numInitStages() const {
     return inet::NUM_INIT_STAGES;
 }
@@ -41,11 +46,80 @@ void UdpScheduledTrafficGenerator::initialize(int stage)
 void UdpScheduledTrafficGenerator::finish()
 {
     scheduleManager->unsubscribeOperStateChanges(*this);
+    ApplicationBase::finish();
+}
+
+void UdpBasicApp::setSocketOptions()
+{
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        socket.setTimeToLive(timeToLive);
+
+    int typeOfService = par("typeOfService");
+    if (typeOfService != -1)
+        socket.setTypeOfService(typeOfService);
+
+    const char *multicastInterface = par("multicastInterface");
+    if (multicastInterface[0]) {
+        IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        InterfaceEntry *ie = ift->getInterfaceByName(multicastInterface);
+        if (!ie)
+            throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
+        socket.setMulticastOutputInterface(ie->getInterfaceId());
+    }
+
+    bool receiveBroadcast = par("receiveBroadcast");
+    if (receiveBroadcast)
+        socket.setBroadcast(true);
+
+    bool joinLocalMulticastGroups = par("joinLocalMulticastGroups");
+    if (joinLocalMulticastGroups) {
+        MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
+        socket.joinLocalMulticastGroups(mgl);
+    }
+    socket.setCallback(this);
+}
+
+void UdpScheduledTrafficGenerator::processStart()
+{
+    socket.setOutputGate(gate("socketOut"));
+    const char *localAddress = par("localAddress");
+    socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+    setSocketOptions();
+}
+
+void UdpScheduledTrafficGenerator::processSend()
+{
+    // TODO
+}
+
+void UdpScheduledTrafficGenerator::processStop()
+{
+    socket.close();
+}
+
+void UdpScheduledTrafficGenerator::processPacket(Packet *msg)
+{
+    // TODO
 }
 
 void UdpScheduledTrafficGenerator::handleMessageWhenUp(cMessage *msg)
 {
-    // TODO
+    if (msg->isSelfMessage()) {
+        assert(msg == &selfMsg);
+        switch (msg->getKind()) {
+        case START:
+            processStart();
+            break;
+        case STOP:
+            processStop();
+        case SEND:
+            processSend();
+        default:
+            throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
+    } else {
+        socket.processMessage(msg);
+    }
 }
 
 void UdpScheduledTrafficGenerator::handleStartOperation(inet::LifecycleOperation *operation)
