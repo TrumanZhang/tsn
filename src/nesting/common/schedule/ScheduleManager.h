@@ -189,7 +189,7 @@ protected:
                 rescheduleAt(simTime(), &listExecuteMsg);
             } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
                 T oldState = operState;
-                executeOperation(listPointer);
+                executeOperation();
                 exitTimer = timeInterval;
                 notifyStateChanged(oldState, operState);
                 listPointer++;
@@ -251,10 +251,8 @@ protected:
     {
         nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
         rescheduleAt(simTime(), &cycleTimerMsg);
-
         nextListExecuteState = ListExecuteState::INIT;
         rescheduleAt(simTime(), &listExecuteMsg);
-
         nextListConfigState = ListConfigState::CONFIG_IDLE;
         rescheduleAt(simTime(), &listConfigMsg);
     }
@@ -308,7 +306,7 @@ protected:
         }
     }
 
-    virtual void executeOperation(uint64_t listPointer)
+    virtual void executeOperation()
     {
         if (operSchedule->getControlListLength() <= 0) {
             // If control list has no entries we have to fall back on default values.
@@ -425,13 +423,11 @@ public:
         if (!enabled) {
             nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
             rescheduleAt(simTime(), &cycleTimerMsg);
-
             nextListExecuteState = ListExecuteState::INIT;
             rescheduleAt(simTime(), &listExecuteMsg);
-
             nextListConfigState = ListConfigState::CONFIG_IDLE;
             rescheduleAt(simTime(), &listConfigMsg);
-        } else {
+        } else if (configChange && enabled) {
             nextListConfigState = ListConfigState::CONFIG_PENDING;
             rescheduleAt(simTime(), &listConfigMsg);
         }
@@ -446,7 +442,7 @@ public:
     {
         Enter_Method_Silent();
         this->configChange = configChange;
-        if (configChange) {
+        if (configChange && enabled) {
             nextListConfigState = ListConfigState::CONFIG_PENDING;
             rescheduleAt(simTime(), &listConfigMsg);
         }
