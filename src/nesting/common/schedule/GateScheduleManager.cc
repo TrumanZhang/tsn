@@ -122,7 +122,7 @@ simtime_t GateScheduleManager::nextGateCloseEvent(uint64_t gateIndex) const
             assert(listPointer < operControlListLength);
             lookaheadListPointer = listPointer;
         } else if (listExecuteState == ListExecuteState::DELAY) {
-            simtime_t timeOfNextExecuteCycleEvent = nextListExecuteUpdate->getLocalTime();
+            simtime_t timeOfNextExecuteCycleEvent = nextListExecuteTimestamp->getLocalTime();
             assert(timeOfNextExecuteCycleEvent >= currentTime);
             simtime_t remainingTimeInterval = timeOfNextExecuteCycleEvent - currentTime;
             timeUntilGateCloseEvent += remainingTimeInterval;
