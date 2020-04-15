@@ -17,6 +17,9 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
+#include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/common/TimeTag_m.h"
 
 namespace nesting {
 
@@ -38,6 +41,7 @@ void UdpScheduledTrafficGenerator::initialize(int stage)
     if (stage == inet::INITSTAGE_LOCAL) {
         localPort = par("localPort");
         dontFragment = par("dontFragment");
+        packetName = par("packetName");
 
         scheduleManager = getModuleFromPar<DatagramScheduleManager>(par("datagramScheduleManagerModule"), this);
         scheduleManager->subscribeOperStateChanges(*this);
@@ -98,9 +102,23 @@ void UdpScheduledTrafficGenerator::processStart()
 
 void UdpScheduledTrafficGenerator::processSend()
 {
-    EV_INFO << "Send packet!" << std::endl;
     const SendDatagramEvent& evt = scheduleManager->getOperState();
-    // TODO
+    EV_INFO << "Send packet! " << evt << std::endl;
+
+    std::ostringstream str;
+    str << packetName << "-" << numSent;
+    Packet *packet = new Packet(str.str().c_str());
+    if(dontFragment) {
+        packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
+    }
+    const auto& payload = makeShared<ApplicationPacket>();
+    payload->setChunkLength(evt.getPayloadSize());
+    payload->setSequenceNumber(numSent);
+    payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    packet->insertAtBack(payload);
+    emit(packetSentSignal, packet);
+    socket.sendTo(packet, evt.getDestAddress(), evt.getDestPort());
+    numSent++;
 }
 
 void UdpScheduledTrafficGenerator::processStop()
@@ -115,6 +133,7 @@ void UdpScheduledTrafficGenerator::processStop()
 void UdpScheduledTrafficGenerator::processPacket(Packet *msg)
 {
     // TODO
+    delete msg;
 }
 
 void UdpScheduledTrafficGenerator::handleMessageWhenUp(cMessage *msg)

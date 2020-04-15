@@ -327,7 +327,7 @@ protected:
         }
     }
 
-    virtual void notifyStateChanged(T oldState, T newState)
+    virtual void notifyStateChanged(const T& oldState, const T& newState)
     {
         for (auto listener : listeners) {
             listener->onOperStateChange(newState);

@@ -27,6 +27,7 @@ simple UdpScheduledTrafficGenerator like IApp
         string datagramScheduleManagerModule; // The path to the DatagramScheduleManager module
         int localPort = default(-1); // local UDP port number (-1: use ephemeral port)
         string localAddress = default("");
+        string packetName = default("UdpScheduledTraffic");
         int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
         bool dontFragment = default(false); // if true, asks IP to not fragment the message during routing
         int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value

@@ -41,11 +41,8 @@ protected:
     UdpSocket socket;
     cMessage selfMsg;
     bool dontFragment = false;
-    enum SelfMsgKinds {
-        START = 1,
-        SEND,
-        STOP
-    };
+    const char *packetName = nullptr;
+    enum SelfMsgKinds { START, SEND, STOP };
 public:
     virtual ~UdpScheduledTrafficGenerator();
 protected:

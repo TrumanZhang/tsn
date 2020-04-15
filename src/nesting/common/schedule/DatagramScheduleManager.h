@@ -39,6 +39,8 @@ protected:
     virtual int numInitStages() const override;
 
     virtual void initialize(int stage) override;
+
+    virtual void notifyStateChanged(const SendDatagramEvent& oldState, const SendDatagramEvent& newState) override;
 };
 
 } // namespace nesting

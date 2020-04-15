@@ -50,4 +50,12 @@ void DatagramScheduleManager::initialize(int stage)
     }
 }
 
+void DatagramScheduleManager::notifyStateChanged(const SendDatagramEvent& oldState, const SendDatagramEvent& newState)
+{
+    // We only want to notify listeners in the EXECUTE_CYCLE state.
+    if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
+        ScheduleManager<SendDatagramEvent>::notifyStateChanged(oldState, newState);
+    }
+}
+
 } // namespace nesting
