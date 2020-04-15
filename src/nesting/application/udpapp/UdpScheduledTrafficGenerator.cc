@@ -133,6 +133,7 @@ void UdpScheduledTrafficGenerator::processStop()
 void UdpScheduledTrafficGenerator::processPacket(Packet *msg)
 {
     // TODO
+    numReceived++;
     delete msg;
 }
 
