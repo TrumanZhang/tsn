@@ -24,25 +24,25 @@ channel cable extends DatarateChannel
 network Sim
 {
     parameters:
-        @display("bgb=196.64334,121.1");
+        @display("bgb=382,266");
     submodules:
         s0: EtherSwitch {
-            @display("p=121.67667,58.82");
+            @display("p=181,122");
         }
         h0: NestingStandardHost {
-            @display("p=88.80666,23.643333");
+            @display("p=83,123");
         }
         h1: NestingStandardHost {
-            @display("p=155.12334,23.643333");
+            @display("p=301,54");
         }
         h2: NestingStandardHost {
-            @display("p=88.80666,93.996666");
+            @display("p=301,123");
         }
         h3: NestingStandardHost {
-            @display("p=155.12334,93.996666");
+            @display("p=301,197");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("is=s;p=30.563334,23.643333");
+            @display("is=s;p=63,39");
         }
     connections:
         h0.ethg++ <--> cable <--> s0.ethg++;
