@@ -26,10 +26,11 @@
 #include "nesting/common/schedule/DatagramScheduleManager.h"
 
 using namespace omnetpp;
+using namespace inet;
 
 namespace nesting {
 
-class UdpScheduledTrafficGenerator : public inet::ApplicationBase, public inet::UdpSocket::ICallback,
+class UdpScheduledTrafficGenerator : public ApplicationBase, public UdpSocket::ICallback,
         public DatagramScheduleManager::IOperStateListener
 {
 protected:
@@ -66,6 +67,8 @@ protected:
     virtual void socketClosed(inet::UdpSocket *socket) override;
 
     virtual void onOperStateChange(const SendDatagramEvent& sendDatagramEvent) override;
+
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace nesting

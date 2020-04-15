@@ -216,4 +216,11 @@ void UdpScheduledTrafficGenerator::onOperStateChange(const SendDatagramEvent& se
     scheduleAt(simTime(), &selfMsg);
 }
 
+void UdpScheduledTrafficGenerator::refreshDisplay() const
+{
+    char buf[80];
+    sprintf(buf, "Sent:%d  Rcvd:%d", numSent, numReceived);
+    getDisplayString().setTagArg("t", 0, buf);
+}
+
 } //namespace
