@@ -206,7 +206,7 @@ void UdpScheduledTrafficGenerator::socketErrorArrived(inet::UdpSocket *socket, i
 
 void UdpScheduledTrafficGenerator::socketClosed(inet::UdpSocket *socket)
 {
-    // TODO
+    // Do nothing?
 }
 
 void UdpScheduledTrafficGenerator::onOperStateChange(const SendDatagramEvent& sendDatagramEvent)
