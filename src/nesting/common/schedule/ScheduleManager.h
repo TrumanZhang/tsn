@@ -47,21 +47,20 @@ public:
         virtual void onOperStateChange(const T& newState, const T& oldState) {};
     };
 protected:
-    // Type values to differentiate different timestamp events from the clock module.
-    static const uint64_t CYCLE_TIMER_EVENT = 0;
-    static const uint64_t LIST_EXECUTE_EVENT = 1;
-    static const uint64_t LIST_CONFIG_EVENT = 2;
+    /** Type values to associate timestamp events with state machines. */
+    enum StateMachines { CYCLE_TIMER, LIST_EXECUTE, LIST_CONFIG };
 
     // Keep track of subscribed timestamp events for each state machine
     std::shared_ptr<const IClock2::Timestamp> nextCycleTimerUpdate = nullptr;
     std::shared_ptr<const IClock2::Timestamp> nextListExecuteUpdate = nullptr;
     std::shared_ptr<const IClock2::Timestamp> nextListConfigUpdate = nullptr;
 
-    // Self-messages used to update state machines
-    cMessage updateCycleTimerMsg = cMessage("updateCycleTimerStateMachine");
-    cMessage updateListExecuteMsg = cMessage("updateListExecuteStateMachine");
-    cMessage updateListConfigMsg = cMessage("updateListConfigStateMachine");
+    // Self-messages used to update state machines.
+    cMessage updateCycleTimerMsg = cMessage("updateCycleTimer");
+    cMessage updateListExecuteMsg = cMessage("updateListExecute");
+    cMessage updateListConfigMsg = cMessage("updateListConfig");
 
+    /** Pointer to host's clock module. */
     IClock2* clock;
 
     /** If the GateManager isn't enabled no internal state transitions will take place. */
@@ -162,12 +161,12 @@ protected:
                 setCycleStartTime();
                 simtime_t idleTime = cycleStartTime - clock->updateAndGetLocalTime();
                 nextCycleTimerState = CycleTimerState::START_CYCLE;
-                nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER_EVENT);
+                nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER);
             } else if (cycleTimerState == CycleTimerState::START_CYCLE) {
                 setCycleStart(true);
                 nextCycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
                 simtime_t minClockResolution = SimTime(1, SIMTIME_S) / clock->getClockRate();
-                nextCycleTimerUpdate = clock->subscribeDelta(*this, minClockResolution, CYCLE_TIMER_EVENT);
+                nextCycleTimerUpdate = clock->subscribeDelta(*this, minClockResolution, CYCLE_TIMER);
             }
         }
     }
@@ -207,7 +206,7 @@ protected:
                 }
             } else if (listExecuteState == ListExecuteState::DELAY) {
                 nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
-                nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE_EVENT);
+                nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE);
             } else if (listExecuteState == ListExecuteState::INIT) {
                 T oldState = operState;
                 operState = adminState;
@@ -236,7 +235,7 @@ protected:
                 setConfigChangeTime();
                 configPending = true;
                 nextListConfigState = ListConfigState::UPDATE_CONFIG;
-                nextListConfigUpdate = clock->subscribeTimestamp(*this, configChangeTime, LIST_CONFIG_EVENT);
+                nextListConfigUpdate = clock->subscribeTimestamp(*this, configChangeTime, LIST_CONFIG);
             } else if (listConfigState == ListConfigState::UPDATE_CONFIG) {
                 operSchedule = adminSchedule;
                 setNewConfigCT(true);
@@ -467,13 +466,13 @@ public:
     {
         Enter_Method("timestamp");
         switch (timestamp->getKind()) {
-        case CYCLE_TIMER_EVENT:
+        case CYCLE_TIMER:
             rescheduleAt(simTime(), &updateCycleTimerMsg);
             break;
-        case LIST_EXECUTE_EVENT:
+        case LIST_EXECUTE:
             rescheduleAt(simTime(), &updateListExecuteMsg);
             break;
-        case LIST_CONFIG_EVENT:
+        case LIST_CONFIG:
             rescheduleAt(simTime(), &updateListConfigMsg);
             break;
         default:
