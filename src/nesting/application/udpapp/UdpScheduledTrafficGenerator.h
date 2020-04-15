@@ -68,7 +68,7 @@ protected:
     virtual void socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication) override;
     virtual void socketClosed(inet::UdpSocket *socket) override;
 
-    virtual void onOperStateChange(SendDatagramEvent sendDatagramEvent) override;
+    virtual void onOperStateChange(const SendDatagramEvent& sendDatagramEvent) override;
 };
 
 } // namespace nesting

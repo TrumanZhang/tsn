@@ -66,7 +66,16 @@ output-vector-file = result_dir/Sim_vec.sqlite
 output-scalar-file = result_dir/Sim_sca.sqlite
 sim-time-limit = 100ms
 
-%file: datagramSchedule.xml
-TODO
+**.h*.numApps = 1
+**.h*.app[0].typename = "UdpScheduledTrafficApp"
+**.h*.app[0].trafficGenerator.localPort = 100
+**.h*.app[0].scheduleManager.initialAdminSchedule = xmldoc("datagram_schedule_h0.xml")
+
+%file: datagram_schedule_h0.xml
+<datagramSchedule cycleTime="100us">
+    <entry payloadSize="500B" destAddress="h1" destPort="100" pcp="7" de="true" vid="2" timeInterval="10us"/>
+    <entry payloadSize="600B" destAddress="h2" destPort="100" pcp="7" de="true" vid="2" timeInterval="20us"/>
+    <entry payloadSize="700B" destAddress="h3" destPort="100" pcp="7" de="true" vid="2" timeInterval="70us"/>
+</datagramSchedule>
 
 %exitcode: 0

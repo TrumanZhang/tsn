@@ -23,6 +23,7 @@ module UdpScheduledTrafficApp like IApp
 {
     parameters:
         @display("i=block/app;bgb=208,249");
+        **.datagramScheduleManagerModule = default(absPath(".scheduleManager"));
     gates:
         input socketIn;
         output socketOut;
@@ -32,6 +33,7 @@ module UdpScheduledTrafficApp like IApp
         }
         scheduleManager: DatagramScheduleManager {
             @display("p=108,63;is=s");
+            enabled = false;
         }
     connections:
         socketIn --> trafficGenerator.socketIn;

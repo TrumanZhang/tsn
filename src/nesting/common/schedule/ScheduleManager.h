@@ -43,8 +43,8 @@ public:
     public:
         virtual ~IOperStateListener() {};
     protected:
-        virtual void onOperStateChange(T newState) {};
-        virtual void onOperStateChange(T newState, T oldState) {};
+        virtual void onOperStateChange(const T& newState) {};
+        virtual void onOperStateChange(const T& newState, const T& oldState) {};
     };
 protected:
     // Type values to differentiate different timestamp events from the clock module.
@@ -108,8 +108,6 @@ protected:
 
         operSchedule = initialAdminSchedule();
         adminSchedule = initialAdminSchedule();
-        
-        begin();
 
         // Variables
         WATCH(enabled);
@@ -127,6 +125,8 @@ protected:
         WATCH(cycleTimerState);
         WATCH(listExecuteState);
         WATCH(listConfigState);
+
+        begin();
     }
 
     virtual void handleMessage(cMessage *msg) override
@@ -396,6 +396,8 @@ public:
 
     virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
     {
+        Enter_Method_Silent();
+
         // Schedule must not be nullptr.
         if (adminSchedule == nullptr) {
             throw cRuntimeError("adminSchedule must not be nullptr");
@@ -419,6 +421,7 @@ public:
 
     virtual void setEnabled(bool enabled)
     {
+        Enter_Method_Silent();
         this->enabled = enabled;
         if (!enabled) {
             nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
@@ -442,6 +445,7 @@ public:
 
     virtual void setConfigChange(bool configChange)
     {
+        Enter_Method_Silent();
         this->configChange = configChange;
         if (configChange) {
             nextListConfigState = ListConfigState::CONFIG_PENDING;

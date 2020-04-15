@@ -27,7 +27,8 @@ UdpScheduledTrafficGenerator::~UdpScheduledTrafficGenerator()
     cancelEvent(&selfMsg);
 }
 
-int UdpScheduledTrafficGenerator::numInitStages() const {
+int UdpScheduledTrafficGenerator::numInitStages() const
+{
     return inet::NUM_INIT_STAGES;
 }
 
@@ -85,19 +86,29 @@ void UdpScheduledTrafficGenerator::setSocketOptions()
 
 void UdpScheduledTrafficGenerator::processStart()
 {
+    // Open socket connection
     socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();
+
+    // Enable schedule
+    scheduleManager->setEnabled(true);
 }
 
 void UdpScheduledTrafficGenerator::processSend()
 {
+    EV_INFO << "Send packet!" << std::endl;
+    const SendDatagramEvent& evt = scheduleManager->getOperState();
     // TODO
 }
 
 void UdpScheduledTrafficGenerator::processStop()
 {
+    // Disable schedule
+    scheduleManager->setEnabled(false);
+
+    // Close socket connection
     socket.close();
 }
 
@@ -116,8 +127,10 @@ void UdpScheduledTrafficGenerator::handleMessageWhenUp(cMessage *msg)
             break;
         case STOP:
             processStop();
+            break;
         case SEND:
             processSend();
+            break;
         default:
             throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
         }
@@ -128,27 +141,33 @@ void UdpScheduledTrafficGenerator::handleMessageWhenUp(cMessage *msg)
 
 void UdpScheduledTrafficGenerator::handleStartOperation(inet::LifecycleOperation *operation)
 {
-    // TODO
+    selfMsg.setKind(START);
+    scheduleAt(simTime(), &selfMsg);
 }
 
 void UdpScheduledTrafficGenerator::handleStopOperation(inet::LifecycleOperation *operation)
 {
-    // TODO
+    cancelEvent(&selfMsg);
+    selfMsg.setKind(STOP);
+    scheduleAt(simTime(), &selfMsg);
 }
 
 void UdpScheduledTrafficGenerator::handleCrashOperation(inet::LifecycleOperation *operation)
 {
-    // TODO
+    cancelEvent(&selfMsg);
+    scheduleManager->setEnabled(false);
+    socket.destroy();
 }
 
 void UdpScheduledTrafficGenerator::socketDataArrived(inet::UdpSocket *socket, inet::Packet *packet)
 {
-    // TODO
+    processPacket(packet);
 }
 
 void UdpScheduledTrafficGenerator::socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication)
 {
-    // TODO
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpScheduledTrafficGenerator::socketClosed(inet::UdpSocket *socket)
@@ -156,9 +175,11 @@ void UdpScheduledTrafficGenerator::socketClosed(inet::UdpSocket *socket)
     // TODO
 }
 
-void UdpScheduledTrafficGenerator::onOperStateChange(SendDatagramEvent sendDatagramEvent)
+void UdpScheduledTrafficGenerator::onOperStateChange(const SendDatagramEvent& sendDatagramEvent)
 {
-    // TODO
+    Enter_Method("datagram");
+    selfMsg.setKind(SEND);
+    scheduleAt(simTime(), &selfMsg);
 }
 
 } //namespace

@@ -35,6 +35,10 @@ protected:
 
     /** @copydoc Schedule::initialAdminSchedule() */
     virtual std::shared_ptr<const Schedule<SendDatagramEvent>> initialAdminSchedule() const override;
+
+    virtual int numInitStages() const override;
+
+    virtual void initialize(int stage) override;
 };
 
 } // namespace nesting

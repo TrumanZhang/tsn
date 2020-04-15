@@ -71,7 +71,7 @@ protected:
 protected:
     virtual ~TestGateScheduleManager();
     virtual void initialize() override;
-    virtual void onOperStateChange(GateBitvector oldBitvector, GateBitvector newBitvector) override;
+    virtual void onOperStateChange(const GateBitvector& newBitvector) override;
     virtual void handleMessage(cMessage* msg) override;
     virtual void logGateClosingTimes() const;
 };
@@ -108,7 +108,7 @@ void TestGateScheduleManager::initialize()
     scheduleAt(SimTime(65, SIMTIME_US), new cMessage());
 }
 
-void TestGateScheduleManager::onOperStateChange(GateBitvector oldBitvector, GateBitvector newBitvector)
+void TestGateScheduleManager::onOperStateChange(const GateBitvector& newBitvector)
 {
     Enter_Method("GateBitvector");
     simtime_t localTime = clock->updateAndGetLocalTime();

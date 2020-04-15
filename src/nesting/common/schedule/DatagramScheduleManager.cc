@@ -17,6 +17,7 @@
 #include "nesting/common/schedule/ScheduleFactory.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/InitStages.h"
 
 namespace nesting {
 
@@ -33,6 +34,20 @@ std::shared_ptr<const Schedule<SendDatagramEvent>> DatagramScheduleManager::init
 {
     Schedule<SendDatagramEvent>* scheduleRawPtr = ScheduleFactory::createDatagramSchedule(par("initialAdminSchedule"));
     return std::shared_ptr<const Schedule<SendDatagramEvent>>(scheduleRawPtr);
+}
+
+int DatagramScheduleManager::numInitStages() const
+{
+    return inet::NUM_INIT_STAGES;
+}
+
+void DatagramScheduleManager::initialize(int stage)
+{
+    // Initalize after assignment of L3 addresses. Otherwise L3 addresses in
+    // default schedule cannot be resolved.
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
+        ScheduleManager<SendDatagramEvent>::initialize();
+    }
 }
 
 } // namespace nesting
