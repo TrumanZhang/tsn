@@ -14,6 +14,7 @@
 //
 
 #include "nesting/application/udpapp/UdpScheduledTrafficGenerator.h"
+#include "nesting/linklayer/vlan/EnhancedVlanTag_m.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -103,19 +104,32 @@ void UdpScheduledTrafficGenerator::processStart()
 void UdpScheduledTrafficGenerator::processSend()
 {
     const SendDatagramEvent& evt = scheduleManager->getOperState();
-    EV_INFO << "Send packet! " << evt << std::endl;
+    EV_INFO << evt << std::endl;
 
+    // Create packet
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
+
+    // Enable/Disable fragmentation
     if(dontFragment) {
         packet->addTagIfAbsent<FragmentationReq>()->setDontFragment(true);
     }
+
+    // Add request vor VLAN tag
+    auto vlanReq = packet->addTag<EnhancedVlanReq>();
+    vlanReq->setPcp(evt.getPriorityCodePoint());
+    vlanReq->setDe(evt.isDropEligible());
+    vlanReq->setVlanId(evt.getVlanId());
+
+    // Add payload
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(evt.getPayloadSize());
     payload->setSequenceNumber(numSent);
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
     packet->insertAtBack(payload);
+
+    // Send packet
     emit(packetSentSignal, packet);
     socket.sendTo(packet, evt.getDestAddress(), evt.getDestPort());
     numSent++;

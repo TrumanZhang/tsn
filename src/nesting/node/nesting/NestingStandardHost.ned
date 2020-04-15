@@ -27,6 +27,8 @@ module NestingStandardHost extends StandardHost
         **.clockModule = default(absPath(".clock"));
         **.oscillatorModule = default(absPath(".oscillator"));
         **.interfaceTableModule = default(absPath(".interfaceTable"));
+        eth[*].typename = default("EthernetInterface");
+        eth[*].qEncap.typename = "EnhancedIeee8021qEncap";
     submodules:
         oscillator: <default("IdealOscillator")> like IOscillator {
             @display("p=196,211;is=s");
