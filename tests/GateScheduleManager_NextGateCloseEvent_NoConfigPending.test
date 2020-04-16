@@ -145,9 +145,9 @@ void TestGateScheduleManager::logGateClosingTimes() const
 
 %file: schedule.xml
 <schedule baseTime="0s" cycleTime="60us">
-    <entry gateStates="00000011" timeInterval="10us"/>
-    <entry gateStates="00000101" timeInterval="20us"/>
-    <entry gateStates="00000111" timeInterval="30us"/>
+    <event gateStates="00000011" timeInterval="10us"/>
+    <event gateStates="00000101" timeInterval="20us"/>
+    <event gateStates="00000111" timeInterval="30us"/>
 </schedule>
 
 %inifile: omnetpp.ini

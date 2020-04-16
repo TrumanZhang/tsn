@@ -60,7 +60,7 @@ Schedule<GateBitvector>* ScheduleFactory::createGateSchedule(cXMLElement *xml)
     schedule->setCycleTimeExtension(getCycleTimeExtensionAttribute(xml));
 
     // Parse schedule entries
-    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("event");
     for (cXMLElement* entry : entries) {
         GateBitvector gateBitvector = getGateBitvectorAttribute(entry);
         simtime_t timeInterval = getTimeIntervalAttribute(entry);
@@ -93,7 +93,7 @@ Schedule<SendDatagramEvent>* ScheduleFactory::createDatagramSchedule(cXMLElement
     schedule->setCycleTimeExtension(getCycleTimeExtensionAttribute(xml));
 
     // Parse schedule entries
-    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("entry");
+    std::vector<cXMLElement*> entries = xml->getChildrenByTagName("event");
     for (cXMLElement* entry : entries) {
         SendDatagramEvent evt;
         evt.setDestAddress(getDestAddressAttribute(entry));

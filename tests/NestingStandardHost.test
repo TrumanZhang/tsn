@@ -78,8 +78,8 @@ sim-time-limit = 100ms
 
 %file: datagram_schedule_h0.xml
 <datagramSchedule cycleTime="1h">
-    <entry payloadSize="500B" destAddress="h1" destPort="100" timeInterval="30us"/>
-    <entry payloadSize="600B" destAddress="h2" destPort="100" timeInterval="40us"/>
+    <event payloadSize="500B" destAddress="h1" destPort="100" timeInterval="30us"/>
+    <event payloadSize="600B" destAddress="h2" destPort="100" timeInterval="40us"/>
 </datagramSchedule>
 
 %exitcode: 0
