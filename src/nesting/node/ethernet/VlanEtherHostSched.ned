@@ -24,6 +24,8 @@ import nesting.ieee8021q.queue.gating.ScheduleSwap;
 
 
 //
+// @deprecated
+//
 // Simple Host with the capability to send out frames according to a given schedule
 //
 // @see ~VlanEtherTrafGen

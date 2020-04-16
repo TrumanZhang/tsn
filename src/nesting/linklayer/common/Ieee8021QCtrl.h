@@ -17,6 +17,9 @@
 
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
+/**
+ * @deprecated
+ */
 namespace nesting {
 struct Ieee8021QCtrl {
     VLANTagReq q1Tag;

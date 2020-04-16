@@ -21,6 +21,9 @@ class noncobject inet::TagBase;
 
 namespace nesting;
 
+//
+// @deprecated
+//
 class DeprecatedVLANTagBase extends inet::TagBase
 {
     uint8_t pcp;    
@@ -29,6 +32,7 @@ class DeprecatedVLANTagBase extends inet::TagBase
 }
 
 //
+// @deprecated
 // Determines VLAN 802.1Q parameters for an outgoing packet.
 //
 class VLANTagReq extends DeprecatedVLANTagBase
@@ -37,6 +41,7 @@ class VLANTagReq extends DeprecatedVLANTagBase
 }
 
 //
+// @deprecated
 // Specifies VLAN 802.1Q parameters for an incoming packet.
 //
 class VLANTagInd extends DeprecatedVLANTagBase

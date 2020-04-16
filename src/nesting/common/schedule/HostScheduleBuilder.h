@@ -33,6 +33,7 @@ using namespace omnetpp;
 namespace nesting {
 
 /**
+ * @deprecated
  * Utility class to build schedules from e.g. XML files.
  */
 class HostScheduleBuilder final {

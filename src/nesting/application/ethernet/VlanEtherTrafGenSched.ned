@@ -15,6 +15,7 @@
 
 package nesting.application.ethernet;
 
+// @deprecated
 simple VlanEtherTrafGenSched
 {
     parameters:

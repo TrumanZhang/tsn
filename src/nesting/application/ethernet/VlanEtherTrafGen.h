@@ -25,7 +25,10 @@ using namespace inet;
 
 namespace nesting {
 
-/** See the NED file for a detailed description */
+/**
+ * @deprecated
+ * See the NED file for a detailed description
+ */
 class VlanEtherTrafGen: public EtherTrafGen {
 private:
     // Parameters from NED file

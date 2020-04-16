@@ -16,6 +16,8 @@
 package nesting.common.time;
 
 //
+// @deprecated
+//
 // This ideal clock implementation provides the ability to subscribe to clock
 // ticks and has no clock drift or any failure.
 //

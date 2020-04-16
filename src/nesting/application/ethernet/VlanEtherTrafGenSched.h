@@ -42,6 +42,7 @@ using namespace inet;
 namespace nesting {
 
 /**
+ * @deprecated
  * See the NED file for a detailed description
  */
 class VlanEtherTrafGenSched: public cSimpleModule, public IClockListener {

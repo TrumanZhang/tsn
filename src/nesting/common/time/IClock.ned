@@ -16,6 +16,8 @@
 package nesting.common.time;
 
 //
+// @deprecated
+//
 // This module interface is used to provide a stub for clock components with a
 // configurable clock rate.
 //
