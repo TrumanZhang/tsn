@@ -16,7 +16,7 @@ can effect the time-sensitive flow if length-aware scheduling isn't working
 correctly. We use 1kB of payload and send with 1GBit/s.
 
 The test will pass if every packet from the time-sensitive flow (h0, h1) is
-transmitted within the upper bound for end-to-end delay.
+transmitted exactly within the lower bound for end-to-end delay.
 
 %file: package.ned
 package @TESTNAME@;

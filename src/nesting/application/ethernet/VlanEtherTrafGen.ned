@@ -19,6 +19,8 @@ import inet.applications.ethernet.EtherTrafGen;
 
 
 //
+// @deprecated
+//
 // Traffic generator application for VLAN tagged ethernet frames. This
 // module should be connected to a VLANEncap module and the VLANEncap
 // module should be connected to an EtherEncap module to provide encap/decap

@@ -23,7 +23,8 @@
 namespace nesting {
 
 class IdealOscillator : public OscillatorBase {
-    virtual simtime_t globalSchedulingTimeForTick(uint64_t idleTicks) override;
+    virtual simtime_t globalTimeFromTick(uint64_t idleTicks) override;
+    virtual uint64_t tickFromGlobalTime(simtime_t globalTime) override;
 };
 
 } // namespace nesting

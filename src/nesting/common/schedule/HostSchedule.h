@@ -24,6 +24,7 @@ using namespace omnetpp;
 namespace nesting {
 
 /**
+ * @deprecated
  * A host-schedule is an array of entries, that consist of a timestamp, a size in bytes and an Ieee8021QCtrl-info containing values
  * such as destination address and PCP.
  */

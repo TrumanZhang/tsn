@@ -13,28 +13,27 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package nesting.application.udpapp;
+package nesting.node.nesting;
 
-import inet.applications.contract.IApp;
-import nesting.common.schedule.DatagramScheduleManager;
+import inet.node.inet.StandardHost;
+import nesting.common.time.IClock2;
+import nesting.common.time.IOscillator;
 
 
-module UdpScheduledTrafficApp like IApp
+module NestingStandardHost extends StandardHost
 {
     parameters:
-        @display("i=block/app;bgb=208,249");
-        **.datagramScheduleManagerModule = default(absPath(".scheduleManager"));
-    gates:
-        input socketIn;
-        output socketOut;
+        @display("i=device/pc2");
+        **.clockModule = default(absPath(".clock"));
+        **.oscillatorModule = default(absPath(".oscillator"));
+        **.interfaceTableModule = default(absPath(".interfaceTable"));
+        eth[*].typename = default("EthernetInterface");
+        eth[*].qEncap.typename = "EnhancedIeee8021qEncap";
     submodules:
-        trafficGenerator: UdpScheduledTrafficGenerator {
-            @display("p=108,157");
+        oscillator: <default("IdealOscillator")> like IOscillator {
+            @display("p=196,211;is=s");
         }
-        scheduleManager: DatagramScheduleManager {
-            @display("p=108,63;is=s");
+        clock: <default("RealtimeClock")> like IClock2 {
+            @display("p=196,122;is=s");
         }
-    connections:
-        socketIn --> trafficGenerator.socketIn;
-        trafficGenerator.socketOut --> socketOut;
 }

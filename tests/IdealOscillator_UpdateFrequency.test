@@ -128,11 +128,6 @@ void TestIdealOscillator::onTick(IOscillator& oscillator, std::shared_ptr<const 
     if (tickCount == 1) {
     	oscillator.setFrequency(2.0);
     }
-    
-    // Unsubscribe config changes (to oscillator frequency) at tick #2
-    if (tickCount == 2) {
-    	oscillator.unsubscribeConfigChanges(*this);
-    }
 }
 
 void TestIdealOscillator::onFrequencyChange(IOscillator& oscillator, double oldFrequency, double newFrequency)

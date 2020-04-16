@@ -3,44 +3,40 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-#ifndef __NESTING_VETHERTRAFGEN_H
-#define __NESTING_VETHERTRAFGEN_H
+#include <cstdlib>
 
-#include <omnetpp.h>
+#ifndef NESTING_COMMON_TESTUTIL_H_
+#define NESTING_COMMON_TESTUTIL_H_
 
-#include "inet/applications/ethernet/EtherTrafGen.h"
+#include <iostream>
+#include <cstdlib>
 
-using namespace omnetpp;
-using namespace inet;
+// Useful macros for writing tests. Not intended to be used in regular NESTING components.
 
-namespace nesting {
+#define ASSERT_EQUAL(value, expectedValue) \
+({ \
+    if ((value) != (expectedValue)) { \
+        std::cout << "Expected " << #value << " == " << #expectedValue << std::endl; \
+        exit(1); \
+    } \
+})
 
-/**
- * @deprecated
- * See the NED file for a detailed description
- */
-class VlanEtherTrafGen: public EtherTrafGen {
-private:
-    // Parameters from NED file
-    cPar* vlanTagEnabled;
-    cPar* pcp;
-    cPar* dei;
-    cPar* vid;
-protected:
-    virtual void initialize(int stage) override;
-    virtual void sendBurstPackets() override;
-};
+#define ASSERT_NOT_EQUAL(value, expectedValue) \
+({ \
+    if ((value) == (expectedValue)) { \
+        std::cout << "Expected " << #value << " != " << #expectedValue << std::endl; \
+        exit(1); \
+    } \
+})
 
-} // namespace nesting
-
-#endif /* __NESTING_VETHERTRAFGEN_H */
+#endif

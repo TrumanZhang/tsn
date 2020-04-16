@@ -23,6 +23,8 @@ import nesting.common.time.IOscillator;
 
 
 //
+// @deprecated
+//
 // Simple Host with the capability to create and receive VLAN tagged ethernet
 // traffic. Mainly used for test purposes.
 //

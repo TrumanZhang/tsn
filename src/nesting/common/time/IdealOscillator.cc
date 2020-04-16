@@ -19,11 +19,18 @@ namespace nesting {
 
 Define_Module(IdealOscillator);
 
-simtime_t IdealOscillator::globalSchedulingTimeForTick(uint64_t tick)
+simtime_t IdealOscillator::globalTimeFromTick(uint64_t tick)
 {
-    uint64_t currentTick = updateAndGetTickCount();
-    uint64_t deltaTick = tick - currentTick;
+    assert(tick >= lastTick);
+    uint64_t deltaTick = tick - lastTick;
     return timeOfLastTick + deltaTick * tickInterval();
+}
+
+uint64_t IdealOscillator::tickFromGlobalTime(simtime_t globalTime)
+{
+    assert(globalTime >= timeOfLastTick);
+    uint64_t elapsedTicks = std::floor((globalTime - timeOfLastTick) / tickInterval());
+    return lastTick + elapsedTicks;
 }
 
 } // namespace nesting
