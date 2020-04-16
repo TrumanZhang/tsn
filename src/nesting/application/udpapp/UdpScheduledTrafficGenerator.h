@@ -22,38 +22,40 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/networklayer/common/L3Address.h"
 
+#include "nesting/application/udpapp/DatagramScheduleManager.h"
 #include "nesting/common/schedule/Schedule.h"
 
 using namespace omnetpp;
+using namespace inet;
 
 namespace nesting {
 
-/**
- * TODO - Generated class
- */
-class UdpScheduledTrafficGenerator : public inet::ApplicationBase, public inet::UdpSocket::ICallback
+class UdpScheduledTrafficGenerator : public ApplicationBase, public UdpSocket::ICallback,
+        public DatagramScheduleManager::IOperStateListener
 {
-public:
-    struct SendEvent {
-        inet::L3Address destAddress;
-        int destPort;
-        int pcp;
-        int vid;
-        int payloadSize;
-        int maxPayloadFragmentSize;
-    };
 protected:
+    DatagramScheduleManager* scheduleManager;
     int localPort = -1;
-    Schedule<SendEvent> schedule;
     // statistics
     int numSent = 0;
     int numReceived = 0;
+    UdpSocket socket;
+    cMessage selfMsg;
+    bool dontFragment = false;
+    const char *packetName = nullptr;
+    enum SelfMsgKinds { START, SEND, STOP };
 public:
-    static Schedule<SendEvent> buildSchedule(cXMLElement *xml);
+    virtual ~UdpScheduledTrafficGenerator();
 protected:
-    virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
+    virtual int numInitStages() const override;
     virtual void initialize(int stage);
     virtual void finish() override;
+    virtual void setSocketOptions();
+
+    virtual void processStart();
+    virtual void processSend();
+    virtual void processStop();
+    virtual void processPacket(Packet *msg);
 
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void handleStartOperation(inet::LifecycleOperation *operation) override;
@@ -64,8 +66,11 @@ protected:
     virtual void socketErrorArrived(inet::UdpSocket *socket, inet::Indication *indication) override;
     virtual void socketClosed(inet::UdpSocket *socket) override;
 
+    virtual void onOperStateChange(const SendDatagramEvent& sendDatagramEvent) override;
+
+    virtual void refreshDisplay() const override;
 };
 
-} //namespace
+} // namespace nesting
 
 #endif

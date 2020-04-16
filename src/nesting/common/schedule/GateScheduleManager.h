@@ -24,6 +24,9 @@
 
 namespace nesting {
 
+/**
+ * Important invariant: adminSchedule must always be normalized
+ */
 class GateScheduleManager : public ScheduleManager<GateBitvector> {
 public:
     GateScheduleManager();
@@ -32,13 +35,13 @@ protected:
     virtual const GateBitvector initialAdminState() const override;
 
     /** @copydoc Schedule::initialAdminSchedule() */
-    virtual std::shared_ptr<const Schedule<GateBitvector>> initialAdminSchedule() const override;
+    virtual std::unique_ptr<Schedule<GateBitvector>> initialAdminSchedule() const override;
 
     /**
      * Valid admin schedules must (1) not be nullptr, (2) have a cycleTime
      * greater than SimTime::ZERO and (3) be normalized.
      */
-    virtual void setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule) override;
+    virtual void setAdminSchedule(std::unique_ptr<Schedule<GateBitvector>> adminSchedule) override;
 
     /**
      * Returns the time interval after a gate will be closed, by eaxamining

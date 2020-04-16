@@ -155,8 +155,8 @@ public:
      * Normalizes the schedule so that sumTimeIntervals is equal to cycleTime.
      * Therefore entries in controlList will be prolonged or
      * shortended/removed. A normalized schedule semantically stays the same,
-     * but is easier to work with, because it allow to get rid of some special
-     * cases.
+     * but is easier to work with, because it might allow to get rid of some
+     * special cases.
      */
     virtual void normalize()
     {
@@ -209,11 +209,28 @@ std::ostream& operator<<(std::ostream& stream, const Schedule<T>& schedule)
             << ", sumTimeIntervals=" << schedule.getSumTimeIntervals() << "]";
 }
 
-// Overload stream operator for schedule objects wrapped in smart pointers.
 template<typename T>
-std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<const Schedule<T>>& schedule)
+std::ostream& operator<<(std::ostream& os, const std::shared_ptr<const Schedule<T>>& schedule)
 {
-    return stream << *schedule;
+    return os << *schedule;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::shared_ptr<Schedule<T>>& schedule)
+{
+    return os << *schedule;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::unique_ptr<const Schedule<T>>& schedule)
+{
+    return os << *schedule;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::unique_ptr<Schedule<T>>& schedule)
+{
+    return os << *schedule;
 }
 
 } // namespace nesting

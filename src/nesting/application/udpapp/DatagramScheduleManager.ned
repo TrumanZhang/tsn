@@ -13,13 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package nesting.common.schedule;
+package nesting.application.udpapp;
 
-simple SendDatagramScheduleManager
+simple DatagramScheduleManager
 {
     parameters:
         @display("i=block/table2");
         string clockModule; // Path to clock module implementing IClock2 interface
-        bool enabled = default(true); // If enabled is true, then sent datagram events will be scheduled.
-        xml initialAdminSchedule = default(xml("<schedule CycleTime=\"1h\"></schedule>")); // schedule that will be loaded initially if enabled is true.
+        xml initialAdminSchedule = default(xml("<schedule cycleTime=\"1h\"></schedule>")); // schedule that will be loaded initially if enabled is true.
 }

@@ -39,26 +39,28 @@ template<typename T>
 class ScheduleManager : public cSimpleModule, public IClock2::TimestampListener {
 public:
     class IOperStateListener {
+        friend ScheduleManager;
     public:
         virtual ~IOperStateListener() {};
-        virtual void onOperStateChange(T oldState, T newState) = 0;
+    protected:
+        virtual void onOperStateChange(const T& newState) {};
+        virtual void onOperStateChange(const T& newState, const T& oldState) {};
     };
 protected:
-    // Type values to differentiate different timestamp events from the clock module.
-    static const uint64_t CYCLE_TIMER_EVENT = 0;
-    static const uint64_t LIST_EXECUTE_EVENT = 1;
-    static const uint64_t LIST_CONFIG_EVENT = 2;
+    /** Type values to associate timestamp events with state machines. */
+    enum StateMachine { CYCLE_TIMER, LIST_EXECUTE, LIST_CONFIG };
 
     // Keep track of subscribed timestamp events for each state machine
-    std::shared_ptr<const IClock2::Timestamp> nextCycleTimerUpdate = nullptr;
-    std::shared_ptr<const IClock2::Timestamp> nextListExecuteUpdate = nullptr;
-    std::shared_ptr<const IClock2::Timestamp> nextListConfigUpdate = nullptr;
+    std::shared_ptr<const IClock2::Timestamp> nextCycleTimerTimestamp = nullptr;
+    std::shared_ptr<const IClock2::Timestamp> nextListExecuteTimestamp = nullptr;
+    std::shared_ptr<const IClock2::Timestamp> nextListConfigTimestamp = nullptr;
 
-    // Self-messages used to update state machines
-    cMessage updateCycleTimerMsg = cMessage("updateCycleTimerStateMachine");
-    cMessage updateListExecuteMsg = cMessage("updateListExecuteStateMachine");
-    cMessage updateListConfigMsg = cMessage("updateListConfigStateMachine");
+    // Self-messages used to update state machines.
+    cMessage cycleTimerMsg = cMessage("updateCycleTimer");
+    cMessage listExecuteMsg = cMessage("updateListExecute");
+    cMessage listConfigMsg = cMessage("updateListConfig");
 
+    /** Pointer to host's clock module. */
     IClock2* clock;
 
     /** If the GateManager isn't enabled no internal state transitions will take place. */
@@ -105,8 +107,6 @@ protected:
 
         operSchedule = initialAdminSchedule();
         adminSchedule = initialAdminSchedule();
-        
-        begin();
 
         // Variables
         WATCH(enabled);
@@ -124,15 +124,17 @@ protected:
         WATCH(cycleTimerState);
         WATCH(listExecuteState);
         WATCH(listConfigState);
+
+        begin();
     }
 
     virtual void handleMessage(cMessage *msg) override
     {
-        if (msg == &updateListConfigMsg) {
+        if (msg == &listConfigMsg) {
             updateListConfigState();
-        } else if (msg == &updateListExecuteMsg) {
+        } else if (msg == &listExecuteMsg) {
             updateListExecuteState();
-        } else if (msg == &updateCycleTimerMsg) {
+        } else if (msg == &cycleTimerMsg) {
             updateCycleTimerState();
         } else {
             throw cRuntimeError("Can't handle this type of messages.");
@@ -142,8 +144,8 @@ protected:
     virtual void updateCycleTimerState()
     {
         // Cancel outdated timestamp events
-        if (nextCycleTimerUpdate != nullptr) {
-            clock->unsubscribeTimestamp(*this, *nextCycleTimerUpdate);
+        if (nextCycleTimerTimestamp != nullptr) {
+            clock->unsubscribeTimestamp(*this, *nextCycleTimerTimestamp);
         }
 
         cycleTimerState = nextCycleTimerState;
@@ -154,17 +156,17 @@ protected:
                 setCycleStart(false);
                 setNewConfigCT(false);
                 nextCycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
-                rescheduleAt(simTime(), &updateCycleTimerMsg);  
+                rescheduleAt(simTime(), &cycleTimerMsg);  
              } else if (cycleTimerState == CycleTimerState::SET_CYCLE_START_TIME) {
                 setCycleStartTime();
                 simtime_t idleTime = cycleStartTime - clock->updateAndGetLocalTime();
                 nextCycleTimerState = CycleTimerState::START_CYCLE;
-                nextCycleTimerUpdate = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER_EVENT);
+                nextCycleTimerTimestamp = clock->subscribeTimestamp(*this, cycleStartTime, CYCLE_TIMER);
             } else if (cycleTimerState == CycleTimerState::START_CYCLE) {
                 setCycleStart(true);
                 nextCycleTimerState = CycleTimerState::SET_CYCLE_START_TIME;
                 simtime_t minClockResolution = SimTime(1, SIMTIME_S) / clock->getClockRate();
-                nextCycleTimerUpdate = clock->subscribeDelta(*this, minClockResolution, CYCLE_TIMER_EVENT);
+                nextCycleTimerTimestamp = clock->subscribeDelta(*this, minClockResolution, CYCLE_TIMER);
             }
         }
     }
@@ -172,8 +174,8 @@ protected:
     virtual void updateListExecuteState()
     {
         // Cancel outdated timestamp events
-        if (nextListExecuteUpdate != nullptr) {
-            clock->unsubscribeTimestamp(*this, *nextListExecuteUpdate);
+        if (nextListExecuteTimestamp != nullptr) {
+            clock->unsubscribeTimestamp(*this, *nextListExecuteTimestamp);
         }
 
         listExecuteState = nextListExecuteState;
@@ -184,27 +186,27 @@ protected:
                 setCycleStart(false);
                 listPointer = 0;
                 nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
-                rescheduleAt(simTime(), &updateListExecuteMsg);
+                rescheduleAt(simTime(), &listExecuteMsg);
             } else if (listExecuteState == ListExecuteState::EXECUTE_CYCLE) {
                 T oldState = operState;
-                executeOperation(listPointer);
+                executeOperation();
                 exitTimer = timeInterval;
                 notifyStateChanged(oldState, operState);
                 listPointer++;
                 if (exitTimer <= SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
                     nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
-                    rescheduleAt(simTime(), &updateListExecuteMsg);
+                    rescheduleAt(simTime(), &listExecuteMsg);
                 } else if (exitTimer > SimTime::ZERO && listPointer < operSchedule->getControlListLength()) {
                     nextListExecuteState = ListExecuteState::DELAY;
-                    rescheduleAt(simTime(), &updateListExecuteMsg);
+                    rescheduleAt(simTime(), &listExecuteMsg);
                 } else {
                     assert(listPointer >= operSchedule->getControlListLength());
                     nextListExecuteState = ListExecuteState::END_OF_CYCLE;
-                    rescheduleAt(simTime(), &updateListExecuteMsg);
+                    rescheduleAt(simTime(), &listExecuteMsg);
                 }
             } else if (listExecuteState == ListExecuteState::DELAY) {
                 nextListExecuteState = ListExecuteState::EXECUTE_CYCLE;
-                nextListExecuteUpdate = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE_EVENT);
+                nextListExecuteTimestamp = clock->subscribeDelta(*this, exitTimer, LIST_EXECUTE);
             } else if (listExecuteState == ListExecuteState::INIT) {
                 T oldState = operState;
                 operState = adminState;
@@ -212,7 +214,7 @@ protected:
                 exitTimer = SimTime::ZERO;
                 listPointer = 0;
                 nextListExecuteState = ListExecuteState::END_OF_CYCLE;
-                rescheduleAt(simTime(), &updateListExecuteMsg);
+                rescheduleAt(simTime(), &listExecuteMsg);
             }
         }
     }
@@ -220,8 +222,8 @@ protected:
     virtual void updateListConfigState()
     {
         // Cancel outdated timestamp events
-        if (nextListConfigUpdate != nullptr) {
-            clock->unsubscribeTimestamp(*this, *nextListConfigUpdate);
+        if (nextListConfigTimestamp != nullptr) {
+            clock->unsubscribeTimestamp(*this, *nextListConfigTimestamp);
         }
 
         listConfigState = nextListConfigState;
@@ -233,12 +235,12 @@ protected:
                 setConfigChangeTime();
                 configPending = true;
                 nextListConfigState = ListConfigState::UPDATE_CONFIG;
-                nextListConfigUpdate = clock->subscribeTimestamp(*this, configChangeTime, LIST_CONFIG_EVENT);
+                nextListConfigTimestamp = clock->subscribeTimestamp(*this, configChangeTime, LIST_CONFIG);
             } else if (listConfigState == ListConfigState::UPDATE_CONFIG) {
                 operSchedule = adminSchedule;
                 setNewConfigCT(true);
                 nextListConfigState = ListConfigState::CONFIG_IDLE;
-                rescheduleAt(simTime(), &updateListConfigMsg);
+                rescheduleAt(simTime(), &listConfigMsg);
             } else if (listConfigState == ListConfigState::CONFIG_IDLE) {
                 configPending = false;
             }
@@ -248,13 +250,11 @@ protected:
     virtual void begin()
     {
         nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
-        rescheduleAt(simTime(), &updateCycleTimerMsg);
-
+        rescheduleAt(simTime(), &cycleTimerMsg);
         nextListExecuteState = ListExecuteState::INIT;
-        rescheduleAt(simTime(), &updateListExecuteMsg);
-
+        rescheduleAt(simTime(), &listExecuteMsg);
         nextListConfigState = ListConfigState::CONFIG_IDLE;
-        rescheduleAt(simTime(), &updateListConfigMsg);
+        rescheduleAt(simTime(), &listConfigMsg);
     }
 
     virtual void setCycleStartTime()
@@ -293,7 +293,7 @@ protected:
         this->cycleStart = cycleStart;
         if (cycleStart) {
             nextListExecuteState = ListExecuteState::NEW_CYCLE;
-            rescheduleAt(simTime(), &updateListExecuteMsg);
+            rescheduleAt(simTime(), &listExecuteMsg);
         }
     }
 
@@ -302,11 +302,11 @@ protected:
         this->newConfigCT = newConfigCT;
         if (newConfigCT) {
             nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
-            rescheduleAt(simTime(), &updateCycleTimerMsg);
+            rescheduleAt(simTime(), &cycleTimerMsg);
         }
     }
 
-    virtual void executeOperation(uint64_t listPointer)
+    virtual void executeOperation()
     {
         if (operSchedule->getControlListLength() <= 0) {
             // If control list has no entries we have to fall back on default values.
@@ -325,9 +325,10 @@ protected:
         }
     }
 
-    virtual void notifyStateChanged(T oldState, T newState)
+    virtual void notifyStateChanged(const T& oldState, const T& newState)
     {
         for (auto listener : listeners) {
+            listener->onOperStateChange(newState);
             listener->onOperStateChange(oldState, newState);
         }
     }
@@ -367,12 +368,12 @@ protected:
 
     virtual const T initialAdminState() const = 0;
 
-    virtual std::shared_ptr<const Schedule<T>> initialAdminSchedule() const = 0;
+    virtual std::unique_ptr<Schedule<T>> initialAdminSchedule() const = 0;
 public:
     virtual ~ScheduleManager() {
-        cancelEvent(&updateCycleTimerMsg);
-        cancelEvent(&updateListExecuteMsg);
-        cancelEvent(&updateListConfigMsg);
+        cancelEvent(&cycleTimerMsg);
+        cancelEvent(&listExecuteMsg);
+        cancelEvent(&listConfigMsg);
     }
 
     virtual void setAdminState(T adminState)
@@ -390,8 +391,10 @@ public:
         return this->operState;
     }
 
-    virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
+    virtual void setAdminSchedule(std::unique_ptr<Schedule<T>> adminSchedule)
     {
+        Enter_Method_Silent();
+
         // Schedule must not be nullptr.
         if (adminSchedule == nullptr) {
             throw cRuntimeError("adminSchedule must not be nullptr");
@@ -410,24 +413,23 @@ public:
             EV_WARN << "AdminCycleTime is smaller than minimum clock resolution." << std::endl;
         }
 
-        this->adminSchedule = adminSchedule;
+        this->adminSchedule = std::move(adminSchedule);
     }
 
     virtual void setEnabled(bool enabled)
     {
+        Enter_Method_Silent();
         this->enabled = enabled;
         if (!enabled) {
             nextCycleTimerState = CycleTimerState::CYCLE_IDLE;
-            rescheduleAt(simTime(), &updateCycleTimerMsg);
-
+            rescheduleAt(simTime(), &cycleTimerMsg);
             nextListExecuteState = ListExecuteState::INIT;
-            rescheduleAt(simTime(), &updateListExecuteMsg);
-
+            rescheduleAt(simTime(), &listExecuteMsg);
             nextListConfigState = ListConfigState::CONFIG_IDLE;
-            rescheduleAt(simTime(), &updateListConfigMsg);
-        } else {
+            rescheduleAt(simTime(), &listConfigMsg);
+        } else if (configChange && enabled) {
             nextListConfigState = ListConfigState::CONFIG_PENDING;
-            rescheduleAt(simTime(), &updateListConfigMsg);
+            rescheduleAt(simTime(), &listConfigMsg);
         }
     }
 
@@ -438,10 +440,11 @@ public:
 
     virtual void setConfigChange(bool configChange)
     {
+        Enter_Method_Silent();
         this->configChange = configChange;
-        if (configChange) {
+        if (configChange && enabled) {
             nextListConfigState = ListConfigState::CONFIG_PENDING;
-            rescheduleAt(simTime(), &updateListConfigMsg);
+            rescheduleAt(simTime(), &listConfigMsg);
         }
     }
 
@@ -459,14 +462,14 @@ public:
     {
         Enter_Method("timestamp");
         switch (timestamp->getKind()) {
-        case CYCLE_TIMER_EVENT:
-            rescheduleAt(simTime(), &updateCycleTimerMsg);
+        case CYCLE_TIMER:
+            rescheduleAt(simTime(), &cycleTimerMsg);
             break;
-        case LIST_EXECUTE_EVENT:
-            rescheduleAt(simTime(), &updateListExecuteMsg);
+        case LIST_EXECUTE:
+            rescheduleAt(simTime(), &listExecuteMsg);
             break;
-        case LIST_CONFIG_EVENT:
-            rescheduleAt(simTime(), &updateListConfigMsg);
+        case LIST_CONFIG:
+            rescheduleAt(simTime(), &listConfigMsg);
             break;
         default:
             throw cRuntimeError("Invalid timestamp event.");

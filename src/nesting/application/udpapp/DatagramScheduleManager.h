@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef NESTING_COMMON_SCHEDULE_SENDDATAGRAMSCHEDULEMANAGER_H_
-#define NESTING_COMMON_SCHEDULE_SENDDATAGRAMSCHEDULEMANAGER_H_
+#ifndef NESTING_APPLICATION_UDPAPP_DATAGRAMSCHEDULEMANAGER_H_
+#define NESTING_APPLICATION_UDPAPP_DATAGRAMSCHEDULEMANAGER_H_
 
 #include <omnetpp.h>
 
@@ -27,14 +27,20 @@ using namespace omnetpp;
 
 namespace nesting {
 
-class SendDatagramScheduleManager : public ScheduleManager<SendDatagramEvent>
+class DatagramScheduleManager : public ScheduleManager<SendDatagramEvent>
 {
 protected:
     /** @copydoc Schedule::initialAdminState() */
     virtual const SendDatagramEvent initialAdminState() const override;
 
     /** @copydoc Schedule::initialAdminSchedule() */
-    virtual std::shared_ptr<const Schedule<SendDatagramEvent>> initialAdminSchedule() const override;
+    virtual std::unique_ptr<Schedule<SendDatagramEvent>> initialAdminSchedule() const override;
+
+    virtual int numInitStages() const override;
+
+    virtual void initialize(int stage) override;
+
+    virtual void notifyStateChanged(const SendDatagramEvent& oldState, const SendDatagramEvent& newState) override;
 };
 
 } // namespace nesting
