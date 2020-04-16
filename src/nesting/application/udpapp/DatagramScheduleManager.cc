@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "nesting/common/schedule/DatagramScheduleManager.h"
+#include "nesting/application/udpapp/DatagramScheduleManager.h"
 #include "nesting/common/schedule/ScheduleFactory.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"

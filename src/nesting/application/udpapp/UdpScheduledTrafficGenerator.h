@@ -22,8 +22,8 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/networklayer/common/L3Address.h"
 
+#include "nesting/application/udpapp/DatagramScheduleManager.h"
 #include "nesting/common/schedule/Schedule.h"
-#include "nesting/common/schedule/DatagramScheduleManager.h"
 
 using namespace omnetpp;
 using namespace inet;
