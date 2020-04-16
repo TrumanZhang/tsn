@@ -27,26 +27,23 @@ const GateBitvector GateScheduleManager::initialAdminState() const
     return GateBitvector(par("initialAdminGateStates").stringValue());
 }
 
-std::shared_ptr<const Schedule<GateBitvector>> GateScheduleManager::initialAdminSchedule() const
+std::unique_ptr<Schedule<GateBitvector>> GateScheduleManager::initialAdminSchedule() const
 {
     cXMLElement* xml = par("initialAdminSchedule");
     Schedule<GateBitvector>* scheduleRawPtr = ScheduleFactory::createGateSchedule(xml);
-    std::shared_ptr<Schedule<GateBitvector>> schedule(scheduleRawPtr);
+    std::unique_ptr<Schedule<GateBitvector>> schedule(scheduleRawPtr);
     schedule->normalize();
     return schedule;
 }
 
-void GateScheduleManager::setAdminSchedule(std::shared_ptr<const Schedule<GateBitvector>> adminSchedule)
+void GateScheduleManager::setAdminSchedule(std::unique_ptr<Schedule<GateBitvector>> adminSchedule)
 {
-    // Only allow normalized schedules.
-    if (!adminSchedule->isNormalized()) {
-        throw cRuntimeError("Gate schedule isn't normalized!.");
-    }
     // Schedules with no entries don't make sense.
     if (adminSchedule->getControlListLength() == 0) {
         EV_WARN << "Loading a schedule with controlListLenth of 0." << std::endl;
     }
-    ScheduleManager<GateBitvector>::setAdminSchedule(adminSchedule);
+    adminSchedule->normalize();
+    ScheduleManager<GateBitvector>::setAdminSchedule(std::move(adminSchedule));
 }
 
 simtime_t GateScheduleManager::nextGateCloseEventInSchedule(uint64_t gateIndex, uint64_t listPointerStart,

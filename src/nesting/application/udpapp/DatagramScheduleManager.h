@@ -34,7 +34,7 @@ protected:
     virtual const SendDatagramEvent initialAdminState() const override;
 
     /** @copydoc Schedule::initialAdminSchedule() */
-    virtual std::shared_ptr<const Schedule<SendDatagramEvent>> initialAdminSchedule() const override;
+    virtual std::unique_ptr<Schedule<SendDatagramEvent>> initialAdminSchedule() const override;
 
     virtual int numInitStages() const override;
 

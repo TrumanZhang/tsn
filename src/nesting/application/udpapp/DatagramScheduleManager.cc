@@ -30,10 +30,10 @@ const SendDatagramEvent DatagramScheduleManager::initialAdminState() const
     return evt;
 }
 
-std::shared_ptr<const Schedule<SendDatagramEvent>> DatagramScheduleManager::initialAdminSchedule() const
+std::unique_ptr<Schedule<SendDatagramEvent>> DatagramScheduleManager::initialAdminSchedule() const
 {
     Schedule<SendDatagramEvent>* scheduleRawPtr = ScheduleFactory::createDatagramSchedule(par("initialAdminSchedule"));
-    return std::shared_ptr<const Schedule<SendDatagramEvent>>(scheduleRawPtr);
+    return std::unique_ptr<Schedule<SendDatagramEvent>>(scheduleRawPtr);
 }
 
 int DatagramScheduleManager::numInitStages() const

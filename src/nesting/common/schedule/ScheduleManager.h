@@ -368,7 +368,7 @@ protected:
 
     virtual const T initialAdminState() const = 0;
 
-    virtual std::shared_ptr<const Schedule<T>> initialAdminSchedule() const = 0;
+    virtual std::unique_ptr<Schedule<T>> initialAdminSchedule() const = 0;
 public:
     virtual ~ScheduleManager() {
         cancelEvent(&cycleTimerMsg);
@@ -391,7 +391,7 @@ public:
         return this->operState;
     }
 
-    virtual void setAdminSchedule(std::shared_ptr<const Schedule<T>> adminSchedule)
+    virtual void setAdminSchedule(std::unique_ptr<Schedule<T>> adminSchedule)
     {
         Enter_Method_Silent();
 
@@ -413,7 +413,7 @@ public:
             EV_WARN << "AdminCycleTime is smaller than minimum clock resolution." << std::endl;
         }
 
-        this->adminSchedule = adminSchedule;
+        this->adminSchedule = std::move(adminSchedule);
     }
 
     virtual void setEnabled(bool enabled)
