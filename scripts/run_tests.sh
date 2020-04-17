@@ -14,11 +14,6 @@ else
 fi
 
 echo
-echo "=== Preprocessing tests ==="
-echo
-python3 $NESTING/scripts/preprocess_tests.py
-
-echo
 echo "=== Generating tests ==="
 echo
 mkdir -p $NESTING/work
