@@ -35,6 +35,7 @@ run_cppcheck_cmd = [
 ]
 
 # Run cppcheck
+print(" ".join(run_cppcheck_cmd))
 output = subprocess.run(run_cppcheck_cmd, check=True, encoding='utf-8', stdout=sys.stdout, stderr=subprocess.PIPE)
 
 # Create json output file conform to gitlabs code quality report format.
@@ -60,7 +61,8 @@ for line in output.stderr.split('\n'):
             fingerprint = "{}:{}:{}".format(
                     issue['description'],
                     issue['location']['path'],
-                    issue['location']['path'], issue['location']['lines']['begin']).encode('utf-8')
+                    issue['location']['lines']['begin']
+            ).encode('utf-8')
             issue['fingerprint'] = hashlib.sha1(fingerprint).hexdigest()
             cppcheck_report.append(issue)
 
