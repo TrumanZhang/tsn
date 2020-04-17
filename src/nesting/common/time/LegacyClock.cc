@@ -69,7 +69,7 @@ void LegacyClock::unsubscribeTicks(IClockListener* listener)
 
 void LegacyClock::onTick(IOscillator& oscillator, std::shared_ptr<const IOscillator::Tick> tick)
 {
-    Enter_Method("onTick()");
+    Enter_Method("tick");
     auto listeners = tickToListenerTable[tick];
     for (IClockListener* listener : listeners) {
         listener->tick(this, tick->getKind());
