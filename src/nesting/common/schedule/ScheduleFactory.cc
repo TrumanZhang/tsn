@@ -215,9 +215,9 @@ b ScheduleFactory::getPayloadSizeAttribute(cXMLElement* xml)
 
 bool ScheduleFactory::parseBool(const char* cstring)
 {
-    if (strcmp(cstring, "True") == 0 || strcmp(cstring, "true") || strcmp(cstring, "1")) {
+    if (std::strcmp(cstring, "True") == 0 || std::strcmp(cstring, "true") == 0|| std::strcmp(cstring, "1") == 0) {
         return true;
-    } else if (strcmp(cstring, "false") == 0 || strcmp(cstring, "False") || strcmp(cstring, "0")) {
+    } else if (std::strcmp(cstring, "false") == 0 || std::strcmp(cstring, "False") == 0 || std::strcmp(cstring, "0") == 0) {
         return false;
     } else {
         std::ostringstream buffer;

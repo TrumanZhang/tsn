@@ -35,7 +35,7 @@ run_cppcheck_cmd = [
 ]
 
 # Run cppcheck
-print(" ".join(run_cppcheck_cmd))
+print("Cppcheck run command: ", " ".join(run_cppcheck_cmd))
 output = subprocess.run(run_cppcheck_cmd, check=True, encoding='utf-8', stdout=sys.stdout, stderr=subprocess.PIPE)
 
 # Create json output file conform to gitlabs code quality report format.
