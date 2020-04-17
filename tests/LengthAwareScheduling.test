@@ -7,9 +7,9 @@ Test topology consists of four hosts h0, h1, h2, h3 and one switch s0:
     /  \
   h2    h3
 
-To test length-aware scheduling. We schedule a time-sensiive flow (h0, h1) with
-100B payload. If we assume 2us processing delay we get a lower bound of
-2 * (100+42)*8/1e9s + 2e-6s = 4.272e-6s = 4.272us for the end-to-end delay.
+To test length-aware scheduling. We schedule a flow (h0, h1) with 100B
+payload. If we assume 2us processing delay we get an upper bound of
+2 * (100+30)*8/1e9s + 2e-6s = 4.08e-6s = 4.08us for the end-to-end delay.
 
 For the test we introduce another flow (h2, h3) with best-effort traffic that
 can effect the time-sensitive flow if length-aware scheduling isn't working
@@ -97,7 +97,7 @@ network Sim
     <cycle>100000ns</cycle>
     <port id="1">
       <entry>
-        <length>3136ns</length>
+        <length>3040ns</length>
         <bitvector>01111111</bitvector>
       </entry>
       <entry>
@@ -105,7 +105,7 @@ network Sim
         <bitvector>10000000</bitvector>
       </entry>
       <entry>
-        <length>95728ns</length>
+        <length>95824ns</length>
         <bitvector>01111111</bitvector>
       </entry>
     </port>
@@ -205,8 +205,8 @@ if __name__ == "__main__":
     test_pkt_sent_h2_greater_equal_10k = "passed" if count_pkt_sent_h2 >= 10e3 else "failed"
     test_pkt_rcvd_h3_greater_equal_10k = "passed" if count_pkt_rcvd_h3 >= 10e3 else "failed"
 
-    upper_bound_delay_h0_h1 = 4.272e-6
-    test_max_delay_h0_h1_less_or_equal_lower_bound = "passed" if max_delay_h0_h1 <= upper_bound_delay_h0_h1 else "failed"
+    lower_bound_delay_h0_h1 = 4.08e-6
+    test_max_delay_less_or_equal_lower_bound_h0_h1 = "passed" if max_delay_h0_h1 <= lower_bound_delay_h0_h1 else "failed"
 
     file = open("test_evaluation.txt", "w")
 
@@ -216,14 +216,14 @@ if __name__ == "__main__":
     file.write("count_pkt_sent_h2 = {}\n".format(count_pkt_sent_h2))
     file.write("count_pkt_rcvd_h3 = {}\n".format(count_pkt_rcvd_h3))
     file.write("max_delay_h0_h1 = {}\n".format(max_delay_h0_h1))
-    file.write("upper_bound_delay_h0_h1 = {}\n".format(upper_bound_delay_h0_h1))
+    file.write("lower_bound_delay_h0_h1 = {}\n".format(lower_bound_delay_h0_h1))
     file.write("\n")
     file.write("# Test results\n")
     file.write("test_pkt_sent_h0_greater_equal_1k = {}\n".format(test_pkt_sent_h0_greater_equal_1k))
     file.write("test_pkt_rcvd_h1_greater_equal_1k = {}\n".format(test_pkt_rcvd_h1_greater_equal_1k))
     file.write("test_pkt_sent_h2_greater_equal_10k = {}\n".format(test_pkt_sent_h2_greater_equal_10k))
     file.write("test_pkt_rcvd_h3_greater_equal_10k = {}\n".format(test_pkt_rcvd_h3_greater_equal_10k))
-    file.write("test_max_delay_h0_h1_less_or_equal_lower_bound = {}\n".format(test_max_delay_h0_h1_less_or_equal_lower_bound))
+    file.write("test_max_delay_less_or_equal_lower_bound_h0_h1 = {}\n".format(test_max_delay_less_or_equal_lower_bound_h0_h1))
 
     file.close()    
 
@@ -249,4 +249,4 @@ test_pkt_sent_h2_greater_equal_10k = passed
 test_pkt_rcvd_h3_greater_equal_10k = passed
 
 %contains: test_evaluation.txt
-test_max_delay_h0_h1_less_or_equal_lower_bound = passed
+test_max_delay_less_or_equal_lower_bound_h0_h1 = passed
