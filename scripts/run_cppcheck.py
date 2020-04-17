@@ -44,7 +44,11 @@ cppcheck_report = []
 id = 1
 for line in output.stderr.split('\n'):
     if line != '':
-        issue = json.loads(line)
+        try:
+            issue = json.loads(line)
+        except json.decoder.JSONDecodeError as err:
+            print("Failed to parse JSON: ", line)
+            raise err
         if issue['severity'] == 'information':
             print(issue, file=sys.stderr)
             continue
