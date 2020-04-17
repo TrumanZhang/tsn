@@ -3,7 +3,7 @@ image: niessan/omnetpp-inet:omnet-5.4.2-inet-4.1.0
 stages:
     - build
     - test
-    - analysis
+#    - analysis
 
 before_script:
     - export OMNETPP=/root/omnetpp
@@ -39,15 +39,15 @@ test_dbg:
         paths:
             - work
 
-code_quality:
-    stage: analysis
-    script:
-        - python3 $NESTING/scripts/run_cppcheck.py gl-code-quality-report.json
-    artifacts:
-        reports:
-            codequality: gl-code-quality-report.json
-        paths:
-            - gl-code-quality-report.json
-    only:
-        - master
-        - develop
+#code_quality:
+#    stage: analysis
+#    script:
+#        - python3 $NESTING/scripts/run_cppcheck.py gl-code-quality-report.json
+#    artifacts:
+#        reports:
+#            codequality: gl-code-quality-report.json
+#        paths:
+#            - gl-code-quality-report.json
+#    only:
+#        - master
+#        - develop
