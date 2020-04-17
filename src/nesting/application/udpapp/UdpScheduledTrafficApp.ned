@@ -16,7 +16,6 @@
 package nesting.application.udpapp;
 
 import inet.applications.contract.IApp;
-import nesting.common.schedule.DatagramScheduleManager;
 
 
 module UdpScheduledTrafficApp like IApp
