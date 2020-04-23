@@ -1,4 +1,4 @@
-FROM niessan/omnetpp-inet:omnet-5.4.2-inet-4.1.0
+FROM niessan/omnetpp-inet:omnet-5.5.1-inet-4.1.2
 
 RUN mkdir -p /root/models/nesting
 WORKDIR /root/models/nesting
