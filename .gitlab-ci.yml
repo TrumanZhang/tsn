@@ -46,6 +46,7 @@ release_image:
     only:
         - master
 
+# How to keep several pages published for different branches: https://stackoverflow.com/a/58915486
 pages:
     stage: deploy
     script:
