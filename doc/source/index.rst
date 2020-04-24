@@ -8,8 +8,10 @@ NESTING documentation
 
 .. toctree::
    :maxdepth: 2
+   :numbered:
 
    linux_gsg
    user_guide
    prog_guide
    contributing
+   rel_notes
