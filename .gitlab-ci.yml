@@ -37,7 +37,7 @@ test_dbg:
         - docker pull $CONTAINER_TEST_IMAGE
         - docker run --env MODE=debug $CONTAINER_TEST_IMAGE /root/models/nesting/scripts/run_tests.sh
 
-release-image:
+release_image:
     stage: release
     script:
         - docker pull $CONTAINER_TEST_IMAGE
@@ -45,3 +45,14 @@ release-image:
         - docker push $CONTAINER_RELEASE_IMAGE
     only:
         - master
+
+pages:
+    stage: deploy
+    script:
+        - CID=$(docker create $CONTAINER_TEST_IMAGE)
+        - mkdir -p public/$CI_COMMIT_REF_SLUG
+        - docker cp $CID:/root/models/nesting/doc/build/html/. public/$CI_COMMIT_REF_SLUG
+        - docker rm $CID
+    artifacts:
+        paths:
+            - public

@@ -7,6 +7,8 @@ RUN make makefiles \
     && make clean \
     && make -j$(grep -c proc /proc/cpuinfo) \
     && make MODE=debug -j$(grep -c proc /proc/cpuinfo) \
-# import NESTING into eclipse workspace
-    && /root/omnetpp/ide/omnetpp -nosplash -data /root/models -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import /root/models/nesting
+# Import NESTING into eclipse workspace
+    && /root/omnetpp/ide/omnetpp -nosplash -data /root/models -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import /root/models/nesting \
+# Build doc
+    && make -C /root/models/nesting/doc html
 ENV INET=/root/models/inet NESTING=/root/models/nesting OMNETPP=/root/omnetpp
