@@ -54,5 +54,9 @@ pages:
         - docker cp $CID:/root/models/nesting/doc/build/html/. public/$CI_COMMIT_REF_SLUG
         - docker rm $CID
     artifacts:
+        name: "$CI_COMMIT_REF_SLUG"
         paths:
             - public
+    only:
+        - master
+        - /^v\d+\.\d+\.x$/ # version branches, '1.0.x', '1.1.x', usw.
