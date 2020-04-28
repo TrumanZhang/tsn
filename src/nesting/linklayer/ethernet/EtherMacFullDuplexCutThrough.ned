@@ -13,27 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package nesting.application.udpapp;
+package nesting.linklayer.ethernet;
 
-import inet.applications.contract.IApp;
+import inet.linklayer.ethernet.EtherMacFullDuplex;
 
-
-module UdpScheduledTrafficApp like IApp
+simple EtherMacFullDuplexCutThrough extends EtherMacFullDuplex
 {
     parameters:
-        @display("i=block/app;bgb=208,249");
-        **.datagramScheduleManagerModule = default(absPath(".scheduleManager"));
-    gates:
-        input socketIn;
-        output socketOut;
-    submodules:
-        trafficGenerator: UdpScheduledTrafficGenerator {
-            @display("p=108,157");
-        }
-        scheduleManager: DatagramScheduleManager {
-            @display("p=108,63;is=s");
-        }
-    connections:
-        socketIn --> trafficGenerator.socketIn;
-        trafficGenerator.socketOut --> socketOut;
+        @class(EtherMacFullDuplexCutThrough);
+        bool cutThrough = default(true);
 }

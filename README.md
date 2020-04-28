@@ -6,11 +6,11 @@ The model was initially developed by a group of students during a curricular pro
 
 ## Compatibility
 
-The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.4.1 and INET version 4.1.0 under Linux.
+The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.5.1 and INET version 4.1.2 under Linux.
 
 ## Getting Started
 
-+ Follow the instructions at [https://omnetpp.org/](https://omnetpp.org/) to download and install OMNeT++ version 5.4.1
++ Follow the instructions at [https://omnetpp.org/](https://omnetpp.org/) to download and install OMNeT++ version 5.5.1
 + Make sure OMNeT++ is in your `PATH` by changing into the OMNeT++ directory and sourcing the `setenv` script.
 + `cd` into an arbitrarily named, preferably empty `<workspace>` directory.
 + Clone this repository, i.e.
@@ -19,15 +19,15 @@ The current version of the NeSTiNg simulation framework has been tested with OMN
   $ git clone https://gitlab.com/ipvs/nesting.git
 ```
 
-+ Download and unpack INET version 4.1.0 or clone the INET repository and checkout tag `v4.1.0`, i.e.
++ Download and unpack INET version 4.1.2 or clone the INET repository and checkout tag `v4.1.2`, i.e.
 
 ```
   $ git clone https://github.com/inet-framework/inet.git
-  $ git checkout -b v4.1.0 v4.1.0
+  $ git checkout -b v4.1.2 v4.1.2
 ```
   or alternatively with a space-saving one-liner:
 ```
-  $ git clone --branch v4.1.0 --depth 1 https://github.com/inet-framework/inet.git
+  $ git clone --branch v4.1.2 --depth 1 https://github.com/inet-framework/inet.git
 ```
 
 + Your directory should now look like this:

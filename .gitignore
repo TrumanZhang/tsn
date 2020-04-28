@@ -27,3 +27,5 @@
 *.elog
 *.anf
 .idea
+
+/doc/build
