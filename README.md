@@ -107,4 +107,4 @@ The author's version can be retrieved [here](ftp://ftp.informatik.uni-stuttgart.
 ## Contribution
 Institute of Parallel and Distributed Systems  
 University of Stuttgart  
-[https://www.ipvs.uni-stuttgart.de/abteilungen/vs/](https://www.ipvs.uni-stuttgart.de/abteilungen/vs/)
+https://www.ipvs.uni-stuttgart.de/departments/vs/
