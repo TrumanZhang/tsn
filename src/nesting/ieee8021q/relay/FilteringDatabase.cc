@@ -68,8 +68,7 @@ void FilteringDatabase::initialize(int stage) {
 
         loadDatabase(fdb, cycle);
 
-        // TODO remove all config swap features from this module and move them somewhere else
-        //clock->subscribeTick(this, 0);
+        clock->subscribeTick(this, 0);
     }
 }
 
@@ -235,7 +234,12 @@ void FilteringDatabase::tick(IClock *clock, short kind) {
 
         changeDatabase = false;
     }
-    clock->subscribeTick(this, cycle / clock->getClockRate());
+
+
+    // TODO Deactivated because of too many events created
+    //clock->subscribeTick(this, cycle / clock->getClockRate());
+
+    // TODO remove all config swap features from this module and move them somewhere else
 }
 
 void FilteringDatabase::handleMessage(cMessage *msg) {
@@ -292,8 +296,7 @@ std::vector<int> FilteringDatabase::getDestInterfaceIds(MacAddress macAddress,
         ports = it->second.second;
         // static entries (ts == 0) do not age
         if (!agingActive || (ts == 0 || curTS - ts < agingThreshold)) {
-            operFdb[macAddress] = std::pair<simtime_t, std::vector<int>>(curTS,
-                    ports);
+            operFdb[macAddress] = std::pair<simtime_t, std::vector<int>>(curTS, ports);
             return ports;
         } else {
             operFdb.erase(macAddress);
