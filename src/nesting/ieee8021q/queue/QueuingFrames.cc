@@ -19,6 +19,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qHeader_m.h"
 
 namespace nesting {
 
@@ -50,11 +51,18 @@ void QueuingFrames::handleMessage(cMessage *msg) {
     inet::Packet *packet = check_and_cast<inet::Packet *>(msg);
     const auto& frame = packet->peekAtFront<inet::EthernetMacHeader>();
 
-    int pcpValue;
+    const inet::Ieee8021qHeader* qHeader;
     if (vlanTagType == C_TAG) {
-        pcpValue = frame->getCTag()->getPcp();
+        qHeader = frame->getCTag();
     } else {
-        pcpValue = frame->getSTag()->getPcp();
+        qHeader = frame->getSTag();
+    }
+
+    int pcpValue;
+    if (!qHeader) {
+        pcpValue = kDefaultPCPValue;
+    } else {
+        pcpValue = qHeader->getPcp();
     }
 
     // Check whether the PCP value is correct.
