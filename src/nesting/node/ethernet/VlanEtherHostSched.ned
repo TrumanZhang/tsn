@@ -20,7 +20,6 @@ import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGenSched;
 import nesting.common.time.IClock;
 import nesting.common.time.IOscillator;
-import nesting.ieee8021q.queue.gating.ScheduleSwap;
 
 
 //
@@ -56,10 +55,6 @@ module VlanEtherHostSched
         }
         legacyClock: <default("LegacyClock")> like IClock {
             @display("p=311,96;is=s");
-        }
-        scheduleSwap: ScheduleSwap {
-            @display("p=310,153;is=s");
-            usedInHost = true;
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
