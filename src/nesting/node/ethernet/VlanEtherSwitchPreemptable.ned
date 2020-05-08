@@ -23,7 +23,6 @@ import inet.networklayer.common.InterfaceTable;
 import nesting.common.time.IClock;
 import nesting.common.time.IClock2;
 import nesting.common.time.IOscillator;
-import nesting.ieee8021q.queue.gating.ScheduleSwap;
 import nesting.ieee8021q.relay.FilteringDatabase;
 
 
@@ -73,9 +72,6 @@ module VlanEtherSwitchPreemptable
         }
         filteringDatabase: FilteringDatabase {
             @display("p=90.94039,133.65482;is=s");
-        }
-        scheduleSwap: ScheduleSwap {
-            @display("p=90.94039,224.5952;i=block/switch;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=90.94039,59.24904;is=s");
