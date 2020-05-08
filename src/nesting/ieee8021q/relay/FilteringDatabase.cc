@@ -67,7 +67,9 @@ void FilteringDatabase::initialize(int stage) {
         }
 
         loadDatabase(fdb, cycle);
-        clock->subscribeTick(this, 0);
+
+        // TODO remove all config swap features from this module and move them somewhere else
+        //clock->subscribeTick(this, 0);
     }
 }
 
