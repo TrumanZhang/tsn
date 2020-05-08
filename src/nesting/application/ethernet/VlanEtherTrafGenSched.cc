@@ -32,6 +32,8 @@ namespace nesting {
 
 Define_Module(VlanEtherTrafGenSched);
 
+const Protocol* VlanEtherTrafGenSched::L2_PROTOCOL = &Protocol::nextHopForwarding;
+
 VlanEtherTrafGenSched::~VlanEtherTrafGenSched() {
     // Delete self-messages for not yet sent packets
     for (std::map<cMessage*, uint64_t>::iterator it = sendEvents.begin(); it != sendEvents.end(); it++) {

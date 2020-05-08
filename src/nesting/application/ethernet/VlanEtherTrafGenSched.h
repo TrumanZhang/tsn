@@ -80,14 +80,7 @@ protected:
 
     cPar* jitter;
 
-public:
-    /**
-     * Arbitrary L2 protocol from inet::ProtocolGroup::ethertype, so that the
-     * EtherEncap module will encapsulate frames in Ethernet2 format.
-     */
-    static constexpr const Protocol* L2_PROTOCOL = &Protocol::nextHopForwarding;
 protected:
-
     virtual void initialize(int stage) override;
     virtual void sendPacket(uint64_t scheduleIndexTx);
     virtual void receivePacket(Packet *msg);
@@ -97,6 +90,12 @@ protected:
     virtual int numInitStages() const override;
     virtual simtime_t scheduleNextTickEvent();
 public:
+    /**
+     * Arbitrary L2 protocol from inet::ProtocolGroup::ethertype, so that the
+     * EtherEncap module will encapsulate frames in Ethernet2 format.
+     */
+    static const Protocol* L2_PROTOCOL;
+
     virtual void tick(IClock *clock, short kind) override;
 
     ~VlanEtherTrafGenSched();
