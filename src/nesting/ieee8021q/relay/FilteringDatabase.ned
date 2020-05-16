@@ -26,7 +26,6 @@ simple FilteringDatabase
     parameters:
 	    @display("i=block/table2");
 	    @class(FilteringDatabase);
-	    xml cycle = default(xml("<Empty/>"));
 	    xml database;
 	    string switchModule = default("^"); // Path to the ~VlanEtherSwitch module
 	    string clockModule = default("^.clock"); // Path to the ~IClock module.

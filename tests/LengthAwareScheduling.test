@@ -81,7 +81,7 @@ network Sim
 </filteringDatabases>
 
 %file: schedule.xml
-<schedule>
+<schedules>
   <defaultcycle>1s</defaultcycle>
   <host name="h0">
     <cycle>100us</cycle>
@@ -94,23 +94,24 @@ network Sim
     </entry>
   </host>
   <switch name="s0">
-    <cycle>100000ns</cycle>
     <port id="1">
-      <entry>
-        <length>3040ns</length>
-        <bitvector>01111111</bitvector>
-      </entry>
-      <entry>
-        <length>1136ns</length>
-        <bitvector>10000000</bitvector>
-      </entry>
-      <entry>
-        <length>95824ns</length>
-        <bitvector>01111111</bitvector>
-      </entry>
+      <schedule cycleTime="100000ns">
+        <entry>
+          <length>3040ns</length>
+          <bitvector>01111111</bitvector>
+        </entry>
+        <entry>
+          <length>1136ns</length>
+          <bitvector>10000000</bitvector>
+        </entry>
+        <entry>
+          <length>95824ns</length>
+          <bitvector>01111111</bitvector>
+        </entry>
+      </schedule>
     </port>
   </switch>
-</schedule>
+</schedules>
 
 %inifile: omnetpp.ini
 [General]
@@ -146,9 +147,8 @@ Sim.h1.trafGenApp.vector-recording = true
 **.s0.processingDelay.delay = 2us
 
 **.filteringDatabase.database = xmldoc("routing.xml", "/filteringDatabases/")
-**.filteringDatabase.cycle = xmldoc("schedule.xml", "/schedule/")
 
-**.gateController.initialSchedule = xmldoc("schedule.xml")
+**.s0.eth[1].queue.gateController.initialSchedule = xmldoc("schedule.xml", "/schedules/switch[@name='s0']/port[@id='1']/schedule")
 **.gateController.enableHoldAndRelease = false
 **.eth[*].queuing.tsAlgorithms[0].typename = "StrictPriority"
 **.eth[*].queuing.tsAlgorithms[1].typename = "StrictPriority"

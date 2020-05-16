@@ -89,7 +89,5 @@ debug-on-errors = true
 **.h1.trafGenApp.numPacketsPerBurst = 0
 
 **.s1.filteringDatabase.database = xmldoc("fdb.xml")
-**.s1.filteringDatabase.cycle = xmldoc("schedule.xml")
-**.gateController.initialSchedule = xmldoc("schedule.xml")
 
 %exitcode: 0

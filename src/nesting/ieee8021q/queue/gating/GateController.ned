@@ -36,6 +36,5 @@ simple GateController
         string transmissionGateVectorModule = default("^.tGates[0]");
         bool verbose = default(false);
         bool enableHoldAndRelease = default(true);
-        xml initialSchedule = default(xml("<schedule><defaultcycle>100</defaultcycle></schedule>"));
-        xml emptySchedule = default(xml("<schedule><defaultcycle>100</defaultcycle></schedule>"));
+        xml initialSchedule = default(xml("<schedule cycleTime=\"1s\"><entry><length>1s</length><bitvector>11111111</bitvector></entry></schedule>"));
 }
