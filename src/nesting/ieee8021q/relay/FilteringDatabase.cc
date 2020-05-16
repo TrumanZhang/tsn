@@ -21,54 +21,32 @@ namespace nesting {
 
 Define_Module(FilteringDatabase);
 
-FilteringDatabase::FilteringDatabase() {
+FilteringDatabase::FilteringDatabase()
+{
     this->agingActive = false;
     this->agingThreshold = 0;
 }
 
-FilteringDatabase::FilteringDatabase(bool agingActive,
-        simtime_t agingThreshold) {
+FilteringDatabase::FilteringDatabase(bool agingActive, simtime_t agingThreshold)
+{
     this->agingActive = agingActive;
     this->agingThreshold = agingThreshold;
 }
 
-FilteringDatabase::~FilteringDatabase() {
+FilteringDatabase::~FilteringDatabase()
+{
 }
 
-void FilteringDatabase::clearAdminFdb() {
+void FilteringDatabase::clearAdminFdb()
+{
     adminFdb.clear();
 }
 void FilteringDatabase::initialize(int stage) {
     if (stage == INITSTAGE_LOCAL) {
-        clock = check_and_cast<IClock*>(getModuleByPath(par("clockModule")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
     } else if (stage == INITSTAGE_LINK_LAYER) {
         cXMLElement* fdb = par("database");
-        cXMLElement* cycleXml = par("cycle");
-
-        std::string switchString =
-                this->getModuleByPath(par("switchModule"))->getFullName();
-        bool foundSwitch = false;
-
-        //try to extract the part of the schedule belonging to this switch
-        if (cycleXml != nullptr && cycleXml->hasChildren()) {
-            for (cXMLElement* host : cycleXml->getChildrenByTagName("switch")) {
-                if (host->getAttribute("name") != NULL && host->getAttribute("name") == switchString) {
-                    const char* cycleString = host->getFirstChildWithTag("cycle")->getNodeValue();
-                    cycle = simTime().parse(cycleString);
-                    foundSwitch = true;
-                }
-            }
-            // if switch not in xml, get default cycle time
-            if (foundSwitch == false) {
-                const char* cycleString = cycleXml->getFirstChildWithTag("defaultcycle")->getNodeValue();
-                cycle = simTime().parse(cycleString);
-            }
-        }
-
-        loadDatabase(fdb, cycle);
-
-        clock->subscribeTick(this, 0);
+        loadDatabase(fdb);
     }
 }
 
@@ -76,11 +54,8 @@ int FilteringDatabase::numInitStages() const {
     return INITSTAGE_LINK_LAYER + 1;
 }
 
-void FilteringDatabase::loadDatabase(cXMLElement* xml, simtime_t cycle) {
-    newCycle = cycle;
-
-    std::string switchName =
-            this->getModuleByPath(par("switchModule"))->getFullName();
+void FilteringDatabase::loadDatabase(cXMLElement* xml) {
+    std::string switchName = this->getModuleByPath(par("switchModule"))->getFullName();
     cXMLElement* fdb;
     //TODO this bool can probably be refactored to a nullptr check
     bool databaseFound = false;
@@ -104,15 +79,14 @@ void FilteringDatabase::loadDatabase(cXMLElement* xml, simtime_t cycle) {
     if (staticRules != nullptr) {
         clearAdminFdb();
 
-        cXMLElement* forwardingXml = staticRules->getFirstChildWithTag(
-                "forward");
+        cXMLElement* forwardingXml = staticRules->getFirstChildWithTag("forward");
         if (forwardingXml != nullptr) {
             this->parseEntries(forwardingXml);
         }
-
-        changeDatabase = true;
     }
 
+    operFdb.swap(adminFdb);
+    clearAdminFdb();
 }
 
 void FilteringDatabase::parseEntries(cXMLElement* xml) {
@@ -219,27 +193,6 @@ void FilteringDatabase::parseEntries(cXMLElement* xml) {
                     "Multicast address rules with VIDs aren't supported yet");
         }
     }
-}
-
-void FilteringDatabase::tick(IClock *clock, short kind) {
-    Enter_Method("tick");
-
-    if (changeDatabase) {
-        operFdb.swap(adminFdb);
-        cycle = newCycle;
-        clearAdminFdb();
-
-        EV_INFO << getFullPath() << ": Loading filtering database at time "
-                       << clock->getTime().inUnit(SIMTIME_US) << endl;
-
-        changeDatabase = false;
-    }
-
-
-    // TODO Deactivated because of too many events created
-    //clock->subscribeTick(this, cycle / clock->getClockRate());
-
-    // TODO remove all config swap features from this module and move them somewhere else
 }
 
 void FilteringDatabase::handleMessage(cMessage *msg) {

@@ -43,20 +43,10 @@ namespace nesting {
 /**
  * See the NED file for a detailed description
  */
-class FilteringDatabase: public cSimpleModule, public IClockListener {
+class FilteringDatabase: public cSimpleModule {
 private:
     std::unordered_map<MacAddress, std::pair<simtime_t, std::vector<int>>> adminFdb;
     std::unordered_map<MacAddress, std::pair<simtime_t, std::vector<int>>> operFdb;
-
-    bool changeDatabase = false;
-
-    /**
-     * Clock reference, needed to subscribe notifications of cycle iterations
-     */
-    IClock* clock;
-
-    simtime_t cycle = simTime().parse("100us");
-    simtime_t newCycle = simTime().parse("100us");;
 
     bool agingActive = false;
     simtime_t agingThreshold;
@@ -79,10 +69,7 @@ public:
     FilteringDatabase();
     virtual ~FilteringDatabase();
 
-    /** @see IClockListener::tick(IClock*) */
-    virtual void tick(IClock *clock, short kind) override;
-
-    virtual void loadDatabase(cXMLElement* fdb, simtime_t cycle);
+    virtual void loadDatabase(cXMLElement* fdb);
 
     virtual int getDestInterfaceId(MacAddress macAddress, simtime_t curTS);
 

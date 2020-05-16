@@ -1,36 +1,34 @@
 <?xml version="1.0" ?>
-<schedule>
+<schedules>
 	<defaultcycle>400us</defaultcycle>
 	<host name="robotController">
 		<cycle>400us</cycle>
 		<entry>
-			<!-- us -->
 			<start>10us</start>
 			<queue>7</queue>
 			<dest>00:00:00:00:00:04</dest>
-			<!-- byte -->
 			<size>354B</size>
 			<flowId>1</flowId>
 		</entry>
 	</host>
 	<switch name="switchA">
-		<cycle>400us</cycle>
 		<port id="3">
-			<entry>
-				<!-- us -->
-				<length>400us</length>
-				<bitvector>11111111</bitvector>
-			</entry>
+			<schedule cycleTime="400us">
+				<entry>
+					<length>400us</length>
+					<bitvector>11111111</bitvector>
+				</entry>
+			</schedule>
 		</port>
 	</switch>
 	<switch name="switchB">
-		<cycle>400us</cycle>
 		<port id="0">
-			<entry>
-				<!-- us -->
-				<length>400us</length>
-				<bitvector>11111111</bitvector>
-			</entry>
+			<schedule cycleTime="400us">
+				<entry>
+					<length>400us</length>
+					<bitvector>11111111</bitvector>
+				</entry>
+			</schedule>
 		</port>
 	</switch>
-</schedule>
+</schedules>

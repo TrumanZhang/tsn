@@ -267,40 +267,7 @@ unsigned int GateController::calculateMaxBit(int gateIndex) {
 }
 
 void GateController::loadScheduleOrDefault(cXMLElement* xml) {
-    Schedule<GateBitvector> *schedule;
-    bool realScheduleFound = false;
-
-    //try to extract the part of the schedule belonging to this switch and port
-    if (xml != nullptr && xml->hasChildren()) {
-        for (cXMLElement* host : xml->getChildren()) {
-            if (strcmp(host->getTagName(), "defaultcycle") != 0
-                    && host->getAttribute("name") == switchString) {
-                for (cXMLElement* port : host->getChildrenByTagName("port")) {
-                    if (port->getAttribute("id") == portString) {
-                        schedule = ScheduleFactory::createGateBitvectorSchedule(
-                                port);
-                        realScheduleFound = true;
-                        break;
-                    }
-                }
-                if (realScheduleFound) {
-                    schedule->setCycleTime(
-                            simTime().parse(
-                                    host->getFirstChildWithTag("cycle")->getNodeValue()));
-                }
-                break;
-            }
-        }
-//if the schedule xml does not contain scheduling information for this port,
-//create a schedule that has the same cycle as the others, but opens all gates the entire time
-        if (!realScheduleFound) {
-            schedule = ScheduleFactory::createDefaultBitvectorSchedule(xml);
-        }
-    } else {
-//use the default xml that has no entry, but a default cycle defined
-        cXMLElement* defaultXml = par("emptySchedule").xmlValue();
-        schedule = ScheduleFactory::createGateBitvectorSchedule(defaultXml);
-    }
+    Schedule<GateBitvector> *schedule = ScheduleFactory::createGateBitvectorSchedule(xml);
 
     EV_DEBUG << getFullPath() << ": Loading schedule. Cycle is "
                     << schedule->getCycleTime() << ". Entry count is "
