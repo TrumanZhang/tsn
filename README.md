@@ -5,6 +5,11 @@ Our model uses the [INET framework](https://inet.omnetpp.org/) and enhances it b
 The model was initially developed by a group of students during a curricular project and is continously extended at the [Distributed Systems group of IPVS, University of Stuttgart](https://www.ipvs.uni-stuttgart.de/departments/vs/)
 
 ## Contact
+### Gitter
+We founded a Gitter community to ease the communication
+https://gitter.im/ipvs-nesting/community
+
+### Mail
 + [David Hellmanns](https://www.ipvs.uni-stuttgart.de/institute/team/Hellmanns/)
 + [Jonathan Falk](https://www.ipvs.uni-stuttgart.de/institute/team/Falk-00005/)
 
