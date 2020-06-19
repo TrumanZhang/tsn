@@ -6,7 +6,7 @@ The model was initially developed by a group of students during a curricular pro
 
 ## Contact
 ### Gitter
-We founded a Gitter community to ease the communication
+We founded a Gitter community to ease the communication:
 https://gitter.im/ipvs-nesting/community
 
 ### Mail
