@@ -40,4 +40,6 @@ simple ForwardingRelayUnit like IMacRelayUnit
         output ifOut @labels(EtherFrame);
         input upperLayerIn;
         output upperLayerOut;
+        input DirectDropIn @directIn;
+        input DirectDriftIn @directIn;
 }

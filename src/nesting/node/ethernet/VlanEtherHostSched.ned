@@ -20,7 +20,7 @@ import inet.networklayer.common.InterfaceTable;
 import nesting.application.ethernet.VlanEtherTrafGenSched;
 import nesting.common.time.IClock;
 import nesting.common.time.IOscillator;
-
+import nesting.linklayer.ethernet.EtherMacFullDuplexTSN;
 
 //
 // @deprecated
@@ -61,7 +61,7 @@ module VlanEtherHostSched
                 @display("p=232,283,row,150;q=txQueue");
                 encap.typename = "EtherEncap";
                 qEncap.typename = "EnhancedIeee8021qEncap";
-                mac.typename = "EtherMacFullDuplex";
+                mac.typename = "EtherMacFullDuplexTSN";
                 mac.mtu = 1500B;
         }
     connections:

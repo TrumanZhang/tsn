@@ -20,6 +20,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/vlan/VlanTag_m.h"
+#include "nesting/common/misbehavior_m.h"
+#include "nesting/common/FlowMetaTag_m.h"
 
 #include <sstream>
 
@@ -32,14 +34,35 @@ void ForwardingRelayUnit::initialize(int stage) {
         fdb = getModuleFromPar<FilteringDatabase>(par("filteringDatabaseModule"), this);
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         numberOfPorts = par("numberOfPorts");
+        //subscribe("enqueuePkSignal", this);
+
     } else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
         registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
     }
 }
 
+
+
 void ForwardingRelayUnit::handleMessage(cMessage *msg) {
+    if(msg->arrivedOn("DirectDropIn") || msg->arrivedOn("DirectDriftIn")){
+        //discard,lead,lag signal
+        MisbehaviorMsg *misMsg = check_and_cast<MisbehaviorMsg*>(msg);
+        uint16_t fid = misMsg->getFid();
+        uint16_t type = misMsg->getType();
+        EV_INFO << "get the misbehavior signal !!!!" << misMsg << ", " << fid << ", " << type << std::endl;
+        return;
+    }
     Packet* packet = check_and_cast<Packet*>(msg);
+    if (packet->findTag<FlowMetaTag>() != nullptr){
+        //this is a scheduled packet
+        auto flowMataTag = packet->getTag<FlowMetaTag>();
+        auto fid = flowMataTag->getFlowId();
+        auto seq = flowMataTag->getSeqNum();
+        EV_INFO << "received ST packet, flow id: " << fid << ", sequence: " << seq << std::endl;
+        return;
+    }
+
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
 
@@ -109,7 +132,7 @@ void ForwardingRelayUnit::processMulticast(Packet* packet, int arrivalInterfaceI
 }
 
 void ForwardingRelayUnit::processUnicast(Packet* packet, int arrivalInterfaceId) {
-    //Learning MAC port mappings
+    //Learning M;AC port mappings
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     learn(frame->getSrc(), arrivalInterfaceId);
     int destInterfaceId = fdb->getDestInterfaceId(frame->getDest(), simTime());

@@ -24,6 +24,7 @@
 #include "nesting/ieee8021q/Ieee8021q.h"
 #include "nesting/ieee8021q/queue/transmissionSelectionAlgorithms/TSAlgorithm.h"
 #include "nesting/ieee8021q/queue/framePreemption/IPreemptableQueue.h"
+#include "nesting/common/misbehavior_m.h"
 
 using namespace omnetpp;
 using namespace inet;
@@ -81,6 +82,8 @@ protected:
     simsignal_t queueingTimeSignal;
     simsignal_t queueLengthSignal;
 
+    cModule *targetModule; // relay unit
+
 protected:
     virtual void initialize() override;
 
@@ -93,6 +96,8 @@ protected:
     virtual void handleRequestPacketEvent(uint64_t maxBits);
 
     virtual void handlePacketEnqueuedEvent(cPacket* packet);
+
+    void sendDropMessage(cPacket* packet);
 
 public:
     virtual ~LengthAwareQueue();

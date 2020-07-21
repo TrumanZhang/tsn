@@ -43,6 +43,14 @@ void LengthAwareQueue::initialize() {
     WATCH(numPacketsEnqueued);
     WATCH(availableBufferCapacity);
 
+    //for drop message
+//    EV_INFO << "!!!!!!!!" << std::endl;
+//    EV_INFO << getParentModule()->getFullName() << std::endl;
+//    EV_INFO << getParentModule()->getParentModule()->getFullName() << std::endl;
+//    EV_INFO << getParentModule()->getParentModule()->getParentModule()->getFullName() << std::endl;
+    targetModule =  getParentModule()->getParentModule()->getParentModule()->getSubmodule("relayUnit");
+    EV_INFO << "Drop signal listener: " << targetModule->getFullName() << std::endl;
+
     // module references
     tsAlgorithm = getModuleFromPar<TSAlgorithm>(
             par("transmissionSelectionAlgorithmModule"), this);
@@ -68,23 +76,34 @@ void LengthAwareQueue::enqueue(cPacket* packet) {
     if (availableBufferCapacity >= packet->getBitLength()) {
         emit(enqueuePkSignal, packet->getTreeId());
         numPacketsEnqueued++;
+        sendDropMessage(packet);
         queue.insert(packet);
         availableBufferCapacity -= packet->getBitLength();
         handlePacketEnqueuedEvent(packet);
     } else {
         emit(dropPkByQueueSignal, packet->getTreeId());
         numPacketsDropped++;
+        sendDropMessage(packet);
         handlePacketEnqueuedEvent(packet);
         delete packet;
     }
     emit(queueLengthSignal, queue.getLength());
 }
 
+void LengthAwareQueue::sendDropMessage(cPacket* packet){
+    char msgname[20];
+    sprintf(msgname, "drop-%ld", packet->getTreeId());
+    MisbehaviorMsg * msg = new MisbehaviorMsg(msgname);
+    msg->setType(MisbehaviorType::DISCARD);
+    msg->setFid(packet->getTreeId());
+    sendDirect(msg, targetModule, "DirectDropIn"); // send directly to the relay unit.
+}
+
+
 cPacket* LengthAwareQueue::dequeue() {
     if (queue.isEmpty()) {
         return nullptr;
     }
-
     cPacket* packet = static_cast<cPacket*>(queue.pop());
     availableBufferCapacity += packet->getBitLength();
     

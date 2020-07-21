@@ -122,18 +122,24 @@ void VlanEtherTrafGenSched::sendPacket(uint64_t scheduleIndexTx) {
     // create mac control info
     auto macTag = datapacket->addTag<MacAddressReq>();
     macTag->setDestAddress(header.macTag.getDestAddress());
+
     // create VLAN control info
     auto vlanReq = datapacket->addTag<EnhancedVlanReq>();
     vlanReq->setPcp(header.q1Tag.getPcp());
     vlanReq->setDe(header.q1Tag.getDe());
     vlanReq->setVlanId(header.q1Tag.getVID());
 
+    //add flow mata tag to the packet
+    auto flowMetaPckTag = datapacket->addTagIfAbsent<FlowMetaTag>();
+    flowMetaPckTag->setFlowId(header.flowId);
+    flowMetaPckTag->setSeqNum(seqNum);
+
     // Add flow id to packet meta information
     auto flowMetaTag = payload->addTagIfAbsent<FlowMetaTag>();
     flowMetaTag->setFlowId(header.flowId);
     flowMetaTag->setSeqNum(seqNum);
-
     datapacket->insertAtBack(payload);
+
 
     EV_TRACE << getFullPath() << ": Send TSN packet '" << datapacket->getName()
                     << "' at time " << clock->getTime().inUnit(SIMTIME_US)

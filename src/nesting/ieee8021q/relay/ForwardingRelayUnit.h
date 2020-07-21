@@ -39,6 +39,7 @@ private:
     int numberOfPorts;
     simtime_t fdbAgingThreshold = 1000; //TODO: Create parameter for filtering database aging
     IInterfaceTable *ifTable;
+
 protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -47,7 +48,7 @@ protected:
     virtual void processMulticast(Packet* packet, int arrivalInterfaceId);
     virtual void processUnicast(Packet* packet, int arrivalInterfaceId);
     virtual void learn(MacAddress srcAddr, int arrivalInterfaceId);
-
+    //virtual void receiveSignal(cComponent *source, simsignal_t signalID, long x, cObject *details);
 public:
     //TODO: Fix filtering database aging parameter!
 //  ForwardingRelayUnit() : fdb(1000) {};
