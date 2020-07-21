@@ -60,6 +60,7 @@ void ForwardingRelayUnit::handleMessage(cMessage *msg) {
         auto fid = flowMataTag->getFlowId();
         auto seq = flowMataTag->getSeqNum();
         EV_INFO << "received ST packet, flow id: " << fid << ", sequence: " << seq << std::endl;
+        //find the expected window id.
         return;
     }
 
