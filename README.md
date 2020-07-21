@@ -1,21 +1,5 @@
-# NeSTiNg - Network Simulator for Time-sensitive Networking
+This project is based on NeSTiNg (https://gitlab.com/ipvs/nesting) a simulation model for Time-sensitive Networking (TSN) using the OMNeT++ discrete event simulation framework.
 
-NeSTiNg is a simulation model for Time-sensitive Networking (TSN) using the OMNeT++ discrete event simulation framework.
-Our model uses the [INET framework](https://inet.omnetpp.org/) and enhances it by TSN-capable components.
-The model was initially developed by a group of students during a curricular project and is continously extended at the [Distributed Systems group of IPVS, University of Stuttgart](https://www.ipvs.uni-stuttgart.de/departments/vs/)
-
-## Contact
-### Gitter
-We founded a Gitter community to ease the communication:
-https://gitter.im/ipvs-nesting/community
-
-### Mail
-+ [David Hellmanns](https://www.ipvs.uni-stuttgart.de/institute/team/Hellmanns/)
-+ [Jonathan Falk](https://www.ipvs.uni-stuttgart.de/institute/team/Falk-00005/)
-
-## Compatibility
-
-The current version of the NeSTiNg simulation framework has been tested with OMNeT++ version 5.5.1 and INET version 4.1.2 under Linux.
 
 ## Getting Started
 
@@ -25,7 +9,7 @@ The current version of the NeSTiNg simulation framework has been tested with OMN
 + Clone this repository, i.e.
 
 ```
-  $ git clone https://gitlab.com/ipvs/nesting.git
+  $ https://github.com/TrumanZhang/tsn.git
 ```
 
 + Download and unpack INET version 4.1.2 or clone the INET repository and checkout tag `v4.1.2`, i.e.
@@ -111,9 +95,4 @@ The author's version can be retrieved [here](ftp://ftp.informatik.uni-stuttgart.
     month = mar,
     year = {2019},
 } 
-```
 
-## Contribution
-Institute of Parallel and Distributed Systems  
-University of Stuttgart  
-https://www.ipvs.uni-stuttgart.de/departments/vs/
